@@ -1,0 +1,81 @@
+
+/** 【注】排序不建议写在sql语句用，建议使用 ASC、DESC关键字作为条件排序
+  * type 类型：condition条件[默认] param参数 var变量
+  * gro  组  ┌├└
+  * ao	  关联 AND[默认] OR andNot andIn
+  * name 字段
+  * op	   条件
+  * value值
+  * sql  子查询
+  * remark 备注
+*/
+{
+	"sysParent" : {
+		"remark" : "获取父集包含自身",
+		"sqlStatement" : "WITH iterator AS(\n    SELECT t.* FROM $name t $condition\n    UNION ALL\n    SELECT t2.* FROM $name t2 JOIN iterator ON t2.id = iterator.parent_id\n)\nSELECT * FROM iterator;",
+		"condition" : [
+			{"type":"var",		"ao":"AND","name":"name","op":"=", "value":"name"},
+			{"type":"condition","ao":"AND","name":"id",	 "op":"in","value":"id"}
+		]
+	},
+	"sysSub" : {
+		"remark" : "获取子集包含自身",
+		"sqlStatement" : "WITH iterator AS(\n    SELECT t.* FROM $name t $condition\n    UNION ALL\n    SELECT t2.* FROM $name t2 JOIN iterator ON t2.parent_id = iterator.id\n)\nSELECT * FROM iterator;",
+		"condition" : [
+			{"type":"var",		"ao":"AND","name":"name","op":"=", "value":"name"},
+			{"type":"condition","ao":"AND","name":"id",	 "op":"in","value":"id"}
+		]
+	},
+	"userInSite" : {
+		"remark" : "用户所在站点(包含子站点)",
+		"sqlStatement" : "WITH iterator AS(\n    SELECT t.* FROM sys_site t left join\n        m_user_site_role m on t.id = m.site_id\n    $condition\n    UNION ALL\n    SELECT t2.* FROM sys_site t2 JOIN iterator ON t2.parent_Id = iterator.id\n)\nSELECT * FROM iterator;",
+		"condition" : [
+			{"type":"condition","ao":"AND","name":"m.user_id","op":"=","value":"userId"}
+		]
+	},
+	"getSiteParent" : {
+		"remark" : "查询上级站点包含自身",
+		"sqlStatement" : "WITH iterator AS(\n    SELECT t.* FROM sys_site t $condition\n    UNION ALL\n    SELECT t2.* FROM sys_site t2 JOIN iterator ON t2.id = iterator.parent_Id\n)\nSELECT * FROM iterator;",
+		"condition" : [
+			{"type":"condition","ao":"AND","name":"t.id","op":"=","value":"siteId"}
+		]
+	},
+	"getRoleAction" : {
+		"remark" : "获取用户权限",
+		"sqlStatement" : "select t.* from m_role_action t\nleft join m_user_site_role m on m.role_id = t.role_id\n$condition",
+		"condition" : [
+			{"type":"condition","ao":"AND","name":"m.user_id","op":"=","value":"userId"},
+			{"type":"condition","ao":"AND","name":"m.site_id","op":"in","value":"siteIds"}
+		]
+	},
+	"getRoleMenu" : {
+		"remark" : "获取权限菜单",
+		"sqlStatement" : "select distinct m.* from m_user_site_role t\nleft join m_role_menu r on r.role_id = t.role_id\nleft join sys_menu m on m.id = r.menu_id\n$condition\norder by m.sequence",
+		"condition" : [
+			{"type":"condition","ao":"AND","name":"t.user_id","op":"=","value":"userId"},
+			{"type":"condition","ao":"AND","name":"t.site_id","op":"in","value":"siteIds"}
+		]
+	},
+	device : {
+		remark : "设备关联设备类型",
+		sqlStatement : "select t.*,y.klass from device t left join device_type y on t.device_type = y.code $condition",
+		condition : [
+			{ao:"AND",name:"t.is_removed",op:"=",value:"isRemoved"}
+		]
+	},
+	"record" : {
+		"remark" : "查询历史记录",
+		"sqlStatement" : "select t.*,p.name,p.code,p.unit from t_record t \nleft join t_point p on p.id = t.pid\n$condition",
+		"updateDate" : "2026-04-04 16:00:00",
+		"condition" : [
+			{"ao":"AND","name":"t.create_date",	"op":">=","value":"beginTime"},
+			{"ao":"AND","name":"t.create_date",	"op":"<=","value":"endTime"},
+			{"ao":"AND","name":"p.code",	"op":"in",	"value":"pCode"},
+			{"ao":"AND","name":"p.name",	"op":"like","value":"name"},
+			{"ao":"AND","name":"t.value",	"op":">",	"value":"vGt"},
+			{"ao":"AND","name":"t.value",	"op":"<",	"value":"vLt"},
+			{"ao":"AND","name":"t.state",	"op":"=",	"value":"state"},
+			{"ao":"AND","name":"t.remark",	"op":"like","value":"remark"}
+		]
+	}
+}

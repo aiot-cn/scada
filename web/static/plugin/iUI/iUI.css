@@ -1,0 +1,71 @@
+@charset "UTF-8";
+.iui-rmenu {
+	position: absolute;
+	display: none;
+	z-index: 12345678;
+	font: 12px/1.5 \5fae\8f6f\96c5\9ed1;
+}
+
+.iui-rmenu,.iui-rmenu ul {
+	float: left;
+	border: 1px solid #979797;
+	background: #f1f1f1
+		url("data:image/gif;base64,R0lGODlhAgABAIAAAOLj4////yH5BAAAAAAALAAAAAACAAEAAAICRAoAOw==")
+		24px 0 repeat-y;
+	padding: 2px;
+	box-shadow: 2px 2px 5px #999;
+	list-style-type: none;
+	margin: 0;
+}
+.iui-rmenu ul{
+	position: absolute;
+	display: none;
+	-overflow-y:auto;/*需要溢出显示*/
+}
+
+.iui-rmenu li {
+	clear: both;
+	height: 24px;
+	line-height: 24px;
+}
+
+.iui-rmenu li a{
+	padding: 0 30px;
+	display: block;
+	cursor: pointer;
+	white-space: nowrap;
+	color: #333;
+}
+
+.iui-rmenu li.sub {
+	position: relative;
+	background-repeat: no-repeat;
+	background-position: right 9px;
+	background-image:
+		url("data:image/gif;base64,R0lGODlhCQAHAIABACgoKP///yH5BAEAAAEALAAAAAAJAAcAAAINRI4Hlrod1ksSzsZgAQA7");
+}
+.iui-rmenu li.sub:hover>ul{
+	display: block;
+}
+
+.iui-rmenu li:hover {
+	background-color: #f1f3f6;
+	background-position: right -8px;
+}
+
+.iui-rmenu li a:hover{
+	padding: 0 29px;
+	border-radius: 3px;
+	border: 1px solid #aecff7;
+	height: 22px;
+	line-height: 22px;
+}
+
+.iui-rmenu li i{
+	position: absolute;
+    left: 5px;
+}
+.iui-rmenu li span{
+	color: #000;
+}
+

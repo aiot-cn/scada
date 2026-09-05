@@ -1,0 +1,83 @@
+@font-face {
+  font-family: "imgfont"; /* Project id 5076954 */
+  src: url('iconfont.woff2?t=1764517403298') format('woff2'),
+       url('iconfont.woff?t=1764517403298') format('woff'),
+       url('iconfont.ttf?t=1764517403298') format('truetype');
+}
+
+.imgfont {
+  font-family: "imgfont" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.imgf-rotate-180:before {
+  content: "\e718";
+}
+
+.imgf-rotate:before {
+  content: "\e600";
+}
+
+.imgf-rotate-left:before {
+  content: "\e69e";
+}
+
+.imgf-rotate-right:before {
+  content: "\e69f";
+}
+
+.imgf-img-rec:before {
+  content: "\ee49";
+}
+
+.imgf-crop:before {
+  content: "\e606";
+}
+
+.imgf-matching:before {
+  content: "\e67d";
+}
+
+.imgf-line:before {
+  content: "\e653";
+}
+
+.imgf-lock:before {
+  content: "\e637";
+}
+
+.imgf-rect:before {
+  content: "\e790";
+}
+
+.imgf-remove:before {
+  content: "\e639";
+}
+
+.imgf-download:before {
+  content: "\e658";
+}
+
+.imgf-open:before {
+  content: "\e6cf";
+}
+
+.imgf-polygon:before {
+  content: "\e6af";
+}
+
+.imgf-eye:before {
+  content: "\e624";
+}
+
+.imgf-hand:before {
+  content: "\e60a";
+}
+
+.imgf-clean:before {
+  content: "\e62a";
+}
+

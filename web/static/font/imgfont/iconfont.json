@@ -1,0 +1,128 @@
+{
+  "id": "5076954",
+  "name": "图像编辑",
+  "font_family": "imgfont",
+  "css_prefix_text": "imgf-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "8342349",
+      "name": "旋转180度",
+      "font_class": "rotate-180",
+      "unicode": "e718",
+      "unicode_decimal": 59160
+    },
+    {
+      "icon_id": "25127709",
+      "name": "旋转",
+      "font_class": "rotate",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "45428293",
+      "name": "向左旋转",
+      "font_class": "rotate-left",
+      "unicode": "e69e",
+      "unicode_decimal": 59038
+    },
+    {
+      "icon_id": "45428302",
+      "name": "向右旋转",
+      "font_class": "rotate-right",
+      "unicode": "e69f",
+      "unicode_decimal": 59039
+    },
+    {
+      "icon_id": "36164383",
+      "name": "图像识别",
+      "font_class": "img-rec",
+      "unicode": "ee49",
+      "unicode_decimal": 61001
+    },
+    {
+      "icon_id": "3624533",
+      "name": "裁剪",
+      "font_class": "crop",
+      "unicode": "e606",
+      "unicode_decimal": 58886
+    },
+    {
+      "icon_id": "44552908",
+      "name": "匹配",
+      "font_class": "matching",
+      "unicode": "e67d",
+      "unicode_decimal": 59005
+    },
+    {
+      "icon_id": "755616",
+      "name": "直线",
+      "font_class": "line",
+      "unicode": "e653",
+      "unicode_decimal": 58963
+    },
+    {
+      "icon_id": "6119271",
+      "name": "锁定",
+      "font_class": "lock",
+      "unicode": "e637",
+      "unicode_decimal": 58935
+    },
+    {
+      "icon_id": "6266248",
+      "name": "矩形",
+      "font_class": "rect",
+      "unicode": "e790",
+      "unicode_decimal": 59280
+    },
+    {
+      "icon_id": "12685485",
+      "name": "删除",
+      "font_class": "remove",
+      "unicode": "e639",
+      "unicode_decimal": 58937
+    },
+    {
+      "icon_id": "12687046",
+      "name": "下载",
+      "font_class": "download",
+      "unicode": "e658",
+      "unicode_decimal": 58968
+    },
+    {
+      "icon_id": "13015634",
+      "name": "打开",
+      "font_class": "open",
+      "unicode": "e6cf",
+      "unicode_decimal": 59087
+    },
+    {
+      "icon_id": "26060539",
+      "name": "多边形",
+      "font_class": "polygon",
+      "unicode": "e6af",
+      "unicode_decimal": 59055
+    },
+    {
+      "icon_id": "29219302",
+      "name": "眼睛",
+      "font_class": "eye",
+      "unicode": "e624",
+      "unicode_decimal": 58916
+    },
+    {
+      "icon_id": "38142593",
+      "name": "抓手",
+      "font_class": "hand",
+      "unicode": "e60a",
+      "unicode_decimal": 58890
+    },
+    {
+      "icon_id": "42268487",
+      "name": "清理",
+      "font_class": "clean",
+      "unicode": "e62a",
+      "unicode_decimal": 58922
+    }
+  ]
+}

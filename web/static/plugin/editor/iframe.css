@@ -1,0 +1,72 @@
+﻿@CHARSET "UTF-8";
+
+#paper{
+    outline: none;
+}
+
+.A4{
+    width:189mm;
+    --height:276mm;
+    box-sizing: border-box;
+    font-family:"宋体";
+    margin: 0 auto;
+}
+
+table{
+    border-collapse: collapse;
+}
+
+var{
+    font-style: normal;
+}
+
+code[data-var]{
+    display: none;
+}
+
+.template #paper{
+    min-height: 1024px;
+}
+
+.template [active]{
+    box-shadow: inset 0 0 0 rgb(0 0 0 / 10%), 0 0 5px rgb(8 100 191 / 90%);
+}
+
+.template var{
+    --background-color: #f1e5f3;
+    --background-image: radial-gradient(#b5a8b9 10%,transparent 0);
+    --background-size: 3px 3px;
+}
+
+.template var:before{
+    color: red;
+    content:attr(title);
+}
+
+.template [data-source]:before,
+.template [data-code]:before{
+    color: red;
+    content:'{' attr(data-source) '.' attr(data-code) '}';
+}
+
+var.checkbox{
+    -webkit-user-modify: read-only !important;
+    width: 14px;
+    height: 14px;
+    line-height: 12px;
+    border: 1px solid #001;
+    display: inline-block;
+    margin: 3px;
+    text-align: center;
+}
+var.checkbox:after{
+    content: "​";
+    font-size: 12px;
+}
+var.checkbox[data-val='1']:after{
+    content: "✓"
+}
+var.checkbox:before{
+    display: none;
+}
+

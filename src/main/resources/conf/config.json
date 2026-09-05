@@ -1,0 +1,103 @@
+
+{
+	"TCommunication" : [
+		{"id":"1","name":"COM3","klass":"org.aiot.communication.mode.SerialPort","uri":"COM3","isRemoved":"1"},
+		{"id":"2","name":"TCP","klass":"org.aiot.communication.mode.TcpClient","uri":"192.168.1.150:8000","isRemoved":"1"}
+	],
+
+
+	"SysDict" : [
+		{"type":"dataType","name":"遥测",	"value":"0"},
+		{"type":"dataType","name":"遥信",	"value":"1","color": "#008000"},
+		{"type":"dataType","name":"遥控",	"value":"2","color": "#0B75E0"},
+		{"type":"dataType","name":"遥调",	"value":"3","color": "#FF5722"},
+
+		{"type":"hisStatus","name":"正常",	"value":"0","color": "#008000"},
+		{"type":"hisStatus","name":"预警",	"value":"1","color": "#FF8000"},
+		{"type":"hisStatus","name":"报警",	"value":"2","color": "#FF0000"},
+
+		{"type":"rate", "name":"2400",	"value":"2400"},
+		{"type":"rate", "name":"9600",	"value":"9600"},
+		{"type":"rate", "name":"19200",	"value":"19200"},
+		{"type":"rate", "name":"115200","value":"115200"},
+
+
+		{"type":"devStatus","name":"状态正常",	"value":".alarm[data-state='0']","color": "#FFFFFF","backColor": "#008000"},
+		{"type":"devStatus","name":"状态预警",	"value":".alarm[data-state='1']","color": "#000000","backColor": "#F5D808"},
+		{"type":"devStatus","name":"状态报警",	"value":".alarm[data-state='2']","color": "#FFFFFF","backColor": "#FF0000"},
+
+		{"type":"devStatus","name":"关闭",	"value":".onoff[data-v='0']","color": "#FFFFFF","backColor": "#666666"},
+		{"type":"devStatus","name":"打开",	"value":".onoff[data-v='1']","color": "#FFFFFF","backColor": "#0000FF"},
+
+		{"type":"devStatus","name":"值正常",	"value":".alarm-v[data-v='0']","color": "#FFFFFF","backColor": "#40CF22"},
+		{"type":"devStatus","name":"值报警",	"value":".alarm-v[data-v='1']","color": "#FFFFFF","backColor": "#FF0000"},
+
+		{"type":"dataClassify","name":"环境",	"value":"0"},
+		{"type":"dataClassify","name":"消防",	"value":"1"},
+		{"type":"dataClassify","name":"安防",	"value":"2"},
+
+		{"type":"sysDevice","name":"以太网",	"value":"ethernet","v2":"PCI\\VEN_10EC&DEV_8168"},
+		{"type":"sysDevice","name":"无线网",	"value":"wireless","V2":"USB\\VID_148F&PID_7601"},
+
+		{"type":"hikCode","name":"门禁主机报警信息",	"value":"5002"},
+		{"type":"hikCode","name":"移动侦测、视频丢失、遮挡、IO信号量等报警信息",	"value":"4000"}
+	],
+	"SysScript" : [
+		{"type" : "normal", "name": "测试",		"code" : "test",	"function": "return arg0 + arg1 + arg2 + arg3 + arg4;"},
+		{"type" : "normal", "name": "系统启动",	"code" : "initCall","function": "var sysUtil = org.aiot.util.SysUtil;\nsysUtil.runExec(\"taskkill /f /im mshta.exe\");\n//return sysUtil.runApp('127.0.0.1:8080/station','--kiosk');"},
+		{"type" : "normal", "name": "观察者通知",	"code" : "observer","function": "print('通知:'+arg2);\nprint('来源:'+arg0);\nprint('参数:'+arg1);"},
+
+		{"type" : "numeric","name": "16进制有符号整数",	"code" : "hexToDec",	"function": "return hexToInt(val);"},
+		{"type" : "numeric","name": "16进制CDAB",		"code" : "hexToDec2",	"function": "return hexToInt(val.slice(4,8)+val.slice(0,4));"},
+		{"type" : "numeric","name": "16进制有符号短整",	"code" : "hexToShort",	"function": "return hexToShort(val);"},
+		{"type" : "numeric","name": "16进制浮点数",		"code" : "hexToFloat32","function": "return hexToFloat32(val);"},
+		{"type" : "numeric","name": "IEC104",			"code" : "IEC104",		"function": "if(val.length < 20)\n    return \"\";\nvar type = val.slice(12,14);\nvar t2 = val.slice(14,16);//可变结构限定词\nvar t3 = val.slice(16,18);\nvar m1 = {\"01\":\"单点遥信\",\"03\":\"双点遥信\",\"09\":\"整型遥测\",\"0D\":\"浮点型遥测\",\"1E\":\"SOE事件记录\",\"24\":\"M-ME-TF-1=测量值,带时标CP56TimE2A的短浮点数\",\"2D\":\"单点遥控\",\"2E\":\"双点遥控\",\"32\":\"浮点遥调\",\"25\":\"电度\",\"64\":\"总召\",\"67\":\"对时\",};\nvar m2 = {\"01\":\"周期、循环\",\"02\":\"背景扫描\",\"03\":\"突发、自发上传\",\"04\":\"初始化\",\"05\":\"请求或被请求\",\"06\":\"激活\",\n\"07\":\"激活确认\",\"08\":\"停止激活\",\"09\":\"停止激活确认\",\"0A\":\"激活结束\",\"14\":\"响应总招\",\"2F\":\"未知信息体地址\"};\nvar msg = (m1[type] || type) + \":\" + (m2[t3] || t3) + (hexBit(t2,7) == 1 ? \"(连续)\" : \"(非连续)\") + \" 数量:\"+(parseInt(t2,16) & 0x7F) +\" \";\n \nif(type == \"01\"){\n    var t = val.slice(24);\n    for(var i=0;i<t.length/8;i++){\n        var a = t.substring(i*8,(i+1)*8);\n        var address = a.slice(4,6) + a.slice(2,4) + a.slice(0,2);\n        var v = a.slice(7,8);\n        address = parseInt(address,16)+\"\";\n        bd.put(address,v).setType(1);\n        msg += address + \":\" + v + \" \";\n    }\n}else if(type == \"0D\"){\n     var t = val.slice(24);\n    for(var i=0;i<t.length/16;i++){\n        var a = t.substring(i*16,(i+1)*16);\n        var address = a.slice(4,6) + a.slice(2,4) + a.slice(0,2);\n        var b = a.slice(12,14) + a.slice(10,12) + a.slice(8,10) + a.slice(6,8);\n        address = parseInt(address,16)+\"\";\n        var v = hexToFloat32(b)+\"\";\n        bd.put(address,v).setType(0);;\n        msg += address + \":\" + v + \" \";\n    }\n}else if(type == \"2D\"){\n    var a = val.slice(24);\n    var address = a.slice(4,6) + a.slice(2,4) + a.slice(0,2);\n    var v = a.slice(7,8);\n    address = parseInt(address,16)+\"\";\n    bd.put(address,v).setType(2);\n    msg += address + \":\" + v + \" \";  \n}else if(type == \"32\"){\n    var a = val.slice(24);\n    var address = a.slice(4,6) + a.slice(2,4) + a.slice(0,2);\n    var b = a.slice(12,14) + a.slice(10,12) + a.slice(8,10) + a.slice(6,8);\n    address = parseInt(address,16)+\"\";\n     var v = hexToFloat32(b)+\"\";\n    bd.put(address,v).setType(3);\n    msg += address + \":\" + v + \" \";  \n}\nreturn msg;"},
+
+		{"type" : "crc","name": "modbusCRC16",	"code" : "modbusCRC16",	"function": "return org.aiot.util.CalcUtil.crcModbus(content)"},
+		{"type" : "crc","name": "校验和低位",		"code" : "CRC1",		"function": "var CALC = Java.type('util.CalcUtil');\r\nreturn CALC.checkSumLow(arg0);"},
+		{"type" : "crc","name": "累加和余256",	"code" : "CRC2",		"function": "var c = 0;\nfor(var i=0;i<arg0.length/2;i++){\n  var s = arg0.substr(i*2,2);\n  c += parseInt(s, 16);\n}\nc = (c%256).toString(16);\nif(c.length == 1)\n  c = '0'+c;\nreturn c;"},
+		{"type" : "crc","name": "ADD8",			"code" : "ADD8",		"function": "var CALC = Java.type('util.CalcUtil');\nreturn CALC.add8(arg0);"},
+
+		{"type" : "reflect","name": "设备数据",	"code" : "bdData",		"function": "/**\n * arg0 : deviceReflect\n * arg1 : 数据Data\n * arg2 : 实例baseDevicea\n * arg3 : 数据val\n */\nreturn arg1;"},
+
+		{"type" : "url","name": "URL代理",	"code" : "urlProxy",		"function": "if(url instanceof Packages.SysUrl){\n   print(\"来源\")\n}\nif(url instanceof org.jsoup.helper.HttpConnection){\n   url.header(\"X-Requested-With\", \"XMLHttpRequest\") //标识为AJAX请求\n   url.header(\"Content-Type\",\"application/x-www-form-urlencoded\");\n}\nif(url instanceof org.jsoup.helper.HttpConnection.Response){\n   print(\"返回处理\")\n}\nreturn null;"}
+	],
+	"SysUser" : [
+		{"id":0,"login":"admin","password":"123456","personId": 1,"isDefault":1},
+		{"id":1,"login":"guest","password":"","personId": 2}
+	],
+	"TPerson" : [
+		{"id":1,"name":"管理员"},
+		{"id":2,"name":"游客"}
+	],
+	"SysSite" : [
+		{"id": 1,"name":"AIOT站点","sysName":"智能监控系统","style": "skin-state-grid"}
+	],
+	"SysRole" : [
+		{"id": 1,"name":"系统管理"}
+	],
+	"MRoleMenu" : [
+		{"roleId": 1,"menuId": 1},
+		{"roleId": 1,"menuId": 2},
+		{"roleId": 1,"menuId": 3},
+		{"roleId": 1,"menuId": 4},
+		{"roleId": 1,"menuId": 5},
+		{"roleId": 1,"menuId": 6}
+	],
+	"MRoleAction" : [
+		{"roleId": 1,"actionCode": "SYS_SET"},
+		{"roleId": 1,"actionCode": "DEV_SET"},
+		{"roleId": 1,"actionCode": "DEV_ADD"},
+		{"roleId": 1,"actionCode": "DEV_EDIT"},
+		{"roleId": 1,"actionCode": "DEV_DEL"},
+		{"roleId": 1,"actionCode": "PRESET_SET"},
+		{"roleId": 1,"actionCode": "ACTION_SET"},
+		{"roleId": 1,"actionCode": "ACTION_ADD"},
+		{"roleId": 1,"actionCode": "ACTION_EDIT"},
+		{"roleId": 1,"actionCode": "ACTION_DEL"}
+	],
+	"MUserSiteRole" : [
+		{"id": 1,"userId": 0,"siteId": 1,"roleId": 1,"isDefault":1}
+	]
+
+}

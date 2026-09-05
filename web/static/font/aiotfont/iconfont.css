@@ -1,0 +1,311 @@
+@font-face {
+  font-family: "aiot-icon"; /* Project id 5130420 */
+  src: url('iconfont.woff2?t=1778328298284') format('woff2'),
+       url('iconfont.woff?t=1778328298284') format('woff'),
+       url('iconfont.ttf?t=1778328298284') format('truetype');
+}
+
+.aiot-icon {
+  font-family: "aiot-icon" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.aiot-icon-img-recognition:before {
+  content: "\e71b";
+}
+
+.aiot-icon-help:before {
+  content: "\e613";
+}
+
+.aiot-icon-model-train:before {
+  content: "\e9c5";
+}
+
+.aiot-icon-download:before {
+  content: "\e6f5";
+}
+
+.aiot-icon-openai:before {
+  content: "\e640";
+}
+
+.aiot-icon-property:before {
+  content: "\e69a";
+}
+
+.aiot-icon-scissors-cut-line:before {
+  content: "\e770";
+}
+
+.aiot-icon-scaleplate:before {
+  content: "\e663";
+}
+
+.aiot-icon-crop-tool:before {
+  content: "\e66e";
+}
+
+.aiot-icon-load:before {
+  content: "\e680";
+}
+
+.aiot-icon-imp-exp:before {
+  content: "\e64a";
+}
+
+.aiot-icon-label:before {
+  content: "\e642";
+}
+
+.aiot-icon-dir-open:before {
+  content: "\e64d";
+}
+
+.aiot-icon-auxiliary-line:before {
+  content: "\e87f";
+}
+
+.aiot-icon-dir:before {
+  content: "\e64b";
+}
+
+.aiot-icon-node-io:before {
+  content: "\e602";
+}
+
+.aiot-icon-rename:before {
+  content: "\e62f";
+}
+
+.aiot-icon-polygon:before {
+  content: "\e624";
+}
+
+.aiot-icon-rotate-3d:before {
+  content: "\e64e";
+}
+
+.aiot-icon-rectangle:before {
+  content: "\e607";
+}
+
+.aiot-icon-stream-media:before {
+  content: "\e62e";
+}
+
+.aiot-icon-rotate:before {
+  content: "\e741";
+}
+
+.aiot-icon-data-source:before {
+  content: "\e8d6";
+}
+
+.aiot-icon-d3:before {
+  content: "\e63c";
+}
+
+.aiot-icon-device:before {
+  content: "\e64c";
+}
+
+.aiot-icon-material-fill:before {
+  content: "\e61f";
+}
+
+.aiot-icon-clock:before {
+  content: "\e645";
+}
+
+.aiot-icon-warehouse:before {
+  content: "\e605";
+}
+
+.aiot-icon-api:before {
+  content: "\e66d";
+}
+
+.aiot-icon-chip:before {
+  content: "\e74c";
+}
+
+.aiot-icon-chem-comp:before {
+  content: "\e897";
+}
+
+.aiot-icon-url:before {
+  content: "\e60e";
+}
+
+.aiot-icon-console:before {
+  content: "\e68a";
+}
+
+.aiot-icon-snowflake:before {
+  content: "\e65f";
+}
+
+.aiot-icon-dehumidification:before {
+  content: "\e677";
+}
+
+.aiot-icon-dehumidifier:before {
+  content: "\e813";
+}
+
+.aiot-icon-material:before {
+  content: "\e60b";
+}
+
+.aiot-icon-computer:before {
+  content: "\e6f7";
+}
+
+.aiot-icon-sensor:before {
+  content: "\e623";
+}
+
+.aiot-icon-workbench:before {
+  content: "\e66b";
+}
+
+.aiot-icon-picture:before {
+  content: "\e660";
+}
+
+.aiot-icon-controller:before {
+  content: "\e6af";
+}
+
+.aiot-icon-o3:before {
+  content: "\e652";
+}
+
+.aiot-icon-alarm-lamp:before {
+  content: "\e600";
+}
+
+.aiot-icon-draught-fan:before {
+  content: "\e662";
+}
+
+.aiot-icon-fence:before {
+  content: "\e6db";
+}
+
+.aiot-icon-air-conditioner:before {
+  content: "\e76f";
+}
+
+.aiot-icon-sf6:before {
+  content: "\e64f";
+}
+
+.aiot-icon-water-level:before {
+  content: "\e787";
+}
+
+.aiot-icon-camera-gun-right:before {
+  content: "\e6ec";
+}
+
+.aiot-icon-camera-gun-left:before {
+  content: "\e6ed";
+}
+
+.aiot-icon-camera-ballhead:before {
+  content: "\e61d";
+}
+
+.aiot-icon-flame:before {
+  content: "\e60d";
+}
+
+.aiot-icon-volume:before {
+  content: "\e632";
+}
+
+.aiot-icon-gas:before {
+  content: "\e606";
+}
+
+.aiot-icon-o2:before {
+  content: "\e635";
+}
+
+.aiot-icon-navigation:before {
+  content: "\e601";
+}
+
+.aiot-icon-entrance-guard:before {
+  content: "\e60a";
+}
+
+.aiot-icon-path:before {
+  content: "\e685";
+}
+
+.aiot-icon-humiture:before {
+  content: "\e661";
+}
+
+.aiot-icon-theft:before {
+  content: "\e622";
+}
+
+.aiot-icon-smoke:before {
+  content: "\e61c";
+}
+
+.aiot-icon-db:before {
+  content: "\e63f";
+}
+
+.aiot-icon-transformer:before {
+  content: "\e628";
+}
+
+.aiot-icon-water-level2:before {
+  content: "\e6b6";
+}
+
+.aiot-icon-aim:before {
+  content: "\ec32";
+}
+
+.aiot-icon-logo-stategrid:before {
+  content: "\e683";
+}
+
+.aiot-icon-logo-stategrid-full:before {
+  content: "\e686";
+}
+
+.aiot-icon-temperature:before {
+  content: "\e641";
+}
+
+.aiot-icon-tvoc:before {
+  content: "\e604";
+}
+
+.aiot-icon-humidity:before {
+  content: "\e603";
+}
+
+.aiot-icon-save:before {
+  content: "\e615";
+}
+
+.aiot-icon-run:before {
+  content: "\e702";
+}
+
+.aiot-icon-rainfall:before {
+  content: "\e784";
+}
+

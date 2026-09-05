@@ -1,37 +1,37 @@
 # scada
 
-#### 介绍
-aiot物联网SCADA系统，纯Java B/S架构，无环境依赖，资源占用低，一键秒级安装。快速集成传感器、控制器、视频、机械手。支持环境监控、设备联动、协议转换、图像识别标注，数据可视化等模块。可做轨道轮式机器人系统，工业控制及组态，广泛应用于工业、农业、教育、家庭...
+### 介绍
+aiot物联网SCADA系统，无环境依赖，资源占用低，一键秒级安装。快速集成传感器、控制器、视频、机械手。支持环境监控、设备联动、协议转换、图像识别标注，数据可视化等模块。可做轨道轮式机器人系统，工业控制及组态，广泛应用于工业、农业、教育、家庭...
 
-#### 软件架构
-软件架构说明
-
-
-#### 安装教程
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 使用说明
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 参与贡献
-
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
+### 环境要求
+| 项目 | 参数                  |
+| ------ |---------------------|
+| 磁盘 | 500Mb               |
+| CPU | 1.8GHz              |
+| 内存 | 1G                  |
+| 架构 | JAVA B/S 无依赖        |
+| 系统 | Linux、windows、macOS |
 
 
-#### 特技
+### windows
+```shell
+PowerShell
+irm http://ai-ot.cn/install.ps1 | iex
+```
+> 或者下载[ aiot.zip](http://ai-ot.cn/file/download/release/windows/x86_64/aiotPro.zip)  （绿色免安装）
+解压后执行目录中的 startup
+浏览器访问 http://localhost:8080/aiot
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+### Linux
+```shell
+Linux,macOS,WSL:
+curl -fsSL http://ai-ot.cn/install.sh | bash
+```
+
+### 使用说明
+
+1.  添加设备
+2.  配置通讯
+3.  页面显示
+
+

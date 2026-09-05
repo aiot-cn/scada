@@ -1,0 +1,14 @@
+
+{
+	"DeviceType" : [
+		{"id":"-1","code": "LOCAL",		"role":"APP",		"name": "本地",		"klass": "org.aiot.device.base.LocalDevice","icon": "aiot-icon aiot-icon-computer"},
+		{"id":"-2","code": "AIMODEL",	"role":"AI_MODEL", 	"name": "AI模型",	"klass": "org.aiot.device.base.AiModelDevice"},
+		{"id":"-3","code": "ZLMediaKit","role":"VIDEO", 	"name": "流媒体服务",	"klass": "org.aiot.device.base.ZLMediaKit"}
+	],
+	
+	"TDevice" : [
+		{"id":"-10", "deviceType":"LOCAL",		"name":"★ 本地"},
+		{"id":"-11", "deviceType":"AIMODEL",	"name":"★ AI模型"},
+		{"id":"-12", "deviceType":"ZLMediaKit",	"name":"★ 流媒体服务"}
+	]
+}

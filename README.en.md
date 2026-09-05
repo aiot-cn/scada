@@ -1,36 +1,36 @@
 # scada
 
-#### Description
-aiot物联网SCADA系统，纯Java B/S架构，无环境依赖，资源占用低，一键秒级安装。快速集成传感器、控制器、视频、机械手。支持环境监控、设备联动、协议转换、图像识别标注，数据可视化等模块。可做轨道轮式机器人系统，工业控制及组态，广泛应用于工业、农业、教育、家庭...
-
-#### Software Architecture
-Software architecture description
-
-#### Installation
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### Instructions
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### Contribution
-
-1.  Fork the repository
-2.  Create Feat_xxx branch
-3.  Commit your code
-4.  Create Pull Request
+### Software Introduction
+The AIoT IoT SCADA system is environment-independent, low-resource consuming, and can be installed instantly with one click. It enables rapid integration of sensors, controllers, video feeds, and robotic arms. The system supports modules such as environmental monitoring, device interconnection, protocol conversion, image recognition and annotation, and data visualization. It can be used for track-based or wheeled robot systems, industrial control and configuration, and is widely applied in industries including manufacturing, agriculture, education, and home automation.
+### Environment Requirements
+| List                  | require                  |
+|-----------------------|---------------------|
+| disk                  | 500Mb               |
+| CPU                   | 1.8GHz              |
+| memory                | 1G                  |
+| software architecture | JAVA B/S No dependence        |
+| OS                    | Linux、windows、macOS |
 
 
-#### Gitee Feature
+### windows
+```shell
+PowerShell
+irm http://ai-ot.cn/install.ps1 | iex
+```
+> Or download[ aiot.zip](http://ai-ot.cn/file/download/release/windows/x86_64/aiotPro.zip)  （Green and no installation required）
+After decompression, execute "startup" in the directory
+Browser access http://localhost:8080/aiot
 
-1.  You can use Readme\_XXX.md to support different languages, such as Readme\_en.md, Readme\_zh.md
-2.  Gitee blog [blog.gitee.com](https://blog.gitee.com)
-3.  Explore open source project [https://gitee.com/explore](https://gitee.com/explore)
-4.  The most valuable open source project [GVP](https://gitee.com/gvp)
-5.  The manual of Gitee [https://gitee.com/help](https://gitee.com/help)
-6.  The most popular members  [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+### Linux
+```shell
+Linux,macOS,WSL:
+curl -fsSL http://ai-ot.cn/install.sh | bash
+```
+
+### User Manual
+
+1.  Add device
+2.  Configure communication 
+3.  page display
+
+

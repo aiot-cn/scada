@@ -1,0 +1,111 @@
+@charset "UTF-8";
+/*tree*/
+.tree,.tree ul {
+	list-style: none;
+	padding: 0px 0px 0px 0px;
+	margin: 0;
+}
+
+.tree li.opened>ul {
+	display: inline;
+}
+
+.tree li>ul {
+	display: none;
+}
+
+.tree li>span {
+	white-space: nowrap;
+	padding: 2px 4px;
+}
+
+.tree li>span:HOVER,.tree li>span.selected {
+	border: 1px solid #c9d0e2;
+	padding: 0px 3px;
+	background: -webkit-gradient(linear, 0 0, 0 90%, from(#fdfeff),		to(#eff9ff));
+	background: -moz-linear-gradient(top, #fdfeff, #eff9ff 90%);
+	border-radius: 4px;
+	text-decoration: none;
+	color: #333;
+    cursor: pointer;
+}
+
+.tree li>span.selected {
+	padding: 2px 3px;
+	font-weight: bold;
+}
+
+.tree li {
+	padding: 3px 0px 2px 18px;
+	margin: 0;
+	list-style: none;
+	background-position: -5px 4px;
+	background-repeat: no-repeat;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis; /*'ellipsis', 'clip' or any string */
+/*-o-text-overflow: ellipsis; 支持 Opera */
+    line-height: 20px;
+
+}
+
+.tree li:HOVER {
+	text-overflow: none;
+	overflow: visible;
+}
+/**
+ * 树节点
+ */
+.tree li.folder {
+	background-image: url(images/win7-tree-R.png);
+}
+
+.tree li.folder:HOVER {
+	background-image: url(images/win7-tree-R-H.png);
+}
+
+.tree li.folder.opened {
+	background-image: url(images/win7-tree-RD.png);
+}
+/*
+.tree li.opened:HOVER {
+ background-image: url(images/win7-tree-RD-H.png);
+}
+*/
+/**
+ * 树元素图标
+ */
+.tree li>i {
+	display: inline-block;
+	cursor: pointer;
+	margin-left: -15px;
+	padding-left: 15px;
+	width: 10px;
+	height: 14px;
+	line-height: 14px;
+	vertical-align: middle;
+	background-repeat: no-repeat;
+	background-position: 9px, 2px;
+}
+
+.tree li>i:not([class]) {
+	background-image: url("images/file1.png");
+}
+
+.tree li.folder>i:not([class]) {
+	background-image: url("images/folder.png");
+}
+.tree li.opened.folder>i:not([class]) {
+	background-image: url("images/folder-open.gif");
+}
+
+/**
+ * 工具栏
+ */
+.tree-toolbar i{
+	margin-right : 5px;
+}
+.tree-toolbar i:hover{
+	cursor: pointer;
+	color: #0A882B;
+}

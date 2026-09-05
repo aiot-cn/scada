@@ -1,0 +1,419 @@
+@CHARSET "UTF-8";
+
+/*主色 海蓝 #0081ff*/
+html body{
+	font-family: Microsoft YaHei, serif;
+	margin:0;
+	padding: 0;
+}
+
+select.layui-input{
+	-webkit-appearance: menulist;
+}
+
+input[type ^="date"]::-webkit-clear-button,
+input[type ^="date"]::-webkit-inner-spin-button,
+input[type  ="time"]::-webkit-inner-spin-button{
+	display: none;
+}
+[readonly]{
+	background-color: #eee;
+}
+
+.emoji-font{
+	font-family: apple color emoji, segoe ui emoji, noto color emoji, android emoji, emojisymbols, emojione mozilla, twemoji mozilla, segoe ui symbol, Noto Color Emoji Compat, emoji, sans-serif;;
+}
+
+.aiot-info-error{
+	padding: 10px;
+	border-left: 5px solid #ed5757;
+	border-radius: 0 2px 2px 0;
+	background-color: #fff6f6;
+	color: #eb3131;
+	margin-bottom: 10px;
+}
+
+.layui-unselect[readonly]{
+	background-color: #fff;
+}
+.layui-input[disabled]{
+	background: #eee;
+}
+.layui-input[disabled]:hover{
+	cursor:no-drop;
+}
+
+.layui-fluid {
+    padding: 15px;
+}
+/* layui-from-lable 宽一点 */
+.form-label-wider .layui-form-label {
+    width: 180px;
+}
+.form-label-wider .layui-input-block {
+    margin-left: 180px;
+}
+
+/* 弹窗内容 */
+.lay-con{
+  	display: none;
+  	margin: 15px;
+}
+.lay-con .layui-table{
+	margin:0;
+}
+
+/* 选项卡扩展 */
+.layui-tab-title .li-input{
+	padding: 0;
+}
+.layui-tab-title .li-input input{
+	height: 30px;
+}
+.layui-tab-title .li-input:after{
+	padding: 0;
+	height: 31px;
+}
+
+
+/* 鼠标指针 */
+*[onclick]{
+    cursor: pointer;
+}
+/** 框架高度自动 **/
+.sty-auto-h .layui-row,.sty-auto-h .layui-card{
+	height: 100%
+}
+.sty-auto-h.layui-fluid{
+	box-sizing: border-box;
+    padding-bottom: 0;
+    height: 100%
+}
+.sty-auto-h >.layui-row >div[class^="layui-col-"]{
+	 height: 100%
+}
+.sty-auto-h .layui-card-body{
+	overflow: auto;
+    height: calc(100% - 70px);
+}
+
+/*---------------------------- 区域头部部件 -------------------------*/
+.layui-card-header .layui-a-tips {
+    float: right;;
+    right: 15px;
+    color: #01AAED;
+}
+
+.layui-card-header input{
+	height: 30px;
+	box-sizing: border-box;
+    border: 1px solid #e6e6e6;
+    border-radius: 2px;
+	padding-left: 8px;
+	vertical-align: middle;
+}
+
+.layui-card-header select{
+	height: 30px;
+	border: 1px solid #e6e6e6;
+	border-radius: 2px;
+	vertical-align: middle;
+}
+
+.layui-card-header .title{
+	font-weight: bold;
+	margin-right: 10px;
+	vertical-align: middle;
+}
+
+.header-right{
+	float: right;
+	margin-right: -5px;
+}
+
+/*------------------------------- lauyi样式重写 -------------------------------------*/
+select.layui-input {
+    -webkit-appearance: menulist;
+    appearance: menulist;
+}
+.layui-btn{
+	-background-color: #3480eb;
+}
+.layui-layer-title{
+	color: #fff;
+	background-color: #5796ef;
+	height: 42px;
+	line-height: 42px;
+}
+.layui-layer-setwin .layui-layer-ico.layui-layer-close{
+	background: none;
+	font-family: layui-icon!important;
+	font-style: normal;
+	-webkit-font-smoothing: antialiased;
+	color: #fff;
+	font-size: 18px;
+	margin-top: -5px;
+}
+.layui-layer-setwin .layui-layer-ico.layui-layer-close:before{
+	content: "\1006";
+}
+
+.layui-form-onswitch{
+	border-color: #0081ff;
+	background-color: #0081ff;
+}
+
+.layui-form-checked span, .layui-form-checked:hover span{
+	-background-color: #0081ff;
+}
+
+.layui-form-checked i, .layui-form-checked:hover i{
+	color: #0081ff;
+}
+
+/*tab*/
+.layui-tab-brief>.layui-tab-title .layui-this{
+	color: #1779cf;
+}
+.layui-tab-brief>.layui-tab-more li.layui-this:after, .layui-tab-brief>.layui-tab-title .layui-this:after{
+	border-bottom: 2px solid #3099e3;
+}
+
+/*------------------------------- admin -------------------------------------*/
+body .layui-side-menu,
+body .layui-layer-admin .layui-layer-title,
+body .layadmin-side-shrink .layui-side-menu .layui-nav > .layui-nav-item > .layui-nav-child {
+	background-color: #fff !important;
+}
+body .layadmin-pagetabs .layui-tab-title li:after,
+body .layadmin-pagetabs .layui-tab-title li.layui-this:after{
+	background-color: #0074fd !important;
+}
+
+body .layadmin-pagetabs .layui-tab-title li:hover,
+body .layadmin-pagetabs .layui-tab-title li.layui-this{
+	background-color: #f7fbff;
+}
+
+body .layui-nav-tree .layui-nav-child{
+	background-color: #fff !important;
+	color: #000;
+}
+
+/*选中*/
+body .layui-nav-tree .layui-this,
+body .layui-nav-tree .layui-this > a,
+body .layui-nav-tree .layui-nav-child dd.layui-this,
+body .layui-nav-tree .layui-nav-child dd.layui-this a {
+	background-color: #fff !important;
+	color: #0877ed;
+}
+/*列表项*/
+body .layui-side-menu .layui-nav .layui-nav-item a{
+	height: 30px;
+	line-height: 30px;
+	padding: 3px 30px 3px 50px;
+	color: #606060;
+}
+
+body .layui-side-menu .layui-nav .layui-nav-item > a{
+	padding-left: 35px;
+	border-radius: 5px;
+}
+
+body .layui-side-menu .layui-nav .layui-nav-item > a cite{
+	font-weight: bold;
+	letter-spacing: 2px;
+}
+body .layui-side-menu .layui-nav .layui-nav-item dd:hover {
+	color: #0074fd;
+	background-color: #eee !important;
+}
+body .layui-side-menu .layui-nav .layui-nav-item > a:hover {
+	background-color: #0074fd;
+	color: #fff;
+}
+
+body .layui-nav-tree .layui-nav-item > a{
+	background-color: #fff;
+	margin: 0 15px;
+}
+/*列表选中*/
+body .layui-nav-tree .layui-nav-itemed > a{
+	background-color: #0054fd;
+}
+
+body .layui-side-menu .layui-nav{
+	margin-top: 65px;
+}
+
+body .layui-side-menu .layui-nav .layui-nav-item .layui-icon{
+	left: 13px;
+	margin-top: -15px;
+}
+
+/*字体颜色*/
+body .layui-nav-tree .layui-nav-child a{
+	color: #000;
+}
+
+body .layui-layout-admin .layui-logo {
+	background-color: #fff !important;
+}
+body .layui-layout-admin .layui-logo,
+body .layui-layout-admin .layui-logo a{
+	color: #000;
+}
+
+body .layui-layout-admin .layui-header {
+	background-color: #fff;
+}
+
+body .layui-layout-admin .layui-header .layui-nav .layui-this:after,
+body .layui-layout-admin .layui-header .layui-nav-bar {
+	background-color: #fff;
+	background-color: rgba(255, 255, 255, .5);
+}
+
+body .layui-nav-tree .layui-nav-bar{
+	background-color: #0074fd;
+}
+body .layui-layout-admin .layui-header {
+	border-bottom: 1px solid #ebebeb;
+}
+
+/*------------------------------- scrollbar -------------------------------------*/
+/* 滚动条整体部分，其中的属性有width,height,background,border（就和一个块级元素一样）等 */ 
+::-webkit-scrollbar              { 
+	-width: 10px;
+}
+/* 滚动条两端的按钮。可以用display:none让其不显示，也可以添加背景图片，颜色改变显示效果 */ 
+::-webkit-scrollbar-button       { 
+
+}
+/* 外层轨道。可以用display:none让其不显示，也可以添加背景图片，颜色改变显示效果 */ 
+::-webkit-scrollbar-track        { 
+
+}
+/* 内层轨道，滚动条中间部分（除去） */ 
+::-webkit-scrollbar-track-piece  { 
+
+}
+/* 滚动条里面可以拖动的那部分 */ 
+::-webkit-scrollbar-thumb        { 
+
+	-background-color: #ddd;
+	-border-radius: 10px;
+}
+/* 边角 */ 
+::-webkit-scrollbar-corner       {
+ 
+}
+/* 定义右下角拖动块的样式 */ 
+::-webkit-resizer                { 
+
+}
+
+/*------------------animation -----------------------*/
+/*----旋转360°----*/
+@keyframes rotate360{
+	from {transform:rotate(0deg);}
+	to {transform:rotate(360deg);}
+}
+
+/*------------------input-----------------------*/
+.bootstrap-input{
+	border: 1px solid #ccc;
+	border-radius: 2px;
+	padding: 5px 6px;
+	-moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+	-moz-transition: border linear 0.2s, box-shadow linear 0.2s;
+	-o-transition: border linear 0.2s, box-shadow linear 0.2s;
+	transition: border linear 0.2s, box-shadow linear 0.2s;
+}
+select.bootstrap-input{
+	padding: 4px 6px;
+}
+.bootstrap-input:focus {
+	border-color: rgba(82, 168, 236, 0.8);
+	outline: 0;
+	outline: thin dotted \9;
+	/* IE6-9 */
+	-webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);
+	-moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);
+	box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);
+}
+/*------------------ 组件 -----------------------*/
+/*----参数格式----*/
+.ta-args{
+	margin: 0;
+}
+.ta-args tbody td{
+	-webkit-user-modify: read-write;
+	-moz-user-modify: read-write;
+	user-modify: read-write;
+}
+.ta-args tr td:first-child{
+	color: #0A882B;
+}
+
+/**----弹出层form---**/
+.layer-from{
+	margin: 15px 15px 0 15px;
+}
+.layer-from .layui-form-item:last-child{
+	margin-bottom: 0;
+}
+
+/**----字符串格式化---**/
+.sct-var{
+	color: #CE3E3E;
+	border-bottom: 1px solid;
+	cursor: help;
+}
+.sct-var-un{
+	color: #999;
+	text-decoration: line-through;
+}
+.sct-pname{
+	color: #1288D0;
+}
+
+/*------------------ 图像标签 -----------------------*/
+.dm-tag{
+	user-select:none;
+	-webkit-user-select:none;
+	position: relative;
+}
+.dm-tag [data-label]{
+	position: absolute;
+	border: 2px solid red;
+	box-sizing: border-box;
+}
+.dm-tag [data-label]:hover{
+	box-shadow: 0px 0px 5px #fff;
+}
+.dm-tag [data-label]:hover .tag{
+	display: inline;
+}
+
+.dm-tag [data-label] .tag{
+	color: #fff;
+	position: absolute;
+	padding: 0 5px;
+	font-size: 12px;
+	line-height: 20px;
+	top: -20px;
+	left: -2px;
+	white-space: nowrap;
+	background-color:red;
+}
+.dm-tag [data-label] .tag:before{
+	content: attr(data-group) " " attr(data-name) " " attr(data-px) " " attr(data-mm);
+}
+.layer-img-tag .layui-layer-content{
+	padding: 15px;
+}
+.layer-img-tag .layui-layer-content::-webkit-scrollbar              {
+	width: 0;
+}

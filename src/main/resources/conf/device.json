@@ -1,0 +1,80 @@
+
+/** 【格式】
+	设备类型 : {
+		role : "设备角色",
+		name : "名称",
+		klass : "实现",
+		icon : "图标",
+		protocol: "协议类",
+		property : [
+			{"code": "temperature",	"name": "温度","unit": "℃",	"type": 0}
+		],
+		command : [
+			{	code : "指令类型",content : "内容",isHex : "16进制",priority:"优先级",delay:"延迟",
+				responseTime:"响应时间",timeout:"超时",invl:"周期",pattern:"数据验证",remark:"备注",isRemoved:"默认0启用",
+				analysis : [
+					{code:"解析类型",start:"起始",end:"结束",calc:"计算",devField:"设备字段",remark:"备注"}
+				]
+			}
+		]
+	}
+*/
+
+{
+	"Humiture" : {
+		"role" : "SENSOR",
+		"name" : "温湿度",
+		"klass":"org.aiot.device.BaseDevice",
+		"icon" : "aiot-icon aiot-icon-humiture",
+		"property" : [
+			{"code": "temperature",	"name": "温度","unit": "℃",	"type": 0},
+			{"code": "humidity",	"name": "湿度","unit": "%RH","type": 0}
+		]
+	},
+
+	"NodeDevice" : {
+		"role" : "CONTROLLER",
+		"name": "节点",
+		"icon": "aiot-icon aiot-icon-node-io",
+		"klass": "org.aiot.device.base.NodeDevice",
+		"protocol": "org.aiot.communication.protocol.GeneralProtocol",
+		"property": [
+			{"code":"d1","name":"数值1"},
+			{"code":"d2","name":"数值2"}
+		],
+		"command": [
+			{"code": "comPoll","content": "@ 03 00 00 00 01","isHex": true,"crc": "modbusCRC16",
+				"analysis": [
+					{"code": "d1","start": 6,"end": 10}
+				]
+			}
+		]
+	},
+
+	"ImgAnno" : {
+		"role" : "APP",
+		"name": "标注平台",
+		"icon": "aiot-icon aiot-icon-picture",
+		"klass": "org.aiot.device.base.imgAnno.ImgAnnoDevice",
+		"protocol": "org.aiot.communication.protocol.GeneralProtocol",
+		"command": [
+			{"code": "sendCmd","content": "{0}"},
+			{"code": "comRx",  "pattern": "[\\s\\S]+"},
+
+			{"code": "trainDet",	"content": "${py.yolo}/train.py --cache --device 0,1,2,3  {0}"},
+			{"code": "detect",		"content": "${py.yolo}/detect.py --nosave --line-thickness 2   --device 4 {0}"},
+			{"code": "autoLabel",	"content": "${py.yolo}/detect2.py  --nosave --device 4  {0}"},
+			{"code": "trainClassify","content": "${py.yolo}/classify/train.py --device 5 {0}"},
+			{"code": "predict",		"content": "${py.yolo}/classify/predict.py --nosave --device 4 {0}"},
+			{"code": "trainSeg",	"content": "${py.yolo}/segment/train.py --cache --device 0,1,2,3 {0}"},
+			{"code": "verifySeg",	"content": "${py.yolo}/segment/segVerify.py --nosave --device 4 {0}"},
+
+			{"code": "ptToOnnx",	"content": "${py2.yolo}/export.py  --imgsz {1} --batch-size 1 --include onnx --weights {0}"},
+
+			{"code": "trainOBB",	"content": "${yolo11}/trainOBB.py --device 0,1,2,3 --cache {0}"},
+			{"code": "yolo11ToOnnx","content": "${yolo11}/yolo export model={0} format=onnx nms=true"},
+			{"code": "trainPose",	"content": "${yolo11}/trainPose.py --device 0,1,2,3 --cache {0}"},
+			{"code": "verifyObb",	"content": "${yolo11}/yolov11_obb_infer.py {0}"}
+		]
+	}
+}

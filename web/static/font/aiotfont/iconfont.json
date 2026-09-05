@@ -1,0 +1,527 @@
+{
+  "id": "5130420",
+  "name": "aiot",
+  "font_family": "aiot-icon",
+  "css_prefix_text": "aiot-icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "27396494",
+      "name": "图像识别",
+      "font_class": "img-recognition",
+      "unicode": "e71b",
+      "unicode_decimal": 59163
+    },
+    {
+      "icon_id": "23018319",
+      "name": "帮助",
+      "font_class": "help",
+      "unicode": "e613",
+      "unicode_decimal": 58899
+    },
+    {
+      "icon_id": "26362298",
+      "name": "模型训练",
+      "font_class": "model-train",
+      "unicode": "e9c5",
+      "unicode_decimal": 59845
+    },
+    {
+      "icon_id": "29961705",
+      "name": "下载",
+      "font_class": "download",
+      "unicode": "e6f5",
+      "unicode_decimal": 59125
+    },
+    {
+      "icon_id": "37945117",
+      "name": "AI模型",
+      "font_class": "openai",
+      "unicode": "e640",
+      "unicode_decimal": 58944
+    },
+    {
+      "icon_id": "39625805",
+      "name": "属性",
+      "font_class": "property",
+      "unicode": "e69a",
+      "unicode_decimal": 59034
+    },
+    {
+      "icon_id": "42194674",
+      "name": "剪切",
+      "font_class": "scissors-cut-line",
+      "unicode": "e770",
+      "unicode_decimal": 59248
+    },
+    {
+      "icon_id": "684274",
+      "name": "标尺",
+      "font_class": "scaleplate",
+      "unicode": "e663",
+      "unicode_decimal": 58979
+    },
+    {
+      "icon_id": "1631072",
+      "name": "图片裁剪",
+      "font_class": "crop-tool",
+      "unicode": "e66e",
+      "unicode_decimal": 58990
+    },
+    {
+      "icon_id": "2570199",
+      "name": "加载",
+      "font_class": "load",
+      "unicode": "e680",
+      "unicode_decimal": 59008
+    },
+    {
+      "icon_id": "3504879",
+      "name": "导入导出",
+      "font_class": "imp-exp",
+      "unicode": "e64a",
+      "unicode_decimal": 58954
+    },
+    {
+      "icon_id": "4398433",
+      "name": "标签",
+      "font_class": "label",
+      "unicode": "e642",
+      "unicode_decimal": 58946
+    },
+    {
+      "icon_id": "4512075",
+      "name": "打开文件",
+      "font_class": "dir-open",
+      "unicode": "e64d",
+      "unicode_decimal": 58957
+    },
+    {
+      "icon_id": "4932890",
+      "name": "辅助线",
+      "font_class": "auxiliary-line",
+      "unicode": "e87f",
+      "unicode_decimal": 59519
+    },
+    {
+      "icon_id": "5121520",
+      "name": "文件夹",
+      "font_class": "dir",
+      "unicode": "e64b",
+      "unicode_decimal": 58955
+    },
+    {
+      "icon_id": "5637388",
+      "name": "节点",
+      "font_class": "node-io",
+      "unicode": "e602",
+      "unicode_decimal": 58882
+    },
+    {
+      "icon_id": "6051919",
+      "name": "重命名",
+      "font_class": "rename",
+      "unicode": "e62f",
+      "unicode_decimal": 58927
+    },
+    {
+      "icon_id": "7328911",
+      "name": "多边形",
+      "font_class": "polygon",
+      "unicode": "e624",
+      "unicode_decimal": 58916
+    },
+    {
+      "icon_id": "11799000",
+      "name": "3D旋转",
+      "font_class": "rotate-3d",
+      "unicode": "e64e",
+      "unicode_decimal": 58958
+    },
+    {
+      "icon_id": "15023268",
+      "name": "矩形框",
+      "font_class": "rectangle",
+      "unicode": "e607",
+      "unicode_decimal": 58887
+    },
+    {
+      "icon_id": "18681348",
+      "name": "流媒体",
+      "font_class": "stream-media",
+      "unicode": "e62e",
+      "unicode_decimal": 58926
+    },
+    {
+      "icon_id": "18790813",
+      "name": "旋转",
+      "font_class": "rotate",
+      "unicode": "e741",
+      "unicode_decimal": 59201
+    },
+    {
+      "icon_id": "9432187",
+      "name": "数据源",
+      "font_class": "data-source",
+      "unicode": "e8d6",
+      "unicode_decimal": 59606
+    },
+    {
+      "icon_id": "10131709",
+      "name": "3D",
+      "font_class": "d3",
+      "unicode": "e63c",
+      "unicode_decimal": 58940
+    },
+    {
+      "icon_id": "2767716",
+      "name": "设备",
+      "font_class": "device",
+      "unicode": "e64c",
+      "unicode_decimal": 58956
+    },
+    {
+      "icon_id": "4508956",
+      "name": "物料-填充",
+      "font_class": "material-fill",
+      "unicode": "e61f",
+      "unicode_decimal": 58911
+    },
+    {
+      "icon_id": "9121576",
+      "name": "时钟",
+      "font_class": "clock",
+      "unicode": "e645",
+      "unicode_decimal": 58949
+    },
+    {
+      "icon_id": "12875273",
+      "name": "仓库",
+      "font_class": "warehouse",
+      "unicode": "e605",
+      "unicode_decimal": 58885
+    },
+    {
+      "icon_id": "21053634",
+      "name": "API",
+      "font_class": "api",
+      "unicode": "e66d",
+      "unicode_decimal": 58989
+    },
+    {
+      "icon_id": "28830392",
+      "name": "芯片",
+      "font_class": "chip",
+      "unicode": "e74c",
+      "unicode_decimal": 59212
+    },
+    {
+      "icon_id": "40207456",
+      "name": "成分",
+      "font_class": "chem-comp",
+      "unicode": "e897",
+      "unicode_decimal": 59543
+    },
+    {
+      "icon_id": "41171927",
+      "name": "url",
+      "font_class": "url",
+      "unicode": "e60e",
+      "unicode_decimal": 58894
+    },
+    {
+      "icon_id": "5769157",
+      "name": "控制台",
+      "font_class": "console",
+      "unicode": "e68a",
+      "unicode_decimal": 59018
+    },
+    {
+      "icon_id": "658032",
+      "name": "雪花",
+      "font_class": "snowflake",
+      "unicode": "e65f",
+      "unicode_decimal": 58975
+    },
+    {
+      "icon_id": "1298042",
+      "name": "除湿",
+      "font_class": "dehumidification",
+      "unicode": "e677",
+      "unicode_decimal": 58999
+    },
+    {
+      "icon_id": "4170104",
+      "name": "除湿器",
+      "font_class": "dehumidifier",
+      "unicode": "e813",
+      "unicode_decimal": 59411
+    },
+    {
+      "icon_id": "4508448",
+      "name": "物料",
+      "font_class": "material",
+      "unicode": "e60b",
+      "unicode_decimal": 58891
+    },
+    {
+      "icon_id": "4721526",
+      "name": "电脑",
+      "font_class": "computer",
+      "unicode": "e6f7",
+      "unicode_decimal": 59127
+    },
+    {
+      "icon_id": "5297839",
+      "name": "传感器",
+      "font_class": "sensor",
+      "unicode": "e623",
+      "unicode_decimal": 58915
+    },
+    {
+      "icon_id": "7905547",
+      "name": "工作台",
+      "font_class": "workbench",
+      "unicode": "e66b",
+      "unicode_decimal": 58987
+    },
+    {
+      "icon_id": "9122487",
+      "name": "图片",
+      "font_class": "picture",
+      "unicode": "e660",
+      "unicode_decimal": 58976
+    },
+    {
+      "icon_id": "9792264",
+      "name": "控制器",
+      "font_class": "controller",
+      "unicode": "e6af",
+      "unicode_decimal": 59055
+    },
+    {
+      "icon_id": "17612242",
+      "name": "臭氧",
+      "font_class": "o3",
+      "unicode": "e652",
+      "unicode_decimal": 58962
+    },
+    {
+      "icon_id": "18149653",
+      "name": "警灯",
+      "font_class": "alarm-lamp",
+      "unicode": "e600",
+      "unicode_decimal": 58880
+    },
+    {
+      "icon_id": "29263282",
+      "name": "风机",
+      "font_class": "draught-fan",
+      "unicode": "e662",
+      "unicode_decimal": 58978
+    },
+    {
+      "icon_id": "34648052",
+      "name": "围栏",
+      "font_class": "fence",
+      "unicode": "e6db",
+      "unicode_decimal": 59099
+    },
+    {
+      "icon_id": "35142458",
+      "name": "空调",
+      "font_class": "air-conditioner",
+      "unicode": "e76f",
+      "unicode_decimal": 59247
+    },
+    {
+      "icon_id": "41341290",
+      "name": "六氟化硫",
+      "font_class": "sf6",
+      "unicode": "e64f",
+      "unicode_decimal": 58959
+    },
+    {
+      "icon_id": "13805005",
+      "name": "水位",
+      "font_class": "water-level",
+      "unicode": "e787",
+      "unicode_decimal": 59271
+    },
+    {
+      "icon_id": "26786019",
+      "name": "枪机-右",
+      "font_class": "camera-gun-right",
+      "unicode": "e6ec",
+      "unicode_decimal": 59116
+    },
+    {
+      "icon_id": "26786020",
+      "name": "枪机-左",
+      "font_class": "camera-gun-left",
+      "unicode": "e6ed",
+      "unicode_decimal": 59117
+    },
+    {
+      "icon_id": "79102",
+      "name": "球机",
+      "font_class": "camera-ballhead",
+      "unicode": "e61d",
+      "unicode_decimal": 58909
+    },
+    {
+      "icon_id": "235847",
+      "name": "火焰",
+      "font_class": "flame",
+      "unicode": "e60d",
+      "unicode_decimal": 58893
+    },
+    {
+      "icon_id": "769621",
+      "name": "音量",
+      "font_class": "volume",
+      "unicode": "e632",
+      "unicode_decimal": 58930
+    },
+    {
+      "icon_id": "1376296",
+      "name": "气体",
+      "font_class": "gas",
+      "unicode": "e606",
+      "unicode_decimal": 58886
+    },
+    {
+      "icon_id": "1909185",
+      "name": "氧气",
+      "font_class": "o2",
+      "unicode": "e635",
+      "unicode_decimal": 58933
+    },
+    {
+      "icon_id": "1973148",
+      "name": "指南针",
+      "font_class": "navigation",
+      "unicode": "e601",
+      "unicode_decimal": 58881
+    },
+    {
+      "icon_id": "2035740",
+      "name": "门禁",
+      "font_class": "entrance-guard",
+      "unicode": "e60a",
+      "unicode_decimal": 58890
+    },
+    {
+      "icon_id": "2066013",
+      "name": "路径",
+      "font_class": "path",
+      "unicode": "e685",
+      "unicode_decimal": 59013
+    },
+    {
+      "icon_id": "2598617",
+      "name": "温湿度",
+      "font_class": "humiture",
+      "unicode": "e661",
+      "unicode_decimal": 58977
+    },
+    {
+      "icon_id": "2782063",
+      "name": "防盗",
+      "font_class": "theft",
+      "unicode": "e622",
+      "unicode_decimal": 58914
+    },
+    {
+      "icon_id": "3814348",
+      "name": "烟雾",
+      "font_class": "smoke",
+      "unicode": "e61c",
+      "unicode_decimal": 58908
+    },
+    {
+      "icon_id": "3846264",
+      "name": "噪声",
+      "font_class": "db",
+      "unicode": "e63f",
+      "unicode_decimal": 58943
+    },
+    {
+      "icon_id": "4236483",
+      "name": "变压器",
+      "font_class": "transformer",
+      "unicode": "e628",
+      "unicode_decimal": 58920
+    },
+    {
+      "icon_id": "5287592",
+      "name": "水位2",
+      "font_class": "water-level2",
+      "unicode": "e6b6",
+      "unicode_decimal": 59062
+    },
+    {
+      "icon_id": "5732759",
+      "name": "瞄准",
+      "font_class": "aim",
+      "unicode": "ec32",
+      "unicode_decimal": 60466
+    },
+    {
+      "icon_id": "5795572",
+      "name": "国家电网",
+      "font_class": "logo-stategrid",
+      "unicode": "e683",
+      "unicode_decimal": 59011
+    },
+    {
+      "icon_id": "5798532",
+      "name": "国家电网",
+      "font_class": "logo-stategrid-full",
+      "unicode": "e686",
+      "unicode_decimal": 59014
+    },
+    {
+      "icon_id": "6081512",
+      "name": "温度",
+      "font_class": "temperature",
+      "unicode": "e641",
+      "unicode_decimal": 58945
+    },
+    {
+      "icon_id": "7613879",
+      "name": "TVOC",
+      "font_class": "tvoc",
+      "unicode": "e604",
+      "unicode_decimal": 58884
+    },
+    {
+      "icon_id": "7777423",
+      "name": "湿度",
+      "font_class": "humidity",
+      "unicode": "e603",
+      "unicode_decimal": 58883
+    },
+    {
+      "icon_id": "10885919",
+      "name": "保存",
+      "font_class": "save",
+      "unicode": "e615",
+      "unicode_decimal": 58901
+    },
+    {
+      "icon_id": "12045642",
+      "name": "执行",
+      "font_class": "run",
+      "unicode": "e702",
+      "unicode_decimal": 59138
+    },
+    {
+      "icon_id": "13804990",
+      "name": "降雨量",
+      "font_class": "rainfall",
+      "unicode": "e784",
+      "unicode_decimal": 59268
+    }
+  ]
+}

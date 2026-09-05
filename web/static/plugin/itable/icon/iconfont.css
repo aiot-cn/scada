@@ -1,0 +1,206 @@
+@font-face {
+  font-family: "itable-font"; /* Project id 1046968 */
+  src: url('iconfont.woff?t=1647089411396') format('woff'),
+       url('iconfont.ttf?t=1647089411396') format('truetype');
+}
+
+.itable-font {
+  font-family: "itable-font" !important;
+  font-size: 16px;
+  font-style: normal;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.itable-flag:before {
+  content: "\e6d1";
+}
+
+.itable-run:before {
+  content: "\e6bb";
+}
+
+.itable-copy:before {
+  content: "\e6e6";
+}
+
+.itable-replace:before {
+  content: "\e616";
+}
+
+.itable-runs:before {
+  content: "\e817";
+}
+
+.itable-tree-sub:before {
+  content: "\e70e";
+}
+
+.itable-refresh:before {
+  content: "\e650";
+}
+
+.itable-find:before {
+  content: "\e618";
+}
+
+.itable-eye:before {
+  content: "\e619";
+}
+
+.itable-list:before {
+  content: "\e66a";
+}
+
+.itable-grid-four:before {
+  content: "\e680";
+}
+
+.itable-grid-four2:before {
+  content: "\e7ac";
+}
+
+.itable-more3:before {
+  content: "\e651";
+}
+
+.itable-more1:before {
+  content: "\e64b";
+}
+
+.itable-more:before {
+  content: "\e621";
+}
+
+.itable-more2:before {
+  content: "\e7df";
+}
+
+.itable-angle-right:before {
+  content: "\e645";
+}
+
+.itable-angle-right-plus:before {
+  content: "\e646";
+}
+
+.itable-angle-left-minus:before {
+  content: "\e647";
+}
+
+.itable-angle-left:before {
+  content: "\e648";
+}
+
+.itable-angle-right-minus:before {
+  content: "\e649";
+}
+
+.itable-angle-left-plus:before {
+  content: "\e64a";
+}
+
+.itable-tree-sib:before {
+  content: "\e606";
+}
+
+.itable-hint:before {
+  content: "\e699";
+}
+
+.itable-checked:before {
+  content: "\e698";
+}
+
+.itable-financenormal1:before {
+  content: "\e697";
+}
+
+.itable-time:before {
+  content: "\e696";
+}
+
+.itable-cancel:before {
+  content: "\e60d";
+}
+
+.itable-order:before {
+  content: "\e6a8";
+}
+
+.itable-close:before {
+  content: "\e608";
+}
+
+.itable-add:before {
+  content: "\e613";
+}
+
+.itable-delete1:before {
+  content: "\e614";
+}
+
+.itable-complete:before {
+  content: "\e615";
+}
+
+.itable-no:before {
+  content: "\e617";
+}
+
+.itable-close2:before {
+  content: "\e61a";
+}
+
+.itable-add2:before {
+  content: "\e623";
+}
+
+.itable-complete2:before {
+  content: "\e61f";
+}
+
+.itable-arrows-left:before {
+  content: "\e600";
+}
+
+.itable-circle-arrows-right:before {
+  content: "\e6ae";
+}
+
+.itable-circle-arrows-left:before {
+  content: "\e6b1";
+}
+
+.itable-arrows-down:before {
+  content: "\e610";
+}
+
+.itable-arrows-up:before {
+  content: "\e611";
+}
+
+.itable-arrows-right:before {
+  content: "\e612";
+}
+
+.itable-edit:before {
+  content: "\e609";
+}
+
+.itable-delete2:before {
+  content: "\e620";
+}
+
+.itable-delete:before {
+  content: "\e6d6";
+}
+
+.itable-circle:before {
+  content: "\eb94";
+}
+
+.itable-arrows-up-down:before {
+  content: "\e6b7";
+}
+

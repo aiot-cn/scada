@@ -1,0 +1,402 @@
+@CHARSET "UTF-8";
+
+.itable{
+	width: 100%;
+	counter-reset:row-no 0;
+}
+
+.itable td,.itable th{
+	border-bottom: 1px solid #eee;
+	padding: 5px 10px;
+	color: #666;
+	position: relative;
+}
+
+.itable th{
+	color: #555;
+	text-align: left;
+}
+
+.itable a{
+	color: #1779cf;
+}
+
+
+
+.itable.itable-border-b td,.itable.itable-border-b th{
+	border-top: none;
+	border-bottom: 1px solid #ddd;
+}
+
+
+.itable tbody>tr:hover{
+	background-color: #FBF9E7;
+}
+
+.itable .itable-font{
+	font-size: 20px;
+	vertical-align: middle;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+form[data-for]{
+	display: none !important;
+	padding-top: 20px;
+}
+
+form[data-for] .layui-input:focus, form[data-for] .layui-textarea:focus,
+.itable .layui-input:focus, .itable .layui-textarea:focus{
+    border-color: #5b90f9!important;
+}
+
+.layui-layer-content form[data-for]{
+	display: block !important;
+}
+
+.itable>thead>tr>th{
+	line-height: 24px;
+}
+.itable>tfoot>tr>th{
+	
+}
+
+.itable tr.row_selected,.itable tr.row_selected:HOVER{
+	background-color: #f7fbff;
+}
+
+.itable .itable-delete{
+	color: #f66060;
+}
+.itable .itable-edit{
+	color: #39a3e3;
+}
+.itable .itable-order{
+	
+}
+.thead-hide>thead>tr>th{
+	padding: 0;
+}
+.inline-edit-row td{
+	padding: 5px;
+}
+.inline-edit-row .ita-td-edit{
+	padding: 5px 10px;
+}
+.inline-edit-row .layui-input, 
+.inline-edit-row .layui-select, 
+.inline-edit-row .layui-textarea{
+	padding: 0 6px;
+    font-size: 12px;
+    height: 28px;
+    margin: 0;
+    box-sizing: border-box;
+    width: 100%;
+    display: block;
+}
+.inline-edit-row select.layui-input{
+	padding: 0 1px;
+}
+
+.inline-edit-row .d-file input{
+	height: 100%;
+}
+
+.inline-edit-row .d-file span{
+	line-height: 28px;
+    color: blue;
+    cursor: pointer;
+}
+
+.itable-sort:HOVER{
+	background: url("images/sort_both.png") no-repeat center right;
+	cursor: pointer;
+}
+.itable-sort[sorted="ASC"]{
+	background: url("images/sort_asc.png") no-repeat center right;;
+}
+.itable-sort[sorted="DESC"]{
+	background: url("images/sort_desc.png") no-repeat center right;;
+}
+.itable-switch{
+	cursor: pointer;
+}
+
+.itable-switch:BEFORE,
+.switch-contrary .itable-switch[v="1"]:BEFORE{
+	color: #666;
+	content: "\eb94";
+}
+.itable-switch[v="1"]:BEFORE,
+.switch-contrary .itable-switch[v="0"]:BEFORE{
+	color: #1779cf;
+	content: "\e615";
+}
+
+.switch-opposite .itable-switch:BEFORE{
+	color: #1779cf;
+	content: "\e615";
+}
+.switch-opposite .itable-switch[v="1"]:BEFORE{
+	color: #666;
+	content: "\eb94";
+}
+
+.itable .switch-contrary-no .itable-switch{
+	border: 1px solid #1779cf;
+	font-size: 12px;
+	display: inline-block;
+	border-radius: 20px;
+	width: 20px;
+	height: 20px;
+	line-height: 20px;
+}
+
+.itable .switch-contrary-no .itable-switch[v="1"]{
+	border-color: #999;
+}
+
+.itable .switch-contrary-no .itable-switch[v="0"]{
+	counter-increment:row-no 1;
+}
+
+.itable .switch-contrary-no .itable-switch:before{
+	content: counter(row-no);
+	color: #1779cf;
+}
+.itable .switch-contrary-no .itable-switch[v="1"]:before{
+	content: "";
+	color: #999;
+}
+
+.it-check{
+	width: 14px;
+    height: 14px;
+    vertical-align: middle;
+}
+
+.itable .tal{
+	text-align: left;
+}
+.itable .tar{
+	text-align: right;
+}
+.itable .tac,
+.itable .tac th,
+.itable .tac td{
+	text-align: center;
+}
+.itable .prei{
+	white-space: pre-line;
+}
+.ita-td-edit i{
+	margin-left: 5px;
+	cursor: pointer;
+	font-size: 20px;
+	vertical-align: middle;
+}
+.ita-td-edit i:first-child{
+	margin-left: 0;
+}
+
+.itable a:hover{
+	cursor: pointer;
+}
+.ita-td-edit .itable-order{
+	cursor: move;
+}
+.itable .ita-nodata td{
+	text-align: center;
+	color: #CC8509;
+}
+/*----------- 溢出省略号显示 -----------*/
+.to{
+	overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.itable-level-i1{
+	display: inline-block;
+    width: 20px;
+    font-size: 20px;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.itable-anim-rotate90 {
+    transform:rotate(90deg);
+}
+
+.itable-font{
+	transition: all .3s;
+	-webkit-transition: all .3s;	
+	}
+/**----------- 行号 -----------**/
+.itable tbody .itable-rownum{
+	counter-increment:row-no 1;
+}
+.itable tbody .itable-rownum:before {
+	content: counter(row-no);
+}
+/**----------- 复选框 checkDel v=id-----------**/
+.layui-icon-ok[v]{
+	background-color: #4d89dd;
+	border: 1px solid #4d89dd;
+	color: #fff;
+	border-radius: 2px;
+	cursor: pointer;
+	transition: .1s linear;
+	vertical-align: middle;
+}
+.layui-icon-ok[v="0"]{
+	color: rgba(255,255,255,0);
+	border-color: #d2d2d2;
+	background-color: #fff;
+}
+
+/**----------- 图标 -----------**/
+.ita-icon{
+	font-size: 20px;
+	vertical-align: middle;
+}
+/*----------- 单元格编辑 -----------*/
+.itable-ed-edit{
+	position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0 10px 1px;
+    border-radius: 0;
+    box-shadow: 1px 1px 20px rgba(0,0,0,.15);
+}
+.itable-ed-edit:focus {
+    border-color: #5FB878!important;
+}
+/*----------- 工具栏 -----------*/
+.itable-tool {
+	    position: absolute;
+	    right: 20px;
+	    top: 0px;
+	}
+	.itable-tool-panel {
+	    position: absolute;
+	    top: 29px;
+	    right: -1px;
+	    padding: 5px 0;
+	    min-width: 150px;
+	    min-height: 40px;
+	    max-height: 400px;
+	    border: 1px solid #d2d2d2;
+	    text-align: left;
+	    overflow-y: auto;
+	    background-color: #fff;
+	    box-shadow: 0 2px 4px rgba(0,0,0,.12);
+	    z-index: 10;
+	    display: none;
+	}
+	.itable-tool-cols:hover .itable-tool-panel{
+		display: block;
+	}
+	.itable-tool-panel li {
+		color : #666;
+	    padding: 0 10px;
+	    line-height: 30px;
+	    -webkit-transition: .5s all;
+	    transition: .5s all;
+	    overflow: hidden;
+	    text-overflow: ellipsis;
+	    white-space: nowrap;
+	}
+	.itable-tool-panel li:hover {
+	    background-color: #f2f2f2;
+	    cursor: pointer;
+	}
+	
+	.itable-tool-panel li i{
+		margin-right: 5px;
+	}
+	
+	.itable-tool-panel li:hover i{
+	    border-color: #5FB878;
+	}
+
+	/*-----------操作列 更多---------*/
+.ita-more-ul{
+	position: absolute;
+	background: #fff;
+	z-index: 1;
+	right: -7px;
+	padding: 5px;
+	border-radius: 3px;
+	box-shadow: 0px 0px 2px 0px;
+	display:none;
+}
+.ita-more-ul li{
+	padding: 2px 5px;
+}
+.ita-more-ul:before {
+	box-sizing: content-box;
+	width: 0px;
+	height: 0px;
+	position: absolute;
+	top: -13px;
+	right: 8px;
+	padding: 0;
+	border-bottom: 8px solid #FFFFFF;
+	border-top: 8px solid transparent;
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+	display: block;
+	content: '';
+	z-index: 12;
+}
+.ita-more-ul:after {
+	box-sizing: content-box;
+	width: 0px;
+	height: 0px;
+	position: absolute;
+	top: -14px;
+	right: 9px;
+	padding: 0;
+	border-bottom: 7px solid #cccccc;
+	border-top: 7px solid transparent;
+	border-left: 7px solid transparent;
+	border-right: 7px solid transparent;
+	display: block;
+	content: '';
+	z-index: 10;
+}
+.ita-td-edit .itable-more{
+	position: relative;
+}
+.ita-td-edit .itable-more:hover .ita-more-ul{
+	display: block;
+}
+
+/*-----------------树形----------------------*/
+
+.ita-tree {line-height:0; margin:0px 2px; padding: 0; width:21px; height:21px; display: inline-block; vertical-align:middle;
+	border:0 none; cursor: pointer;outline:none;
+	background-color:transparent; background-repeat:no-repeat; background-attachment: scroll;
+	background-image:url("images/tree.png");
+	background-position: -84px -21px;
+}
+.ita-tree.tree-tab{margin-right: -5px;background-position: -84px -11px;height: 20px}
+.-ita-tree[seq='first']{background-position: -84px 0px;}
+.ita-tree[seq='last']{background-position: -84px -42px;}
+.ita-tree[children][opened='0']{background-position: -126px -21px;}
+.ita-tree[children][opened='1']{background-position: -105px -21px;}
+.ita-tree[children][seq='first'][opened='0']{background-position: -126px 0;}
+.ita-tree[children][seq='first'][opened='1']{background-position: -105px 0;}
+.ita-tree[children][seq='last'][opened='0']{background-position: -126px -42px;}
+.ita-tree[children][seq='last'][opened='1']{background-position: -105px -42px;}
+
+
+
+@MEDIA print {
+	.inline-edit-row,.ita-td-edit{
+		display: none;
+	}
+}	
+	
