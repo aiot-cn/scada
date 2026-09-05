@@ -27,7 +27,8 @@
         <dependency>
             <groupId>org.nutz</groupId>
             <artifactId>nutz</artifactId>
-            <version>1.r.69.v20220703</version>
+            <!--1.r.69.v20220703 设备aop有问题 需要jdk9 -->
+            <version>1.r.68.v20191031</version>
         </dependency>
 
         <!-- servlet-api -->

@@ -68,7 +68,7 @@
 <body>
 <div class="header">
     <div class="header-left">
-        <img alt="" src="${base}/resources/images/logo.png" style="height: 30px">
+        <img alt="" src="${res}/images/logo.png" style="height: 30px">
         <span style="font-size: 18px;vertical-align: middle;color: #6e7989;margin-left: 5px;">爱物联SCADA系统V3.0</span>
     </div>
     <div class="header-center">
