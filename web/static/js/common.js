@@ -512,9 +512,10 @@ var common = {
 			input = '<input '+attr+' type="number" step="0.01">';
 		}else if(data.select) {
 			input = '<select lay-ignore '+attr+'>';
+			input += '<option value="">--</option>';
 			$(data.select.split(",")).each(function () {
 				var op = this.split(":");
-				input += "<option value='" + op[0] + "'>" + op[1] + "</option>";
+				input += "<option value='" + op[0] + "'>" + (op[1] || op[0]) + "</option>";
 			});
 			input += '</select>'
 		}

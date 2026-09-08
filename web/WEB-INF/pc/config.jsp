@@ -157,6 +157,7 @@
                 <cite>系统</cite>
                 <span class="layui-nav-more"></span></a>
               <dl class="layui-nav-child">
+                <dd><a lay-href="${base }/config/sysParam">参数</a></dd>
                 <dd><a lay-href="${base }/config/sqlCode">SQLCode</a></dd>
                 <dd><a lay-href="${base }/index/debug">调试</a></dd>
               </dl>

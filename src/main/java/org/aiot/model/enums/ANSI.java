@@ -11,23 +11,23 @@ public enum ANSI {
 	/** 前景色 */
 	public enum COLOR_FORE{
 		/** 黑色 */
-		black("",30),
+		black("黑色",30),
 		/** 红色 */
-		red("",31),
+		red("红色",31),
 		/** 绿色 */
-		green("",32),
+		green("绿色",32),
 		/** 黄色 */
-		yellow("",33),
+		yellow("黄色",33),
 		/** 蓝色 */
-		blue("",34),
+		blue("蓝色",34),
 		/** 紫色（品红） */
-		purple("",35),
+		purple("紫色",35),
 		/** 青色 */
-		cyan("",36),
+		cyan("青色",36),
 		/** 白色 */
-		white("",37),
+		white("白色",37),
 		/** 默认 */
-		normal("",39);
+		normal("默认",39);
 
 		private int value;
 

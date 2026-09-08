@@ -3,6 +3,7 @@ package org.aiot.device.base;
 import org.aiot.device.BaseDevice;
 import org.aiot.lang.annotation.AoReflect;
 import org.aiot.lang.workflow.Workflow;
+import org.aiot.model.enums.ANSI;
 import org.aiot.model.enums.AstEnum;
 import org.aiot.model.enums.PathEnum;
 import org.aiot.model.lang.RecognitionRes;
@@ -18,6 +19,8 @@ import org.opencv.core.Mat;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -51,8 +54,18 @@ public class FFmpegDevice extends BaseDevice {
 	@AoReflect(value = "推流地址",type = AstEnum.param)
 	private String pushUrl; // rtmp://127.0.0.1:1554/ffmpeg/test
 
-	@AoReflect(value = "GPU加速",type = AstEnum.param)
-	private boolean useGpu = true;
+	List<String> hwDecoders = Arrays.asList(
+			"h264_cuvid",      // NVIDIA CUDA
+			"h264_qsv",        // Intel Quick Sync  -- windows Linux
+			"h264_mediacodec", // Android MediaCodec
+			"h264_videotoolbox", // macOS VideoToolbox
+			"h264_d3d11va",    // Windows D3D11VA --win10推荐
+			"h264_dxva2",      // Windows DXVA2 --win10之前
+			"h264_vaapi"       // Linux VAAPI -- 跨厂商
+	);
+
+	@AoReflect(value = "硬件加速",type = AstEnum.param,select = "auto,CUDA,Intel,macOS,Linux,none")
+	private String hwAccelType = "auto";
 
 	private FFmpegFrameRecorder recorder;
 	private Integer imageWidth;
@@ -81,13 +94,17 @@ public class FFmpegDevice extends BaseDevice {
 			grabber.setOption("rtsp_transport", "tcp"); // 更稳定
 			avutil.av_log_set_level(AV_LOG_ERROR);
 			grabber.setOption("stimeout", "9000000");
-			// GPU 加速配置
-			if(useGpu) {
-				// NVIDIA CUDA 硬件解码
-				grabber.setVideoCodecName("h264_cuvid"); // H.264 CUDA 解码
+			String decode = hwAccelType;
+			if("auto".equals(hwAccelType)) {
+				decode = getHwDecoder();
+			}
+			// NVIDIA CUDA 硬件解码
+			if("h264_cuvid".equals(decode) || "CUDA".equals(decode)){
+				grabber.setVideoCodecName("h264_cuvid");
 				grabber.setOption("hwaccel", "cuda");
 				grabber.setOption("hwaccel_output_format", "cuda");
 			}
+
 			if(streamOpen)
 				start();
 
@@ -101,10 +118,12 @@ public class FFmpegDevice extends BaseDevice {
 	}
 
 	private void pullStream() {
+		String msg = "FFmpeg["+grabber.getVideoCodecName()+"] pull start... <- " + pullUrl;
+		log.info(ANSI.COLOR_FORE.green.format(msg));
 		try {
-			log.info("FFmpeg pull... <- " + pullUrl);
 			grabber.start();
-			log.info("FFmpeg 连接成功,开始读帧");
+			msg = "FFmpeg pull success,开始读帧 <- " + pullUrl;
+			log.info(ANSI.COLOR_FORE.green.format(msg));
 			while (grabber != null) {
 				Mat mat = null;
 				try {
@@ -137,7 +156,8 @@ public class FFmpegDevice extends BaseDevice {
 			}
 
 		}catch(FFmpegFrameGrabber.Exception e){
-			e.printStackTrace();
+			msg = "FFmpeg["+grabber.getVideoCodecName()+"] pull <- " + pullUrl + " error:\n " + e.getMessage();
+			log.error(ANSI.COLOR_FORE.red.format(msg));
 		}
 	}
 
@@ -171,7 +191,11 @@ public class FFmpegDevice extends BaseDevice {
 			recorder.setVideoBitrate(2000000);
 			recorder.setAudioChannels(0);
 
-			if (useGpu) {
+			String encode = hwAccelType;
+			if("auto".equals(hwAccelType)) {
+				encode = getHwDecoder();
+			}
+			if ("h264_cuvid".equals(encode) || "CUDA".equals(encode)) {
 				recorder.setVideoCodecName("h264_nvenc");
 				recorder.setVideoOption("preset", "p1");
 				recorder.setVideoOption("tune", "ll");
@@ -187,21 +211,16 @@ public class FFmpegDevice extends BaseDevice {
 			recorder.start();
 			frameIndex = 0;
 			isStreamPushing = true;
-			log.info("开始推流 -> " + pushUrl + (useGpu ? " [GPU/NVENC]" : " [CPU]"));
+			log.info("开始推流 -> " + pushUrl);
 
 		} catch (FrameRecorder.Exception e) {
-			if (useGpu) {
-				log.info("NVENC 初始化失败，回退到软件编码");
-				useGpu = false;
-				initRecorder();
-				return;
-			}
+			log.error("推流失败 -> " + pushUrl);
 			e.printStackTrace();
 		}
 	}
 
 	public void pushFrame(Mat mat){
-		if (!isStreamPushing || mat == null){
+		if (!isStreamPushing || mat == null || mat.empty()){
 			return;
 		}
 		if (!encoding.compareAndSet(false, true)) {
@@ -271,6 +290,35 @@ public class FFmpegDevice extends BaseDevice {
 		}
 
 		super.destroy();
+	}
+
+	/**
+	 * 获取硬件解码器
+	 */
+	public String getHwDecoder() {
+
+		try {
+
+			// 根据编码格式获取候选硬件解码器列表
+			List<String> hwDecoders = Arrays.asList(
+					"h264_cuvid",      // NVIDIA CUDA
+					"h264_qsv",        // Intel Quick Sync  -- windows Linux
+					"h264_mediacodec", // Android MediaCodec
+					"h264_videotoolbox", // macOS VideoToolbox
+					"h264_d3d11va",    // Windows D3D11VA --win10推荐
+					"h264_dxva2",      // Windows DXVA2 --win10之前
+					"h264_vaapi"       // Linux VAAPI -- 跨厂商
+			);
+
+			for (String decoderName : hwDecoders) {
+				if (avcodec.avcodec_find_decoder_by_name(decoderName) != null) {
+					return decoderName;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	public String getPullUrl() {

@@ -252,7 +252,10 @@
 	function getMediaList(){
 		common.devExec2("getMediaList",{},function (json){
 			var schemaSpan = $(".schema-info").empty();
-			var list = json.data.data;
+			var data = json.data;
+			if(!data)
+				return;
+			var list = data.data;
 			$(list).each(function (){
 				var span = schemaSpan.filter("[data-id='"+this.stream+"']");
 				var title = [];
