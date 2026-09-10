@@ -55,7 +55,13 @@ public class FFmpegDevice extends BaseDevice {
 	@AoReflect(value = "推流地址",type = AstEnum.param)
 	private String pushUrl; // rtmp://127.0.0.1:1554/ffmpeg/test
 
-	@AoReflect(value = "硬件加速",type = AstEnum.param,select = "CUDA,Intel,macOS,Linux")
+	/**
+	 * Intel Quick Sync 难用，不推荐
+	 * win10 D3D11VA
+	 * win10之前 DXVA2
+	 */
+
+	@AoReflect(value = "硬件加速",type = AstEnum.param,select = "CUDA,D3D11VA,DXVA2,macOS,Linux")
 	private String hwAccelType = ConfigEnum.hwAccelType.getValue();
 
 	private FFmpegFrameRecorder recorder;
@@ -90,13 +96,31 @@ public class FFmpegDevice extends BaseDevice {
 			if("CUDA".equals(hwAccelType)){
 				grabber.setVideoCodecName("h264_cuvid");
 				grabber.setOption("hwaccel", "cuda");
-				grabber.setOption("hwaccel_output_format", "cuda");
+				grabber.setOption("hwaccel_output_format", "cuda");//显存直通，零拷贝
 			}
-			if("Intel".equals(hwAccelType)){
-				grabber.setVideoCodecName("h264_qsv");
-				grabber.setOption("hwaccel", "qsv");
+			if("D3D11VA".equals(hwAccelType)){
+				grabber.setVideoCodecName("h264_d3d11va");// 机制A：强制使用 D3D11,默认适配器通常是主显示适配器
+				grabber.setOption("hwaccel", "d3d11va"); // 机制B：保持软解器 h264 不变，但让 libavformat 在打开码流时挂上 D3D11VA 加速
+				/*
+				  h264_d3d11va 解码后，帧默认停留在 GPU 显存（D3D11 纹理），JavaCV 的 matConverter 拿不到。
+				  FFmpeg 把每帧从显存拷回系统内存（nv12 格式），JavaCV 再转成 BGR 的 Mat。
+				 */
 				grabber.setOption("hwaccel_output_format", "nv12");
-				grabber.setOption("init_hw_device", "qsv=hw_any");
+			}
+			if("DXVA2".equals(hwAccelType)){
+				grabber.setVideoCodecName("h264_dxva2");
+				grabber.setOption("hwaccel", "dxva2");
+				grabber.setOption("hwaccel_output_format", "nv12");
+			}
+			if("macOS".equals(hwAccelType)){
+				// VideoToolbox 解码器自带硬件加速，输出 CVPixelBuffer，JavaCV 已内置转换
+				grabber.setVideoCodecName("h264_videotoolbox");
+			}
+			if("Linux".equals(hwAccelType)){
+				grabber.setVideoCodecName("h264_vaapi");
+				grabber.setOption("hwaccel", "vaapi");
+				grabber.setOption("hwaccel_device", "/dev/dri/renderD128"); // 视机器可能为 renderD129
+				grabber.setOption("hwaccel_output_format", "nv12"); // 转回系统内存，JavaCV 才能转 Mat
 			}
 
 			if(streamOpen)
@@ -186,12 +210,21 @@ public class FFmpegDevice extends BaseDevice {
 			recorder.setAudioChannels(0);
 
 			if ("CUDA".equals(hwAccelType)) {
+				// NVIDIA 硬件编码
 				recorder.setVideoCodecName("h264_nvenc");
 				recorder.setVideoOption("preset", "p1");
 				recorder.setVideoOption("tune", "ll");
 				recorder.setVideoOption("rc", "vbr");
 				recorder.setVideoOption("cq", "28");
+			} else if ("D3D11VA".equals(hwAccelType) || "DXVA2".equals(hwAccelType)) {
+				// Windows Media Foundation 硬件编码（跨厂商，Intel/AMD/NVIDIA 通用）
+				recorder.setVideoCodecName("h264_mf");
+			} else if ("macOS".equals(hwAccelType)){
+				// Apple VideoToolbox 硬件编码
+				recorder.setVideoCodecName("h264_videotoolbox");
 			} else {
+				// 软件编码。注：Linux VAAPI(h264_vaapi) 编码要求输入帧为 VA 表面，
+				// JavaCV 的 FFmpegFrameRecorder 未内置 hwframe 上传，故回退到 libx264。
 				recorder.setVideoCodec(avcodec.AV_CODEC_ID_H264);
 				recorder.setVideoOption("tune", "zerolatency");
 				recorder.setVideoOption("preset", "ultrafast");

@@ -15,7 +15,7 @@ public enum ConfigEnum {
 	passwordType(	"密码类型","md5","select","md5:MD5,sha1:SHA1,sha256:SHA256"),
 	debug(			"调试","0",		"Boolean",""),
 	favicon(		"图标","",		"input",""),
-	hwAccelType(	"硬件加速","","select","CUDA,Intel,macOS,Linux"),
+	hwAccelType(	"硬件加速","","select","CUDA,D3D11VA,DXVA2,macOS,Linux"),
 
 	textCss(		"自定义样式","",	"text-css",""),
 	context(		"环境变量","",	"text-properties","")
