@@ -140,10 +140,17 @@ public class JsonController {
 		BaseService bs = ioc.get(BaseService.class);
 		DeviceService ds = ioc.get(DeviceService.class);
 		DeviceType dt = bs.getTCacheAllFirst(DeviceType.class,v->Strings.equals(deviceType,v.getCode()));
-		List<MethodBean> list = new ArrayList<>();
-		List<MethodBean> list2 = ds.methodsDetail(Strings.sBlank(dt.getKlass(), BaseDevice.class.getName()));
-		if(list2 != null)
-			list.addAll(list2);
+		Class<?> c = BaseDevice.class;
+		if(Strings.isNotBlank(dt.getKlass())){
+			try {
+				c = Lang.loadClass(dt.getKlass());
+			} catch (ClassNotFoundException ignored) {
+
+			}
+		}
+		List<MethodBean> list = ds.methodsDetail(c);
+		if(list == null)
+			return new ArrayList<>();
 		return list;
 	}
 

@@ -32,28 +32,20 @@ import static org.bytedeco.ffmpeg.global.avutil.AV_LOG_ERROR;
 public class FFmpegDevice extends BaseDevice {
 	Log log = Logs.get();
 
+	/**
+	 * rtsp://admin:123456@192.168.1.64:554/h264/ch1/main/av_stream
+	 */
 	@AoReflect(value = "拉流地址",type = AstEnum.param)
-	private String pullUrl = "rtsp://admin:123456@192.168.1.64:554/h264/ch1/main/av_stream";
+	private String pullUrl;
 
-	@AoReflect(value = "实时取流",type = AstEnum.param)
-	private boolean streamOpen = true;
-
-	@AoReflect(value = "超时",type = AstEnum.param)
-	private Integer timeout;
-
-
-	@AoReflect("帧")
-	private long count;
-
-	Java2DFrameConverter converter = new Java2DFrameConverter();
-	private FFmpegFrameGrabber grabber;
-	private BufferedImage image;
-	private final OpenCVFrameConverter.ToOrgOpenCvCoreMat matConverter = new OpenCVFrameConverter.ToOrgOpenCvCoreMat();
-	private Workflow workflow;
-
-
-	@AoReflect(value = "推流地址",type = AstEnum.param)
-	private String pushUrl; // rtmp://127.0.0.1:1554/ffmpeg/test
+	/**
+	 * 如果推送协议为websocket则按帧推送
+	 * websocket:video-1
+	 * 其它则推流
+	 * rtmp://127.0.0.1:1554/ffmpeg/test
+	 */
+	@AoReflect(value = "推送地址",type = AstEnum.param)
+	private String pushUrl;
 
 	/**
 	 * Intel Quick Sync 难用，不推荐
@@ -63,6 +55,21 @@ public class FFmpegDevice extends BaseDevice {
 
 	@AoReflect(value = "硬件加速",type = AstEnum.param,select = "CUDA,D3D11VA,DXVA2,macOS,Linux")
 	private String hwAccelType = ConfigEnum.hwAccelType.getValue();
+
+	@AoReflect(value = "工作间隔",type = AstEnum.param)
+	private int workInterval = 0;
+	private long lastWorkTime;//上次工作时间
+
+
+	@AoReflect("帧")
+	private long count;//接收到的帧数
+
+	Java2DFrameConverter converter = new Java2DFrameConverter();
+	private FFmpegFrameGrabber grabber;
+	private BufferedImage image;
+	private final OpenCVFrameConverter.ToOrgOpenCvCoreMat matConverter = new OpenCVFrameConverter.ToOrgOpenCvCoreMat();
+	private Workflow workflow;
+
 
 	private FFmpegFrameRecorder recorder;
 	private Integer imageWidth;
@@ -123,18 +130,17 @@ public class FFmpegDevice extends BaseDevice {
 				grabber.setOption("hwaccel_output_format", "nv12"); // 转回系统内存，JavaCV 才能转 Mat
 			}
 
-			if(streamOpen)
-				start();
+			startPull();
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
-	public void start(){
+	public void startPull(){
 		new Thread(this::pullStream,"FFmpeg").start();
 	}
-
+	//拉流
 	private void pullStream() {
 		String msg = "FFmpeg["+grabber.getVideoCodecName()+"] pull start... <- " + pullUrl;
 		log.info(ANSI.COLOR_FORE.green.format(msg));
@@ -151,7 +157,7 @@ public class FFmpegDevice extends BaseDevice {
 					//BufferedImage bi = converter.getBufferedImage(frame);
 
 					mat = matConverter.convert(frame);
-					if(mat == null)
+					if(mat == null || mat.empty())
 						continue;
 
 					count ++;
@@ -159,12 +165,11 @@ public class FFmpegDevice extends BaseDevice {
 						imageWidth = mat.cols();
 						imageHeight = mat.rows();
 						log.info("视频宽高: " + imageWidth + "x" + imageHeight);
-						if(Strings.isNotBlank(pushUrl)){
+						if(Strings.isNotBlank(pushUrl) && !pushUrl.startsWith("websocket")){
 							initRecorder();
 						}
 					}
 					pushFrame(mat);
-					setLastTimeNow();
 				} catch (FFmpegFrameGrabber.Exception e) {
 					e.printStackTrace();
 				}finally {
@@ -177,26 +182,6 @@ public class FFmpegDevice extends BaseDevice {
 			log.error("FFmpeg pull error <- " + pullUrl);
 			e.printStackTrace();
 		}
-	}
-
-	@AoReflect(value = "保存视频",type = AstEnum.command)
-	public File saveVideo(int second,File file){
-		if(file == null)
-			file = PathEnum.video.getFile(System.currentTimeMillis()+".mp4");
-		exec(pullUrl,second,file.getAbsolutePath());
-		return file;
-	}
-
-	@Override
-	public void selfTest() {
-
-	}
-
-	@AoReflect("获取图像")
-	public BufferedImage getImage(){
-		if(timeout != null && System.currentTimeMillis() - getLastTime() > timeout)
-			return null;
-		return image;
 	}
 
 	public void initRecorder(){
@@ -242,35 +227,49 @@ public class FFmpegDevice extends BaseDevice {
 		}
 	}
 
+	@AoReflect(value = "保存视频",type = AstEnum.command)
+	public File saveVideo(int second,File file){
+		if(file == null)
+			file = PathEnum.video.getFile(System.currentTimeMillis()+".mp4");
+		exec(pullUrl,second,file.getAbsolutePath());
+		return file;
+	}
+
+	@Override
+	public void selfTest() {
+
+	}
+
+	@AoReflect("获取图像")
+	public BufferedImage getImage(Integer timeout){
+		if(timeout != null && System.currentTimeMillis() - getLastTime() > timeout)
+			return null;
+		return image;
+	}
+
 	public void pushFrame(Mat mat){
-		if (!isStreamPushing || mat == null || mat.empty()){
-			return;
-		}
-		if (!encoding.compareAndSet(false, true)) {
+		long now = System.currentTimeMillis();
+		//正在执行
+		if (now - lastWorkTime < workInterval || !encoding.compareAndSet(false, true)) {
 			skipCount++;
 			return;
 		}
+		lastWorkTime = now;
 
+		//异步执行，需要先克隆一份
 		Mat cloned = mat.clone();
 		encoder.submit(() -> {
+			Object obj = null;
 			try {
-				boolean first = true;
-				do {
-					if (first) {
-						if(workflow != null){
-							Object obj = workflow.run(new NutMap("image", cloned));
-							if(obj instanceof RecognitionRes){
-								RecognitionRes res = (RecognitionRes) obj;
-								OpenCVUtil.drawRecognitionRes(cloned,res);
-							}
-						}
-						first = false;
-					}
-					Frame frame = matConverter.convert(cloned);
-					frame.timestamp = frameIndex * (1000000L / 25);
-					frameIndex++;
-					recorder.record(frame);
-				} while (fillGap());
+				if(workflow != null){
+					obj = workflow.run(new NutMap("image", mat));
+				}
+				if(isStreamPushing){
+					pushStream(cloned,obj);
+				}else if(Strings.isNotBlank(pushUrl) && pushUrl.startsWith("websocket")){
+
+				}
+
 			} catch (Exception e) {
 				e.printStackTrace();
 			} finally {
@@ -278,6 +277,23 @@ public class FFmpegDevice extends BaseDevice {
 				encoding.set(false);
 			}
 		});
+	}
+
+	private void pushStream(Mat mat,Object obj) throws FFmpegFrameRecorder.Exception {
+		boolean first = true;
+		do {
+			if (first) {
+				if(obj instanceof RecognitionRes){
+					RecognitionRes res = (RecognitionRes) obj;
+					OpenCVUtil.drawRecognitionRes(mat,res);
+				}
+				first = false;
+			}
+			Frame frame = matConverter.convert(mat);
+			frame.timestamp = frameIndex * (1000000L / 25);
+			frameIndex++;
+			recorder.record(frame);
+		} while (fillGap());
 	}
 
 	private synchronized boolean fillGap() {

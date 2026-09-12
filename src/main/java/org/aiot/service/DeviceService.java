@@ -4,8 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.aiot.device.BaseDevice;
-import org.aiot.infc.device.DeviceInfc;
 import org.aiot.infc.device.DevData;
+import org.aiot.infc.device.DeviceInfc;
 import org.aiot.lang.Command;
 import org.aiot.lang.NotifyEvent;
 import org.aiot.lang.annotation.AoReflect;
@@ -13,9 +13,10 @@ import org.aiot.model.enums.ANSI;
 import org.aiot.model.enums.AstEnum;
 import org.aiot.model.enums.CommandTypeEnum;
 import org.aiot.model.enums.EventEnum;
+import org.aiot.model.project.ArgBean;
 import org.aiot.model.project.MethodBean;
 import org.aiot.model.table.*;
-import org.aiot.util.SysUtil;
+import org.aiot.util.CommonUtil;
 import org.nutz.aop.ClassAgent;
 import org.nutz.aop.ClassDefiner;
 import org.nutz.aop.DefaultClassDefiner;
@@ -435,13 +436,13 @@ public class DeviceService implements Observer {
 	}
 
 	public List<MethodBean> methodsDetail(Class<?> klass){
-		return dtMethodMap.computeIfAbsent(klass.getName(),v-> {
+		List<MethodBean> list =  dtMethodMap.computeIfAbsent(klass.getName(),v-> {
 			List<MethodBean> m2 = new ArrayList<>();
 			Method[] ms = Mirror.me(klass).getMethods();
 			//klass.getMethods() 这个只能获取当前类的方法
 			for(Method met : ms){
 				if(met.getAnnotation(AoReflect.class) != null){
-					MethodBean b = SysUtil.methodDetail(met);
+					MethodBean b = CommonUtil.methodDetail(met);
 					if(b != null)
 						m2.add(b);
 				}
@@ -449,7 +450,17 @@ public class DeviceService implements Observer {
 			}
 			return m2;
 		});
-
+		BaseDevice bd = (BaseDevice) getDevice(klass);
+		for (MethodBean met: list){
+			for(ArgBean arg: met.getArg()){
+				String selectMethod = arg.getSelectMethod();
+				if(Strings.isNotBlank(selectMethod)){
+					String select = bd.invoke(selectMethod,null)+"";
+					arg.setSelect(select);
+				}
+			}
+		}
+		return list;
 	}
 
 	public MethodBean methodDetail(Class<?> klass,String name){

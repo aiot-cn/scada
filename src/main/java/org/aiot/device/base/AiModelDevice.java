@@ -26,6 +26,9 @@ import java.util.*;
 
 public class AiModelDevice extends BaseDevice implements Observer,BaseExtend.RMenu{
 
+    /**
+     * TAiModel id
+     */
     private Map<Long, AbstractTarget> aiModelMap = new HashMap<>();
     private Map<String,String> labelMap = new HashMap<>();
 
@@ -47,11 +50,22 @@ public class AiModelDevice extends BaseDevice implements Observer,BaseExtend.RMe
     }
 
     @AoReflect(value="识别",type= AstEnum.command)
-    public RecognitionRes recognize(Object img,String type){
+    public RecognitionRes recognize(Object img,
+                                    @AoReflect(value="模型",select="selectModel()") String type
+    ){
         AbstractTarget at = aiModelMap.get(Long.parseLong(type));
         if(at != null)
             return at.recognize(img,null);
         return null;
+    }
+
+    public String selectModel(){
+       List<String> list = new ArrayList<>();
+        for (TAiModel model : bs.getTCache(TAiModel.class)){
+            String[] names = model.getModelPath().split("/");
+            list.add(model.getId()+":"+names[names.length-1]);
+        }
+        return Strings.join(",",list);
     }
 
     public void loadModel(TAiModel tAiModel){

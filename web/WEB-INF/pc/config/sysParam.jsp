@@ -89,7 +89,7 @@
 
 common.ajax("${base}/json/getEnum",{type:"config"},function(json){
 	$(json).each(function(){
-		var $d = common.buildFormItem(this).appendTo(".i1");
+		var $d = buildFormItem(this).appendTo(".i1");
 		var i = this.type.indexOf("text-");
 		if(i == 0){
 			$d.addClass("text-code").find(".layui-form-label").removeClass("layui-form-label");
@@ -105,7 +105,7 @@ common.ajax("${base}/json/getEnum",{type:"config"},function(json){
 common.ajax("${base}/json/getEnum",{type:"varRuntime"},function(json){
 	$(json).each(function(){
 		if(typeof(this.value) != "object")
-			$('.i2').append(common.buildFormItem(this));
+			$('.i2').append(buildFormItem(this));
 	});
     $("[name='dbUrl']").click(function () {
         common.openFile({"suffix":"db"},function(fileName){
@@ -117,6 +117,17 @@ common.ajax("${base}/json/getEnum",{type:"varRuntime"},function(json){
     });
 
 })
+
+function buildFormItem(data){
+    var input  = common.buildInput(data);
+    var node =  '<div class="layui-form-item">'+
+        '<label class="layui-form-label">'+data.name+'</label>' +
+        '<div class="layui-input-block">'+ input +
+        '</div></div>';
+    var $n = $(node);
+    $n.find(":input").val(data.value).addClass("layui-input");
+    return $n;
+}
 
 function saveConfig(){
 	var json = [];

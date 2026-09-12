@@ -397,37 +397,6 @@ public class SysUtil {
 		}
 	}
 
-	public static MethodBean methodDetail(Method met){
-
-		/*boolean isAbs = Modifier.isAbstract(met.getDeclaringClass().getModifiers()) ;
-		if(isAbs){
-			return null;
-		}*/
-		List<String> pname = MethodParamNamesScaner.getParamNames(met);
-		if(pname == null)
-			return null;
-		AoReflect ao = met.getAnnotation(AoReflect.class);
-		MethodBean mb = new MethodBean(met.getName(),ao == null ? "" : ao.value(),met.getReturnType());
-		mb.setType(ao == null ? AstEnum.auto : ao.type());
-		mb.setDeprecated(met.getAnnotation(Deprecated.class) != null);
-		mb.setStatic(Modifier.isStatic(met.getModifiers()));
-
-		Parameter[] parameters = met.getParameters();
-		for(int i=0;i< parameters.length;i++){
-			Parameter p = parameters[i];
-			ArgBean ab = new ArgBean(pname.get(i),p.getType());
-			mb.getArg().add(ab);
-			AoReflect ap = p.getAnnotation(AoReflect.class);
-			if(ap == null)
-				continue;
-			ab.setName(ap.value());
-			ab.setUrl(ap.url());
-			ab.setSelect(ap.select());
-			ab.setPlaceholder(ap.placeholder());
-		}
-		return mb;
-	}
-
 	public static String urlToPdf(HttpServletRequest req,File pdfFile){
 		Context context = VarRuntimeEnum.context.val();
 		String p = "";

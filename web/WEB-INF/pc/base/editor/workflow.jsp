@@ -246,6 +246,11 @@
 			color: #0d7cdf;
 		}
 		.scroll-wrapper { -webkit-overflow-scrolling: touch;overflow-y: scroll;width: 100%; height: 100%;}
+
+		.td-val select{
+			width: 100%;
+			border-color: #ccc;
+		}
 	</style>
 </head>
 <body>
@@ -535,12 +540,15 @@
 
 	DM.prototype.addArg = function(arg,val){
 		var a = (arg.type || "").split(".");
-		var lastType = a[a.length-1];
+		var argType = a[a.length-1];
+		var input = $(common.buildInput(arg)).val(val).attr("placeholder",argType);
+		var tr = $("<tr><td title='"+arg.code+"'>"+(arg.name || arg.code)+"</td><td class='td-val'></td></tr>");
+		tr.find(".td-val").append(input);
+
 		var v = val || "";
-		var input = "<input name='"+arg.code+"' value='"+v+"' placeholder='"+lastType+"' title='"+arg.type+"'>";
-		var tr = $("<tr><td title='"+arg.code+"'>"+(arg.name || arg.code)+"</td><td>"+input+"</td></tr>");
 		if(v.indexOf('"') == 0)
-			tr.find("input").addClass("is-string");
+			tr.find(":input").addClass("is-string");
+
 
 		if(a[0] == "text"){
 			tr = $("<tr><td colspan='2' class='text-con'><textarea name='"+arg.code+"'>"+(val || "")+"</textarea><div class='rb-resize'></div></td></tr>");
@@ -762,6 +770,7 @@
 		});
 	});
 
+	//参数保存
 	$(".layui-icon-senior").click(function (){
 		if(!tWorkflow.id){
 			layer.msg("不支持参数");
@@ -770,13 +779,15 @@
 		common.editArgDefine(tWorkflow.args,function (value){
 			common.jsonModel("tWorkflow", {id:tWorkflow.id,args:value},function(){
 				tWorkflow.args = value;
-				layer.msg("已保存");
+				layer.msg("参数已保存");
 			},{action:"save"});
 		});
 	});
 
 	function save(){
-		common.jsonCont("saveRes",{"url":"${SRes.url}","content":getSource()});
+		common.jsonCont("saveRes",{"url":"${SRes.url}","content":getSource()},function (){
+			layer.msg("保存成功");
+		});
 	}
 
 	$(".monitor-span").click(function (){
@@ -796,12 +807,15 @@
 		}
 	});
 
+	//运行
 	function run(){
 		$(".d-bindings").show();
 		$(".monitor-span").addClass("active");
 		common.jsonCont("workflow/"+tWorkflow.id,{},function (json){
 			loadRes();
-			if(!json || json.success !== false)
+			if(json === null){
+				layer.msg("已执行，无返回");
+			}else if(!json || json.success !== false)
 				layer.alert(JSON.stringify(json));
 		},{"callError":true});
 	}

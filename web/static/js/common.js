@@ -497,10 +497,10 @@ var common = {
 
 	   return ratio;
 	},
-	buildFormItem : function(data){
-		var type = data.klass || data.type || "";
-		var value = data.value || "";
-		var attr = 'class="layui-input" autocomplete="off" name="'+data.code+'"  placeholder="'+(data.placeholder || "")+'"';
+	buildInput : function(argBean){
+		var a = (argBean.type || "").split(".");
+		var type = a[a.length-1];
+		var attr = 'autocomplete="off" name="'+argBean.code+'"  placeholder="'+(argBean.placeholder || "")+'"';
 		var input = '<input '+attr+'>';
 		if(type.indexOf("text") == 0){
 			input = '<textarea '+attr+'></textarea>';
@@ -510,23 +510,18 @@ var common = {
 			input = '<input '+attr+' type="number">';
 		}else if(type.indexOf("Float") >= 0){
 			input = '<input '+attr+' type="number" step="0.01">';
-		}else if(data.select) {
+		}else if(argBean.select) {
 			input = '<select lay-ignore '+attr+'>';
 			input += '<option value="">--</option>';
-			$(data.select.split(",")).each(function () {
+			$(argBean.select.split(",")).each(function () {
 				var op = this.split(":");
 				input += "<option value='" + op[0] + "'>" + (op[1] || op[0]) + "</option>";
 			});
 			input += '</select>'
 		}
-		var node =  '<div class="layui-form-item">'+
-					'<label class="layui-form-label">'+data.name+'</label>' +
-					'<div class="layui-input-block">'+ input +
-					'</div></div>';
-		var $n = $(node);
-		$n.find(":input").val(data.value);
-		return $n;
+		return input;
 	},
+
 	strContext : function (str,context){
 		return (str || "").replace(/ -+\S+/g,function (p){
 			return " <span class='sct-pname'>"+p.slice(1)+"</span>";

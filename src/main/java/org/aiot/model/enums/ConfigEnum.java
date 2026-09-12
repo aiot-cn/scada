@@ -6,9 +6,7 @@ import org.aiot.service.ConfigService;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
 /**
- * 系统参数
- * @author dtj
- *
+ * 系统参数 结构需要与 ArgBean 统一
  */
 public enum ConfigEnum {
 	domain(			"域名","",		"input",""),
@@ -23,7 +21,7 @@ public enum ConfigEnum {
 	
 	private String name;
 	private String value;//默认值
-	private String type;
+	private String type;//值类型
 	private String select;
 	
 	ConfigEnum(String name,String value,String type,String select){

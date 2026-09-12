@@ -1,17 +1,19 @@
 package org.aiot.model.project;
 
+import org.nutz.lang.Strings;
+
 public class ArgBean {
 
 	private String code;
-	private Class<?> type;//返回类型
+	private Class<?> type;//参数类型
 
 	private String name;
 	private String url;
 
 	private String input;
 	private String select;//0:否,1:是
+	private String selectMethod; //通过类方法获取
 	private String placeholder;
-	private Class<?> klass;//注解类型
 
 	public ArgBean(String code, Class<?> type){
 		this.code = code;
@@ -55,7 +57,12 @@ public class ArgBean {
 	}
 
 	public void setSelect(String select) {
-		this.select = select;
+		if(Strings.endsWithChar(select,')')){
+			this.selectMethod = select.substring(0,select.indexOf('('));
+		}else{
+			this.select = select;
+		}
+
 	}
 
 	public String getPlaceholder() {
@@ -66,19 +73,19 @@ public class ArgBean {
 		this.placeholder = placeholder;
 	}
 
-	public Class<?> getKlass() {
-		return klass;
-	}
-
-	public void setKlass(Class<?> klass) {
-		this.klass = klass;
-	}
-
 	public String getInput() {
 		return input;
 	}
 
 	public void setInput(String input) {
 		this.input = input;
+	}
+
+	public String getSelectMethod() {
+		return selectMethod;
+	}
+
+	public void setSelectMethod(String selectMethod) {
+		this.selectMethod = selectMethod;
 	}
 }
