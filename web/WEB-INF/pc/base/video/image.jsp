@@ -10,12 +10,29 @@
 			margin: 0;
 			padding: 0;
 			height: 100%;
+			width: 100%;
+			overflow: hidden;
+			background-color: #333;
+		}
+
+		body {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+
+		#img {
+			max-width: 100vw;
+			max-height: 100vh;
+			width: auto;
+			height: auto;
+			object-fit: contain;
 		}
 
 	</style>
 </head>
 <body>
-	<img id="img" src="" width="100%" height="100%" />
+	<img id="img" />
 </body>
 
 <script>
@@ -40,14 +57,13 @@
 		};
 
 		ws.onmessage = function(evt){
-			if (evt.data instanceof ArrayBuffer) {
-				var blob = new Blob([evt.data], {type: 'image/jpeg'});
-				var url = URL.createObjectURL(blob);
-				img.src = url;
-				URL.revokeObjectURL(img.previousSrc || '');
-				img.previousSrc = url;
+			var blob = evt.data;
+			blob.type = 'image/jpeg';
+			var url = URL.createObjectURL(blob);
+			img.src = url;
 
-			}
+			URL.revokeObjectURL(img.previousSrc);
+			img.previousSrc = url;
 		}
 	}
 </script>

@@ -166,12 +166,13 @@ public class FFmpegDevice extends BaseDevice {
 						skipCount++;
 						continue;
 					}
-					workLastTime = now;
+
 					//BufferedImage bi = converter.getBufferedImage(frame);
 					mat = matConverter.convert(frame);
 					if(mat == null || mat.empty())
 						continue;
 
+					workLastTime = now;
 					if(imageWidth == null || imageHeight == null){
 						imageWidth = mat.cols();
 						imageHeight = mat.rows();
@@ -264,16 +265,16 @@ public class FFmpegDevice extends BaseDevice {
 		encoder.submit(() -> {
 			try {
 				encoding.set(true);
-				Object obj = as.execWorkflow(workId,new NutMap("image", mat));
+				Object obj = as.execWorkflow(workId,new NutMap("image", cloned));
 				if(obj instanceof RecognitionRes){
 					RecognitionRes res = (RecognitionRes) obj;
-					OpenCVUtil.drawRecognitionRes(mat,res);
+					OpenCVUtil.drawRecognitionRes(cloned,res);
 				}
 				if(isStreamPushing){
 					pushStream(cloned);
 				}else if(Strings.isNotBlank(pushUrl) && pushUrl.startsWith("websocket")){
 					byte[] jpegData = OpenCVUtil.toBytes(cloned);
-					socket.sendBinary(pushUrl.substring(10),jpegData);
+					socket.each(pushUrl.substring(10),(index, ele, length) -> socket.sendBinary(ele.getId(),jpegData));
 				}
 
 			} catch (Exception e) {

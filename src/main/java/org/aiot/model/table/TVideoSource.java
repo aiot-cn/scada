@@ -110,9 +110,10 @@ public class TVideoSource extends TBaseSeq{
 	 * 获取实际的RTSP地址：url有值时直接返回，否则根据品牌模板和结构化字段拼接
 	 */
 	public String getRtspUrl() {
-		String rtsp = "rtsp://"+account+":"+password+"@"+url;
 		if(cameraBrand == null)
-			return rtsp;
+			return this.url;
+
+		String rtsp = "rtsp://"+account+":"+password+"@"+url;
 		String template = cameraBrand.getTemplate();
 		template = StrUtil.replace(template,"\\[\\S+\\]", v->{
 			v = v.substring(1,v.length()-1);
