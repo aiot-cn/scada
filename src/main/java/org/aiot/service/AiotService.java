@@ -3,10 +3,16 @@ package org.aiot.service;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import org.aiot.infc.device.DeviceInfc;
+import org.aiot.lang.NotifyEvent;
+import org.aiot.lang.workflow.Workflow;
 import org.aiot.main.Constants;
+import org.aiot.model.enums.EventEnum;
 import org.aiot.model.project.Token;
 import org.aiot.model.table.TBase;
 import org.aiot.model.table.TFile;
+import org.aiot.model.table.TParam;
+import org.aiot.model.table.TWorkflow;
 import org.aiot.util.HttpUtil;
 import org.aiot.util.SysUtil;
 import org.nutz.dao.Cnd;
@@ -24,14 +30,39 @@ import java.net.ConnectException;
 import java.util.*;
 
 
-@IocBean
-public class AiotService {
+@IocBean(create="init")
+public class AiotService implements Observer{
 	Log log = Logs.get();
 	@Inject BaseService bs;
 	@Inject ConfigService cs;
 	@Inject CronService crons;
 	@Inject DeviceService ds;
 	@Inject CommuService commus;
+
+	private final Map<Long, Workflow> workflowMap = new HashMap<>();
+	public void init() {
+		bs.addObserver(this);
+	}
+
+	public Workflow getWorkflow(Long id){
+		Workflow workflow = workflowMap.get(id);
+		if(workflow == null){
+			TWorkflow tWorkflow = bs.getTCache(TWorkflow.class,id);
+			if(tWorkflow != null){
+				workflow = new Workflow(tWorkflow);
+				workflowMap.put(id,workflow);
+			}
+		}
+		return workflow;
+	}
+
+	public Object execWorkflow(Long id,Map<String,Object> params){
+		Workflow workflow = getWorkflow(id);
+		if(workflow != null){
+			return workflow.run(params);
+		}
+		return null;
+	}
 	
 	public void destroy(){
 		commus.close();
@@ -162,5 +193,19 @@ public class AiotService {
 		}
 
 	}
-	
+
+	@Override
+	public void update(Observable o, Object event) {
+		if(!(event instanceof NotifyEvent))
+			return;
+		NotifyEvent ne = (NotifyEvent) event;
+		if(ne.getEventType() != EventEnum.SAVE_AFTER)
+			return;
+		Object arg = ne.getData();
+
+		if(arg instanceof TWorkflow){
+			TWorkflow tWorkflow = (TWorkflow) arg;
+			workflowMap.put(tWorkflow.getId(),new Workflow(tWorkflow));
+		}
+	}
 }

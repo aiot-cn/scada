@@ -2,12 +2,13 @@ package org.aiot.device.base;
 
 import org.aiot.device.BaseDevice;
 import org.aiot.lang.annotation.AoReflect;
-import org.aiot.lang.workflow.Workflow;
 import org.aiot.model.enums.ANSI;
 import org.aiot.model.enums.AstEnum;
 import org.aiot.model.enums.ConfigEnum;
 import org.aiot.model.enums.PathEnum;
 import org.aiot.model.lang.RecognitionRes;
+import org.aiot.service.AiotService;
+import org.aiot.service.WebsocketRoom;
 import org.aiot.util.OpenCVUtil;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.ffmpeg.global.avutil;
@@ -26,6 +27,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static org.aiot.main.Constants.ioc;
 import static org.bytedeco.ffmpeg.global.avutil.AV_LOG_ERROR;
 
 @AoReflect("FFmpeg")
@@ -56,20 +58,23 @@ public class FFmpegDevice extends BaseDevice {
 	@AoReflect(value = "硬件加速",type = AstEnum.param,select = "CUDA,D3D11VA,DXVA2,macOS,Linux")
 	private String hwAccelType = ConfigEnum.hwAccelType.getValue();
 
+	@AoReflect(value = "工作流",type = AstEnum.param)
+	private Long workId;
+
 	@AoReflect(value = "工作间隔",type = AstEnum.param)
-	private int workInterval = 0;
-	private long lastWorkTime;//上次工作时间
+	private int workInterval = 0; //ms
+	private long workLastTime;//上次工作时间
 
 
 	@AoReflect("帧")
-	private long count;//接收到的帧数
+	private long frameCount;//接收到的帧数
 
-	Java2DFrameConverter converter = new Java2DFrameConverter();
+	AiotService as = ioc.get(AiotService.class);
+	WebsocketRoom socket = ioc.get(WebsocketRoom.class);
+	//Java2DFrameConverter converter = new Java2DFrameConverter();
 	private FFmpegFrameGrabber grabber;
 	private BufferedImage image;
 	private final OpenCVFrameConverter.ToOrgOpenCvCoreMat matConverter = new OpenCVFrameConverter.ToOrgOpenCvCoreMat();
-	private Workflow workflow;
-
 
 	private FFmpegFrameRecorder recorder;
 	private Integer imageWidth;
@@ -154,13 +159,19 @@ public class FFmpegDevice extends BaseDevice {
 					Frame frame = grabber.grab();
 					if(frame == null)
 						continue;
+					frameCount++;
+					long now = System.currentTimeMillis();
+					//正在执行
+					if (now - workLastTime < workInterval || encoding.get()) {
+						skipCount++;
+						continue;
+					}
+					workLastTime = now;
 					//BufferedImage bi = converter.getBufferedImage(frame);
-
 					mat = matConverter.convert(frame);
 					if(mat == null || mat.empty())
 						continue;
 
-					count ++;
 					if(imageWidth == null || imageHeight == null){
 						imageWidth = mat.cols();
 						imageHeight = mat.rows();
@@ -248,26 +259,21 @@ public class FFmpegDevice extends BaseDevice {
 	}
 
 	public void pushFrame(Mat mat){
-		long now = System.currentTimeMillis();
-		//正在执行
-		if (now - lastWorkTime < workInterval || !encoding.compareAndSet(false, true)) {
-			skipCount++;
-			return;
-		}
-		lastWorkTime = now;
-
 		//异步执行，需要先克隆一份
 		Mat cloned = mat.clone();
 		encoder.submit(() -> {
-			Object obj = null;
 			try {
-				if(workflow != null){
-					obj = workflow.run(new NutMap("image", mat));
+				encoding.set(true);
+				Object obj = as.execWorkflow(workId,new NutMap("image", mat));
+				if(obj instanceof RecognitionRes){
+					RecognitionRes res = (RecognitionRes) obj;
+					OpenCVUtil.drawRecognitionRes(mat,res);
 				}
 				if(isStreamPushing){
-					pushStream(cloned,obj);
+					pushStream(cloned);
 				}else if(Strings.isNotBlank(pushUrl) && pushUrl.startsWith("websocket")){
-
+					byte[] jpegData = OpenCVUtil.toBytes(cloned);
+					socket.sendBinary(pushUrl.substring(10),jpegData);
 				}
 
 			} catch (Exception e) {
@@ -279,16 +285,8 @@ public class FFmpegDevice extends BaseDevice {
 		});
 	}
 
-	private void pushStream(Mat mat,Object obj) throws FFmpegFrameRecorder.Exception {
-		boolean first = true;
+	private void pushStream(Mat mat) throws FFmpegFrameRecorder.Exception {
 		do {
-			if (first) {
-				if(obj instanceof RecognitionRes){
-					RecognitionRes res = (RecognitionRes) obj;
-					OpenCVUtil.drawRecognitionRes(mat,res);
-				}
-				first = false;
-			}
 			Frame frame = matConverter.convert(mat);
 			frame.timestamp = frameIndex * (1000000L / 25);
 			frameIndex++;
@@ -380,11 +378,19 @@ public class FFmpegDevice extends BaseDevice {
 		this.pushUrl = pushUrl;
 	}
 
-	public Workflow getWorkflow() {
-		return workflow;
+	public Long getWorkId() {
+		return workId;
 	}
 
-	public void setWorkflow(Workflow workflow) {
-		this.workflow = workflow;
+	public void setWorkId(Long workId) {
+		this.workId = workId;
+	}
+
+	public int getWorkInterval() {
+		return workInterval;
+	}
+
+	public void setWorkInterval(int workInterval) {
+		this.workInterval = workInterval;
 	}
 }

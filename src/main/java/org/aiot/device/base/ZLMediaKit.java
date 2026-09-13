@@ -167,10 +167,15 @@ public class ZLMediaKit extends BaseDevice implements Observer,BaseExtend.RMenu{
 				FFmpegDevice ffmpeg = new FFmpegDevice();
 				ffmpegMap.put(vs.getId(),ffmpeg);
 				ffmpeg.setPullUrl("rtsp://127.0.0.1:"+rtspPort+"/live/"+vs.getId());
-				ffmpeg.setPushUrl("rtmp://127.0.0.1:"+rtmpPort+"/ffmpeg/"+vs.getId());
-				if(vs.getWorkId() != null){
-					TWorkflow tWorkflow = bs.getTCache(TWorkflow.class,vs.getWorkId());
-					ffmpeg.setWorkflow(new Workflow(tWorkflow));
+				ffmpeg.setWorkId(vs.getWorkId());
+				if(vs.getWorkInterval() != null)
+					ffmpeg.setWorkInterval((int) (vs.getWorkInterval()*1000));
+				if(vs.getPushResult() != null){
+					if(vs.getPushResult() == 1){
+						ffmpeg.setPushUrl("websocket:video-"+vs.getId());
+					}else if(vs.getPushResult() == 2){
+						ffmpeg.setPushUrl("rtmp://127.0.0.1:"+rtmpPort+"/ffmpeg/"+vs.getId());
+					}
 				}
 				ffmpeg.init();
 			}

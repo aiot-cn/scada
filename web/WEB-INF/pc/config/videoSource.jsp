@@ -66,7 +66,7 @@
 <div class="layui-fluid sty-auto-h">
 
 <div class="layui-row layui-col-space15">
-  <div class="layui-col-md6">
+  <div class="layui-col-md12">
 		<div class="layui-card">
           <div class="layui-card-header">
 			<span class="title">流媒体</span>
@@ -92,8 +92,10 @@
 							<th data-field="name">名称</th>
 							<th data-field="url">地址</th>
 							<th data-render="schemaRender">在线</th>
-							<th data-field="workId" data-type="select">工作</th>
-							<th data-type="edit" class="tac" data-class="tac" width="70">编辑</th>
+							<th data-field="workId">工作</th>
+							<th data-field="workInterval">工作间隔(秒)</th>
+							<th data-field="pushResult">推送结果</th>
+							<th data-type="edit" class="tac" data-class="tac" width="70">操作</th>
 						</tr>
 					</thead>
 				</table>
@@ -102,19 +104,7 @@
         </div>
       </div>    
   </div>
-  <div class="layui-col-md6">
-		<div class="layui-card">
-          <div class="layui-card-header">
-		      	视频预览
-			  <div data-itable="tool_tDictValue" class="itable-tool"></div>
-		  </div>
-          <div class="layui-card-body">
-            <div class="layui-row layui-col-space10">
-				<iframe class="scroll-wrapper" frameborder="0" name="fm"></iframe>
-            </div>
-        </div>
-      </div>    
-  </div>
+
 </div>
 
 </div>
@@ -155,13 +145,8 @@
 				<input type="password" class="layui-input" name="password">
 			</div>
 		</div>
-		<div class="layui-form-item">
-			<label class="layui-form-label">工作</label>
-			<div class="layui-input-block">
-				<select class="layui-input" name="workId"></select>
-			</div>
-		</div>
-	<div id="videoAccount" style="visibility: hidden">
+
+	<div id="videoAccount" style="display: none">
 		<div class="layui-form-item">
 			<label class="layui-form-label">通道</label>
 			<div class="layui-input-block">
@@ -179,7 +164,30 @@
 			</div>
 		</div>
 	</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">工作</label>
+			<div class="layui-input-block">
+				<select class="layui-input" name="workId"></select>
+			</div>
+		</div>
 
+		<div class="layui-form-item">
+			<label class="layui-form-label">工作间隔</label>
+			<div class="layui-input-block">
+				<input type="number" class="layui-input" name="workInterval" step="0.01">
+			</div>
+		</div>
+
+		<div class="layui-form-item">
+			<label class="layui-form-label">推送结果</label>
+			<div class="layui-input-block">
+				<select class="layui-input" name="pushResult">
+					<option value="">--</option>
+					<option value="1">推图</option>
+					<option value="2">推流</option>
+				</select>
+			</div>
+		</div>
 
 	</form>
 
@@ -187,7 +195,9 @@
 </body>
 <script type="text/javascript">
 	param.d = "ZLMediaKit";
-	var cameraBrandMap = {};
+	var suffix = common.isWindowsBrowser() ? "mp4" : "m3u8"
+	var cameraBrandMap = {};//厂商
+	var workMap = {};
 
 	common.jsonEnum("cameraBrand",function (list){
 		common.renderSelect(f1.cameraBrand,list,{empty:false,value:"code"});
@@ -199,6 +209,7 @@
 		var list = json.list;
 		$(list).each(function (){
 			this.name = this.name || this.code;
+			workMap[this.id] = this.name;
 		});
 		common.renderSelect(f1.workId,list,{def:""});
 		tVideoSource.load();
@@ -214,15 +225,36 @@
 					return data.url;
 				var cb = cameraBrandMap[data.cameraBrand].name;
 				var streamName = ["主码流","子码流","第三码流"];
-				return "<span class='camera-info'><a>"+ cb +"</a><a>通道"+data.channel+"</a><a>"+streamName[data.streamType]+"</a></span>"+data.url;
+				var playUrl = "http://"+location.hostname+":${mediaKit.serverPort}/live/"+data.id+".live."+suffix;
+				return "<span class='camera-info'>" +
+						"<a>"+ cb +"</a>" +
+						"<a>通道"+data.channel+"</a>" +
+						"<a>"+streamName[data.streamType]+"</a>" +
+						"</span>"+data.url + "<a target='_blank' href='"+playUrl+"'> 播放</a>";
+			},
+			"workId" : function (td,data){
+				var a = $("<a>"+(workMap[data.workId] || data.workId)+"</a>");
+				return a;
+			},
+			"pushResult" : function (td,data){
+				var a = $("<span>无</span>");
+				if(data.pushResult == 1){
+					var href = "${base}/base/video/image?socket=video-"+data.id;
+					a = $("<a target='_blank' href='"+href+"'>推图</a>");
+				}else if(data.pushResult == 2){
+					var href = "http://"+location.hostname+":${mediaKit.serverPort}/ffmpeg/"+data.id+".live."+suffix;
+					a = $("<a target='_blank' href='"+href+"' style='color: #1779cf'>推流</a>");
+				}
+
+				return a;
 			}
 		},
 		schemaRender:function(td,data){
 			return "<span class='schema-info' data-id='"+data.id+"'></span>";
 		},
 		onSelect : function (tr,data){
-			var suffix = common.isWindowsBrowser() ? "mp4" : "m3u8"
-			$('[name="fm"]').attr("src","http://localhost:${mediaKit.serverPort}/live/"+data.id+".live."+suffix);
+			//var suffix = common.isWindowsBrowser() ? "mp4" : "m3u8"
+			//$('[name="fm"]').attr("src","http://localhost:${mediaKit.serverPort}/live/"+data.id+".live."+suffix);
 		},
 		loadAfter : function (){
 			this.table.find("tbody tr").each(function (){
@@ -239,7 +271,7 @@
 	});
 
 	function changeBrand(type){
-		$("#videoAccount").css("visibility",type ? "visible" : "hidden");
+		$("#videoAccount").css("display",type ? "block" : "none");
 		f1.url.placeholder = type ? "192.168.1.64" : "192.168.1.64:554/h264/ch1/main/av_stream";
 	}
 

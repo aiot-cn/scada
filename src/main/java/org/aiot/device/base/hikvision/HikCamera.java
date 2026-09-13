@@ -1066,7 +1066,7 @@ public class HikCamera extends HikBase implements CameraInfc,BaseExtend.RMenu{
 	@Override
 	public List<RMenuOption> menuList(){
 		List<RMenuOption> list = new ArrayList<>();
-		list.add(buildMenu("视频","/control/hikCamera","DEV"));
+		list.add(buildMenu("视频","/base/video/hikCamera","DEV"));
 		return list;
 	}
 

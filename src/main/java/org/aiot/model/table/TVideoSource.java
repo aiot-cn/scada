@@ -19,9 +19,11 @@ public class TVideoSource extends TBaseSeq{
 	private String account;
 	private String password;
 	private String channel;
-	private Integer streamType;
+	private Integer streamType;//0主码流 1子码流 2第三码流
 
 	private Long workId;
+	private Float workInterval;//工作间隔，单位S
+	private Integer pushResult;//推送结果 1推图 2推流
 
 
 	public String getName() {
@@ -86,6 +88,22 @@ public class TVideoSource extends TBaseSeq{
 
 	public void setWorkId(Long workId) {
 		this.workId = workId;
+	}
+
+	public Float getWorkInterval() {
+		return workInterval;
+	}
+
+	public void setWorkInterval(Float workInterval) {
+		this.workInterval = workInterval;
+	}
+
+	public Integer getPushResult() {
+		return pushResult;
+	}
+
+	public void setPushResult(Integer pushResult) {
+		this.pushResult = pushResult;
 	}
 
 	/**

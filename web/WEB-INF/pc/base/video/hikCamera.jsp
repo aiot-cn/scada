@@ -3,7 +3,7 @@
 <html>
 <head>
 	<title>视频监控</title>
-	<%@include file="../common/page_head.jsp" %>
+	<%@include file="../../common/page_head.jsp" %>
 	<c:if test="${empty param.v}">
 	<script src="${res}/device/hikvision/encryption/AES.js"></script>
 	<script src="${res}/device/hikvision/encryption/cryptico.min.js"></script>
