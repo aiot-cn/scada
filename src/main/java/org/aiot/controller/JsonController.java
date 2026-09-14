@@ -351,10 +351,9 @@ public class JsonController {
 	//==================== 工作流 =============================
 	@At("/workflow/?")
 	public @Ok("json") Object workflow(Long id,HttpServletRequest req){
+		AiotService as = ioc.get(AiotService.class);
 		Map<String,Object> m = HttpUtil.reqToMap(req);
-		TWorkflow tWorkflow = ioc.get(BaseService.class).getTCache(TWorkflow.class,id);
-		Workflow workflow = new Workflow(tWorkflow);
-		return workflow.run(m);
+		return as.execWorkflow(id,m);
 	}
 
 	@At

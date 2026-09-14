@@ -17,12 +17,15 @@ import org.nutz.lang.Strings;
 import org.nutz.lang.util.NutMap;
 import org.nutz.log.Log;
 import org.nutz.log.Logs;
+import org.nutz.plugins.mvc.websocket.WsRoomProvider;
 import org.opencv.core.Mat;
 
+import javax.websocket.Session;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -273,8 +276,26 @@ public class FFmpegDevice extends BaseDevice {
 				if(isStreamPushing){
 					pushStream(cloned);
 				}else if(Strings.isNotBlank(pushUrl) && pushUrl.startsWith("websocket")){
-					byte[] jpegData = OpenCVUtil.toBytes(cloned);
-					socket.each(pushUrl.substring(10),(index, ele, length) -> socket.sendBinary(ele.getId(),jpegData));
+					String room = pushUrl.substring(10);
+					Set<String> wsids = socket.getRoomProvider().wsids(room);
+					if(wsids != null && wsids.size() > 0){
+						byte[] jpegData = OpenCVUtil.toBytes(cloned);
+						String[] tmp = wsids.toArray(new String[0]);
+						for(String wsid : tmp){
+							Session session = socket.getSession(wsid);
+							if(session == null || !session.isOpen())
+								continue;
+							try {
+								socket.sendBinary(wsid,jpegData);
+							}catch (Exception e){
+								log.warn("websocket发送到"+room+"失败:"+e.getMessage());
+							}
+
+						}
+					}
+
+
+
 				}
 
 			} catch (Exception e) {
