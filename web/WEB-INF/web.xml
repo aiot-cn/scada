@@ -45,6 +45,16 @@
         <url-pattern>/druid/*</url-pattern>
     </servlet-mapping>
 
+    <!-- 流媒体反向代理 /media/后的路径原样转发到http端口 如/media/live/1.live.flv -> :8079/live/1.live.flv -->
+    <servlet>
+        <servlet-name>mediaProxy</servlet-name>
+        <servlet-class>org.aiot.mvc.MediaProxyServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>mediaProxy</servlet-name>
+        <url-pattern>/media/*</url-pattern>
+    </servlet-mapping>
+
     <filter>
         <filter-name>nutz</filter-name>
         <filter-class>org.nutz.mvc.NutFilter</filter-class>
@@ -61,7 +71,7 @@
             <!-- *.XXX 忽略后缀 -->
             <!-- /XX/* 忽略前缀 -->
             <!-- /cc   忽略固定路径 -->
-            <param-value>/static/*,/druid/*,/websocket,/install.ps1,/install.sh</param-value>
+            <param-value>/static/*,/druid/*,/media/*,/websocket,/install.ps1,/install.sh</param-value>
         </init-param>
     </filter>
     <filter-mapping>

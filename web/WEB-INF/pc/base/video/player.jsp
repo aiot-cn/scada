@@ -32,10 +32,7 @@
 			return /iPad|iPhone|iPod/.test(navigator.userAgent);
 		}
 
-		var vurl = '${param.url}';
-		if(!vurl){
-			vurl = isIOS()? '/live/${param.ch}/hls.m3u8' : '/live/${param.ch}.live.flv';
-		}
+		var vurl = '${base}/media/live/${param.ch}' + (isIOS() ? "/hls.m3u8" : ".live.flv");
 
 		var netTimeout = '${param.netTimeout}' || 60;
 		if(Object.assign){

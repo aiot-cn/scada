@@ -29,18 +29,22 @@
 		margin: 0;
 	}
 	.camera-info{
-		border: 1px solid #1779cf;
+		display: inline;
+		border: 1px solid #009688;
 		border-radius: 3px;
 		font-size: 12px;
 		padding: 2px 0;
 		margin-right: 5px;
 	}
-	.camera-info a{
-		border-right: 1px solid #1779cf;
+	.camera-info li{
+		display: inline;
+		border-right: 1px solid #009688;
 		padding: 3px 5px;
+		color: #009688;
 	}
 
 	.schema-info{
+		display: inline;
 		border: 1px solid #009688;
 		border-radius: 3px;
 		font-size: 12px;
@@ -51,14 +55,23 @@
 	.schema-info:empty{
 		display: none;
 	}
-	.schema-info a{
+	.schema-info li{
+		display: inline;
 		border-right: 1px solid #009688;
 		color:#009688;
 		padding: 3px 5px;
 	}
-	.camera-info a:last-child,
-	.schema-info a:last-child{
+	.camera-info li:last-child,
+	.schema-info li:last-child{
 		border-right: none;
+	}
+	.schema-info:empty + a{
+		display: none;
+	}
+	.btn-play{
+		font-size: 20px;
+		line-height: 20px;
+		vertical-align: middle;
 	}
 </style>
 </head>
@@ -93,8 +106,8 @@
 							<th data-field="url">地址</th>
 							<th data-render="schemaRender">在线</th>
 							<th data-field="workId">工作</th>
-							<th data-field="workInterval">工作间隔(秒)</th>
-							<th data-field="pushResult">推送结果</th>
+							<th data-field="workInterval">间隔(秒)</th>
+							<th data-field="pushResult">结果</th>
 							<th data-type="edit" class="tac" data-class="tac" width="70">操作</th>
 						</tr>
 					</thead>
@@ -195,7 +208,7 @@
 </body>
 <script type="text/javascript">
 	param.d = "ZLMediaKit";
-	var suffix = common.isWindowsBrowser() ? "mp4" : "m3u8"
+	var suffix = common.isWindowsBrowser() ? ".live.mp4" : "/hls.m3u8"
 	var cameraBrandMap = {};//厂商
 	var workMap = {};
 
@@ -225,15 +238,24 @@
 					return data.url;
 				var cb = cameraBrandMap[data.cameraBrand].name;
 				var streamName = ["主码流","子码流","第三码流"];
-				var playUrl = "http://"+location.hostname+":${mediaKit.serverPort}/live/"+data.id+".live."+suffix;
-				return "<span class='camera-info'>" +
-						"<a>"+ cb +"</a>" +
-						"<a>通道"+data.channel+"</a>" +
-						"<a>"+streamName[data.streamType]+"</a>" +
-						"</span>"+data.url + "<a target='_blank' href='"+playUrl+"'> 播放</a>";
+
+				return "<ul class='camera-info'>" +
+							"<li>"+ cb +"</li>" +
+							"<li>通道"+data.channel+"</li>" +
+							"<li>"+streamName[data.streamType]+"</li>" +
+						"</ul>"+data.url;
 			},
 			"workId" : function (td,data){
-				var a = $("<a>"+(workMap[data.workId] || data.workId)+"</a>");
+				var workName = workMap[data.workId] || data.workId;
+				var a = $("<a>"+workName+"</a>");
+				a.click(function (){
+					common.topWin().layer.open({
+						type: 2,
+						title: "工作 - "+workName,
+						area: ["95%","90%"],
+						content: "${base}/base/editor/workflow?PROTOCOL=tWorkflow-"+data.workId
+					});
+				});
 				return a;
 			},
 			"pushResult" : function (td,data){
@@ -242,7 +264,7 @@
 					var href = "${base}/base/video/image?socket=video-"+data.id;
 					a = $("<a target='_blank' href='"+href+"'>推图</a>");
 				}else if(data.pushResult == 2){
-					var href = "http://"+location.hostname+":${mediaKit.serverPort}/ffmpeg/"+data.id+".live."+suffix;
+					var href = "${base}/media/ffmpeg/"+data.id+suffix;
 					a = $("<a target='_blank' href='"+href+"' style='color: #1779cf'>推流</a>");
 				}
 
@@ -250,11 +272,12 @@
 			}
 		},
 		schemaRender:function(td,data){
-			return "<span class='schema-info' data-id='"+data.id+"'></span>";
+			var playUrl = "${base}/media/live/"+data.id+suffix;
+			return "<ul class='schema-info' data-id='"+data.id+"'></ul>" +
+					"<a title='播放' class='layui-icon layui-icon-play btn-play' target='_blank' href='"+playUrl+"'></a>";
 		},
 		onSelect : function (tr,data){
-			//var suffix = common.isWindowsBrowser() ? "mp4" : "m3u8"
-			//$('[name="fm"]').attr("src","http://localhost:${mediaKit.serverPort}/live/"+data.id+".live."+suffix);
+			//$('[name="fm"]').attr("src","http://localhost:${mediaKit.serverPort}/live/"+data.id+suffix);
 		},
 		loadAfter : function (){
 			this.table.find("tbody tr").each(function (){
@@ -291,13 +314,13 @@
 			$(list).each(function (){
 				var span = schemaSpan.filter("[data-id='"+this.stream+"']");
 				var title = [];
-				if(this.app == "live" && this.originTypeStr == "pull"){
+				if(this.originTypeStr == "pull" && this.app == "live"){
 					$(this.tracks).each(function (){
 						title.push(this.codec_id_name);
 						if(this.fps)
 							title.push(this.fps + "FPS");
 					});
-					var a = $("<a>"+this.schema+"</a>").appendTo(span);
+					var a = $("<li>"+this.schema+"</li>").appendTo(span);
 					a.attr("title",title.join(" "));
 				}
 			});
