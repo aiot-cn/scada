@@ -904,6 +904,8 @@
 	}
 
 	function addLabelByStr(str){
+		if(!str)
+			return ;
 		var a = str.trim().split(/[,\s]+/);
 		var b = {
 			label		: a[0],

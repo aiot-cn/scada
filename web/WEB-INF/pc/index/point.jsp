@@ -68,6 +68,7 @@
 				    <table id="tPoint">
 						<thead>
 							<tr>
+								<th data-field="isRemoved" data-type="switch" width="30" data-class="tac switch-contrary">状态</th>
 								<th data-field="id" width="20">ID</th>
 								<th data-field="name" data-edit="true">名称</th>
 								<th data-field="code" data-edit="true">编号</th>
@@ -145,7 +146,7 @@
 				if(data.image)
 					$("<img>").appendTo(td).attr({
 						"src":"${base}/image"+data.image+"?width=100",
-						"data-target" : data.target
+						"data-target" : data.target || ""
 					});
 			}
 		},
@@ -265,6 +266,8 @@
 	function loadLabel(imgPath){
 		common.jsonModel("tPoint",{"image":imgPath},function (json){
 			$(json.list).each(function (){
+				if(!this.target)
+					return;
 				var label = imgWin.addLabelByStr(this.target);
 				label.data = this;
 				if(this.shape){

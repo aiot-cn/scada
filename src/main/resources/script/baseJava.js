@@ -28,6 +28,23 @@ function helloScript(){
 //线程
 new java.lang.Thread(helloScript).start();
 
+// ====================   内置   ====================
+function _builtIn_(){
+    // -------- 属性 -------
+    NaN; Infinity; undefined;
+    // -------- 函数 -------
+    eval; parseInt; parseFloat; isNaN; isFinite;
+    decodeURI; decodeURIComponent; encodeURI; encodeURIComponent;
+    // ------- 构造器 -------
+    Date; RegExp;
+    Array; ArrayBuffer; String; Boolean; Number;
+    Object; Function; Error;
+    // -------- 对象 -------
+    Math; JSON;
+    // -------- 特殊 -------
+    this; arguments;
+}
+
 // ====================   数据库   ====================
 function _dao_(){
     //查询

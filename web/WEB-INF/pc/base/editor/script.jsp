@@ -187,10 +187,78 @@
 
 		common.ajaxStop(function () {
 			mo = monaco.editor.create(document.getElementById('editor'), options);
+			overrideSuggestWidget();
+			monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+				allowNonTsExtensions: true,
+				allowJs: true,
+				target: monaco.languages.typescript.ScriptTarget.ES5,
+				lib: ["es5"]
+			});
 			if(sysScript)
 				loadScript(sysScript);
 			addExtraLib(libSource,"station");
 		});
+
+		// 覆盖 Monaco 建议列表（suggest-widget）的高度与位置逻辑。
+		function overrideSuggestWidget() {
+			try {
+				var controller = mo.getContribution("editor.contrib.suggestController");
+				var widget = controller && controller.widget && controller.widget.value;
+				if (!widget || !widget._resize || !widget._list) {
+					console.error("[script.jsp] 未取到 Monaco suggest widget");
+					return;
+				}
+
+				// —— 高度：不再按可视空间裁剪 ——
+				widget._resize = function (width, height) {
+					var info = widget.getLayoutInfo();
+					var statusBar = info.statusBarHeight;
+					var border = info.borderHeight;
+					var contentHeight = widget._list.contentHeight;
+					var target = Math.min(contentHeight, info.defaultSize.height - statusBar - border) + statusBar + border;
+					var minH = info.itemHeight + statusBar + border;
+					if (target < minH) target = minH;
+					// 放宽 maxSize，否则 Sash.layout 会把高度重新压回可视区大小
+					if (widget.element && widget.element.maxSize && widget.element.maxSize.height < target) {
+						widget.element.maxSize.height = target;
+					}
+					width = Math.min(widget.element.maxSize.width, width);
+					widget._list.layout(target - statusBar, width);
+					widget._listElement.style.height = (target - statusBar) + "px";
+					widget.element.layout(target, width);
+					widget._contentWidget.layout();
+					widget._positionDetails();
+				};
+
+				// —— 位置：小窗口按剩余空间更大的一侧显示 ——
+				var origLayout = widget._layout;
+				widget._layout = function (size) {
+					origLayout.apply(this, arguments);
+					var winH = window.innerHeight || document.documentElement.clientHeight;
+					if (winH < 400) {
+						var dom = this.editor.getDomNode();
+						var pos = this.editor.getScrolledVisiblePosition(this.editor.getPosition());
+						if (dom && pos) {
+							var rect = dom.getBoundingClientRect();
+							var above = rect.top + pos.top;
+							var below = winH - (rect.top + pos.top + pos.height);
+							if (above >= below) {
+								this._contentWidget.setPreference(1);
+								this.element.enableSashes(true, true, false, false);
+							} else {
+								this._contentWidget.setPreference(2);
+								this.element.enableSashes(false, true, true, false);
+							}
+							this._contentWidget.layout();
+							this._positionDetails();
+						}
+					}
+				};
+
+			} catch (e) {
+				console.error("overrideSuggestWidget 失败", e);
+			}
+		}
 
 		function getValue() {
 			return mo.getValue();
@@ -234,6 +302,15 @@ interface BaseDevice{
     * @deprecated 建议使用dev来获取，以确定设备类型
     */
     static getInstance(devID:number):BD;
+}
+
+interface Date{
+	/**
+	 * 格式化时间
+	 * @param fmt 时间格式字符串，如 "yyyy-MM-dd HH:mm:ss"
+	 * @returns 格式化后的字符串
+	 */
+	format(fmt:string):string;
 }
 `;
 
