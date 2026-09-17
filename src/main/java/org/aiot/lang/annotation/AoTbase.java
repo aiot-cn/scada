@@ -15,6 +15,11 @@ public @interface AoTbase {
 	boolean cache() default true;
 
 	/**
+	 * 变动通知
+	 */
+	boolean notifyChange() default true;
+
+	/**
 	 * 来源类
 	 */
 	Class<?> from() default Object.class;

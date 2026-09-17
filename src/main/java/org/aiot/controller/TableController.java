@@ -214,7 +214,7 @@ public class TableController {
 		Class<?> c = bs.getModelClass(tableName);
 		String[] v = r.getParameterValues(primaryKey);
 		Long[] pks = Castors.me().castTo(v.length > 1 ? v : v[0],Long[].class);
-		if(bs.isTCache(c)){
+		if(bs.isNotify(c)){
 			for (Long pk : pks) {
 				bs.daoDel(c, pk);
 			}

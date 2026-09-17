@@ -137,7 +137,7 @@ iTables.prototype.callFun = function(fun,p1,p2,p3,p4,p5){
 };
 
 iTables.prototype.getPrimaryValue = function(data){
-	return data[this.primaryKey];
+	return data[this.primaryKey] || data.IID;
 };
 
 iTables.prototype.getChecked = function (){
@@ -635,9 +635,9 @@ iTables.prototype.updateRecord = function(data) {
  * 从iTables中删除一条数据，数据在表中对应的行会被移除。
  */
 iTables.prototype.removeRecord = function(data) {
-
+	var PV = this.getPrimaryValue(data);
 	//从注册表里获取tr
-	var tr = this.rows[data.IID];
+	var tr = this.rows[PV];
 
 
 	//直接去表里查找
@@ -652,7 +652,7 @@ iTables.prototype.removeRecord = function(data) {
 	//执行删除
 	if (tr) {
 		this._tbody.removeChild(tr);
-		delete this.rows[data.IID];
+		delete this.rows[PV];
 		this.json.splice(this.json.indexOf(data), 1);
 	}
 

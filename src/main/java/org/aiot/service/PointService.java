@@ -108,7 +108,11 @@ public class PointService implements Observer  {
 
 	//按图片一次识别模板图片全部点位
 	public RecognitionRes recognition(String code,Object targetImg){
-		List<TPoint> points = bs.getTCache(TPoint.class,v->Strings.equals(code,v.getCode()));
+		List<TPoint> points = bs.getTCache(TPoint.class,v->
+						Strings.equals(code,v.getCode()) &&
+						Strings.isNotBlank(v.getImage()) &&
+						Strings.isNotBlank(v.getTarget())
+		);
 		if(points.size() == 0)
 			return null;
 		RecognitionRes src = new RecognitionRes(points.get(0).getImage());

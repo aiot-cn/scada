@@ -1,11 +1,13 @@
 package org.aiot.model.table;
 
+import org.aiot.lang.annotation.AoTbase;
 import org.aiot.util.FileUtil;
 import org.nutz.dao.entity.annotation.Table;
 
 import java.io.File;
 
 @Table
+@AoTbase(cache = false)
 public class TRecord extends TBase{
 
 	private Long pid;//关联ID,目前仅 pointId

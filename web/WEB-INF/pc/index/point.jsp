@@ -258,8 +258,8 @@
 
 	var imgWin,imgData;
 	$("#tPoint").on("click","img[data-target]",function (){
-		var data = this.parentNode.parentNode.data;
-		var url = "${base}/view"+data.image;
+		var pointData = this.parentNode.parentNode.data;
+		var url = "${base}/view"+pointData.image;
 		layer.open({
 			type: 2,
 			title: false,
@@ -289,10 +289,17 @@
 							};
 							//新增
 							if(!point.id){
-								point.image =  "/"+imgWin.pathName;
-								point.code = tPoint._data.code;
-								//默认每次保存
-								point.recOnEvery = true;
+								if(tPoint._data.target){
+									point.image =  "/"+imgWin.pathName;
+									point.code = tPoint._data.code;
+									//默认每次保存
+									point.recOnEvery = true;
+								}else{
+									//原图没有标签则保存到原图
+									point.id = tPoint._data.id;
+									tPoint._data.target = point.target;
+								}
+
 							}
 
 							common.jsonModel("tPoint",point,function(json){
@@ -301,10 +308,14 @@
 						},
 						deleted: function (data, label){
 							common.jsonModel("tPoint",label.data, function (json){
+								tPoint.removeRecord(label.data);
 							}, {"action": "del"});
 						}
 					}
 				}
+			},
+			cancel: function(index, layero) {
+				tPoint.load({"image":pointData.image},{"noClear":true});
 			}
 		});
 	});

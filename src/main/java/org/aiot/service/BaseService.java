@@ -339,6 +339,11 @@ public final class BaseService extends Observable {
 		return ao != null && ao.cache();
 	}
 
+	public  boolean isNotify(Class<?> classOfT){
+		AoTbase ao = classOfT.getAnnotation(AoTbase.class);
+		return ao != null && ao.notifyChange();
+	}
+
 	//----------------------------------- SqlCode -------------------------------------------------------
 	public void initSqlCode() {
 		List<SqlCode> sqlCodeList= dao.query(SqlCode.class, Cnd.where("isRemoved", "=", 0));
