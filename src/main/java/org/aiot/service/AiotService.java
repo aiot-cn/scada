@@ -86,7 +86,7 @@ public class AiotService implements Observer{
 	//============================== 其它 ==============================
 	public void delUnreferencedFile(String pathName){
 		TRecord tRecord = bs.daoFetch(TRecord.class,Cnd.where("file","=",pathName));
-		if(tRecord != null)
+		if(tRecord == null)
 			Files.deleteFile(new File(Constants.HOME_PATH,pathName));
 	}
 
