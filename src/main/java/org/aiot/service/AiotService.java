@@ -3,7 +3,6 @@ package org.aiot.service;
 import com.alibaba.druid.pool.DruidDataSource;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import org.aiot.infc.device.DeviceInfc;
 import org.aiot.lang.NotifyEvent;
 import org.aiot.lang.workflow.Workflow;
 import org.aiot.main.Constants;
@@ -11,7 +10,7 @@ import org.aiot.model.enums.EventEnum;
 import org.aiot.model.project.Token;
 import org.aiot.model.table.TBase;
 import org.aiot.model.table.TFile;
-import org.aiot.model.table.TParam;
+import org.aiot.model.table.TRecord;
 import org.aiot.model.table.TWorkflow;
 import org.aiot.util.HttpUtil;
 import org.aiot.util.SysUtil;
@@ -19,6 +18,7 @@ import org.nutz.dao.Cnd;
 import org.nutz.ioc.loader.annotation.Inject;
 import org.nutz.ioc.loader.annotation.IocBean;
 import org.nutz.json.Json;
+import org.nutz.lang.Files;
 import org.nutz.lang.Mirror;
 import org.nutz.lang.Strings;
 import org.nutz.lang.Times;
@@ -26,7 +26,6 @@ import org.nutz.log.Log;
 import org.nutz.log.Logs;
 
 import java.io.File;
-import java.net.ConnectException;
 import java.util.*;
 
 
@@ -44,6 +43,26 @@ public class AiotService implements Observer{
 		bs.addObserver(this);
 	}
 
+	public void destroy(){
+		commus.close();
+		crons.clean();
+		ds.destroy();
+		DruidDataSource dataSource = (DruidDataSource) bs.getDao().getDataSource();
+		dataSource.close();
+	}
+	public void reInit(String dataSourceUrl){
+		bs.initDataSource(dataSourceUrl);
+		bs.clear();
+		bs.init();
+		cs.init();
+		//ds.init();
+		ds.loadDeviceConfig();
+		ds.initDevice();
+		commus.init();
+		crons.init();
+	}
+
+	//============================== 工作流 ==============================
 	public Workflow getWorkflow(Long id){
 		Workflow workflow = workflowMap.get(id);
 		if(workflow == null){
@@ -63,27 +82,15 @@ public class AiotService implements Observer{
 		}
 		return null;
 	}
-	
-	public void destroy(){
-		commus.close();
-		crons.clean();
-		ds.destroy();
-		DruidDataSource dataSource = (DruidDataSource) bs.getDao().getDataSource();
-		dataSource.close();
+
+	//============================== 其它 ==============================
+	public void delUnreferencedFile(String pathName){
+		TRecord tRecord = bs.daoFetch(TRecord.class,Cnd.where("file","=",pathName));
+		if(tRecord != null)
+			Files.deleteFile(new File(Constants.HOME_PATH,pathName));
 	}
 
-	public void reInit(String dataSourceUrl){
-		bs.initDataSource(dataSourceUrl);
-		bs.clear();
-		bs.init();
-		cs.init();
-		//ds.init();
-		ds.loadDeviceConfig();
-		ds.initDevice();
-		commus.init();
-		crons.init();
-	}
-
+	//============================== 同步表 ==============================
 	public void pullTable(String host,String... table){
 		for(String t:table)
 			pullTable(host,t);
@@ -182,9 +189,7 @@ public class AiotService implements Observer{
 				}catch (Exception e){
 					info += "下载异常:"+e.getMessage();
 					v.setDescription(e.getMessage());
-					if(!(e instanceof ConnectException)){
-						v.setSize(-1F);
-					}
+					v.setSize(-1F);
 				}finally {
 					bs.daoSave(v);
 				}
@@ -199,13 +204,20 @@ public class AiotService implements Observer{
 		if(!(event instanceof NotifyEvent))
 			return;
 		NotifyEvent ne = (NotifyEvent) event;
-		if(ne.getEventType() != EventEnum.SAVE_AFTER)
-			return;
 		Object arg = ne.getData();
 
-		if(arg instanceof TWorkflow){
-			TWorkflow tWorkflow = (TWorkflow) arg;
-			workflowMap.put(tWorkflow.getId(),new Workflow(tWorkflow));
+		if(ne.getEventType() == EventEnum.SAVE_AFTER){
+			if(arg instanceof TWorkflow){
+				TWorkflow tWorkflow = (TWorkflow) arg;
+				workflowMap.put(tWorkflow.getId(),new Workflow(tWorkflow));
+			}
+		}else if(ne.getEventType() == EventEnum.DELETE_AFTER){
+			if(arg instanceof TRecord){
+				TRecord tRecord = (TRecord) arg;
+				if(Strings.isNotBlank(tRecord.getFile())){
+					delUnreferencedFile(tRecord.getFile());
+				}
+			}
 		}
 	}
 }

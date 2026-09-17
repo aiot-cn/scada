@@ -4,17 +4,16 @@ package org.aiot.device.base;
 import org.aiot.device.BaseDevice;
 import org.aiot.infc.device.DeviceInfc;
 import org.aiot.lang.annotation.AoReflect;
-import org.aiot.main.Constants;
 import org.aiot.model.enums.AstEnum;
 import org.aiot.model.lang.PointData;
 import org.aiot.model.table.TDevice;
 import org.aiot.model.table.TPoint;
 import org.aiot.model.table.TRecord;
+import org.aiot.service.AiotService;
 import org.aiot.service.PointService;
 import org.aiot.service.WebsocketRoom;
 import org.aiot.util.OpenCVUtil;
 import org.nutz.dao.Cnd;
-import org.nutz.lang.Files;
 import org.nutz.lang.Strings;
 import org.nutz.lang.Times;
 import org.nutz.log.Log;
@@ -37,6 +36,7 @@ import java.text.DecimalFormat;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import static org.aiot.main.Constants.ioc;
 
@@ -169,9 +169,14 @@ public class LocalDevice extends BaseDevice {
         Cnd cnd = Cnd.where("createDate", "<", Times.nextDay(null,daysAgo*-1));
         List<TRecord> rhs = bs.query(TRecord.class,cnd);
         bs.daoClear(TRecord.class,cnd);
-        for(TRecord rh : rhs){
-            if(Strings.isNotBlank(rh.getFile()))
-                Files.deleteFile(new File(Constants.HOME_PATH+rh.getFile()));
+        AiotService as = ioc.get(AiotService.class);
+        Set<String> uniqueFiles = rhs.stream()
+                .map(TRecord::getFile)
+                .filter(Strings::isNotBlank)
+                .collect(Collectors.toSet());
+
+        for(String filePath : uniqueFiles){
+            as.delUnreferencedFile(filePath);
         }
     }
 

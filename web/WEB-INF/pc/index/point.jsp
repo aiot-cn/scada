@@ -42,6 +42,34 @@
 		font-size: 12px;
 		padding: 0 3px;
 	}
+	/*保存时机 勾选框：方框内名称，左上角小勾。勾选彩色，未选灰色*/
+	.rec-box{
+		display: inline-block;
+		position: relative;
+		margin-right: 5px;
+		padding: 3px 5px;
+		border: 1px solid #c2c2c2;
+		border-radius: 3px;
+		background: #fafafa;
+		color: #999;
+		line-height: 16px;
+		cursor: pointer;
+		white-space: nowrap;
+		user-select: none;
+	}
+	td .rec-box:last-child{
+		margin-right: 0;
+	}
+
+	.rec-box.on{
+		color: #fff;
+	}
+	.rec-box.on:before{
+		color: rgba(255,255,255,0.9);
+	}
+	.rec-every.on{background: #009688;border-color: #009688;}
+	.rec-time.on{background: #1e9fff;border-color: #1e9fff;}
+	.rec-state.on{background: #ffb800;border-color: #ffb800;}
 </style>
 </head>
 <body>
@@ -78,9 +106,7 @@
 								<%--<th data-field="typeId" data-translate="select" data-edit="true">类型</th>
 								<th data-field="placeId" data-translate="select" data-edit="true">位置</th>--%>
 								<th data-field="unit" data-edit="true">单位</th>
-								<th data-field="recOnEvery" data-type="switch"  data-class="tac">每次保存</th>
-								<th data-field="recOnTime" data-type="switch"  data-class="tac">定时保存</th>
-								<th data-field="recOnState" data-type="switch"  data-class="tac">状态保存</th>
+								<th data-render="renderRec" data-class="tac" width="140">保存时机</th>
 								<th data-field="recOnValue" data-edit="true">差异保存</th>
 								<th data-field="alarmRule" data-edit="true">报警规则</th>
 								<th data-type="edit" width="40" class="tac" data-class="tac">操作</th>
@@ -163,6 +189,26 @@
 				"src":"${base}/image"+data.image+"?target="+data.target
 			});
 			$(td).append("<span class='s-tag'>"+data.target.split(",")[0]+"</span>");
+		},
+		/*保存时机：每次/定时/状态 三个勾选框，单击切换并保存*/
+		renderRec : function (td,data,icolumn){
+			var _self = this;
+			var items = [
+				["recOnEvery","rec-every","每次","每次保存"],
+				["recOnTime","rec-time","定时","定时保存"],
+				["recOnState","rec-state","状态","状态保存"]
+			];
+			$(items).each(function (){
+				var field = this[0];
+				var box = $("<span class='rec-box "+this[1]+(data[field] ? " on" : "")+"' title='"+this[3]+"'>"+this[2]+"</span>").appendTo(td);
+				box.click(function (e) {
+					e.stopPropagation();
+					var p = {};
+					p[_self.primaryKey] = data[_self.primaryKey];
+					p[field] = data[field] ? 0 : 1;
+					_self.saveData(p);
+				});
+			});
 		},
 		/*renderImg : function (td,data){
 			$("<img alt='' src=''>").appendTo(td).click(function (){

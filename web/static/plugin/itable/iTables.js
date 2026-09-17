@@ -9,7 +9,7 @@ var iTables = function(atable, params, options) {
 //try {
 	var _self = this;
 	this.json = [];//表格中的数据
-	this.verson = 20210812;//当前版本
+	this.verson = 20260917;//当前版本
 	this.params = params || {};
 	this.options = options || {};
 	this.dict = options.dict || {};
@@ -316,9 +316,6 @@ iTables.prototype.initScroll = function () {
 	});
 };
 
-
-
-
 /**
  * 准备列排序
  */
@@ -355,38 +352,6 @@ iTables.prototype._prepareSort = function() {
 			$(column.th).addClass("itable-sort");
 		}
 	});
-};
-
-/**
- * 打开新建对话框
- */
-iTables.prototype.createDialog = function(){
-	var _self = this;
-	_self.resetForm();
-
-	_self.layerOption.index = layer.open({
-		type: 1,
-		title: _self.layerOption.title ? _self.layerOption.title + "添加" : false,
-		skin: 'ita-layer ita-add ita-'+_self.tid,
-		btn: _self.layerOption.btn || ['确定','取消'],
-		content:_self.form, //捕获的元素
-		area : _self.layerOption.area || ["auto","auto"],
-		cancel: function(index){
-			layer.close(index);
-		},
-		yes : function(index){
-			_self.submitForm();
-		}
-	});
-
-};
-
-iTables.prototype.edit = function(){
-	this._onEdit(this._data);
-};
-
-iTables.prototype.delete = function(){
-	this._onRemove(this._data);
 };
 
 /**
@@ -505,6 +470,38 @@ iTables.prototype.prepare_inlineEdit = function() {
 		}
 		//_self.inputs = _self.form.find(':input');
 	});
+};
+
+/**
+ * 打开新建对话框
+ */
+iTables.prototype.createDialog = function(){
+	var _self = this;
+	_self.resetForm();
+
+	_self.layerOption.index = layer.open({
+		type: 1,
+		title: _self.layerOption.title ? _self.layerOption.title + "添加" : false,
+		skin: 'ita-layer ita-add ita-'+_self.tid,
+		btn: _self.layerOption.btn || ['确定','取消'],
+		content:_self.form, //捕获的元素
+		area : _self.layerOption.area || ["auto","auto"],
+		cancel: function(index){
+			layer.close(index);
+		},
+		yes : function(index){
+			_self.submitForm();
+		}
+	});
+
+};
+
+iTables.prototype.edit = function(){
+	this._onEdit(this._data);
+};
+
+iTables.prototype.delete = function(){
+	this._onRemove(this._data);
 };
 
 
@@ -879,6 +876,26 @@ iTables.prototype.tdType = {
 				_self.dragNode = tr;
 				_self.dragType = "treeSub";
 			}
+
+			//拖动到表头：取消上级，成为顶级。表头只需绑定一次
+			var _thead = _self._table.tHead;
+			if (_thead && !_thead._itTreeDrop) {
+				_thead._itTreeDrop = true;
+				_thead.ondragover = function (e) {
+					e.preventDefault();
+				};
+				_thead.ondrop = function (e) {
+					e.preventDefault();
+					if (_self.dragType != "treeSub" || !_self.dragNode) {
+						return;
+					}
+					var dragTr = _self.dragNode;
+					layer.confirm('确定将： ' + dragTr.innerText + '<br>移动到顶级？', {icon: 3}, function (index) {
+						layer.close(index);
+						_self.setParentVal(dragTr.data[_self.primaryKey],"");
+					});
+				};
+			}
 		}
 
 		if (_self.options.order || parentName) {
@@ -897,12 +914,7 @@ iTables.prototype.tdType = {
 				} else if (_self.dragType == "treeSub") {
 					layer.confirm('确定将： ' + _self.dragNode.innerText + '<br>移动到：' + tr.innerText, {icon: 3}, function (index) {
 						layer.close(index);
-						var p = {};
-						p[_self.primaryKey] = _self.dragNode.data[_self.primaryKey];
-						p[_self.parentName] = data[_self.primaryKey];
-						_self.ajax(_self.options.saveController, p, function () {
-							_self.load()
-						});
+						_self.setParentVal(_self.dragNode.data[_self.primaryKey],data[_self.primaryKey]);
 					});
 				}
 
@@ -1504,6 +1516,7 @@ iTables.prototype.saveData = function(data,option){
 	_self.ajax(_self.options.saveController,data,_self.submitResponse,option);
 };
 
+//根据主键值刷新行
 iTables.prototype.updateByPrimary = function(primaryVal){
 	var _self = this;
 	var p = {};
@@ -1518,6 +1531,17 @@ iTables.prototype.updateByPrimary = function(primaryVal){
 iTables.prototype.refreshSelected = function(){
 	this.updateByPrimary(this._data[this.primaryKey]);
 }
+
+//设置上级
+iTables.prototype.setParentVal = function(primaryVal,parentVal){
+	var _self = this;
+	var p = {};
+	p[this.primaryKey] = primaryVal;
+	p[this.parentName] = parentVal;
+	this.ajax(this.options.saveController, p, function () {
+		_self.load();
+	});
+};
 
 iTables.prototype.submitResponse = function(ajson,params){
 	var _self = this;
