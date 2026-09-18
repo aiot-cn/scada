@@ -41,6 +41,7 @@
 		color: #fff;
 		font-size: 12px;
 		padding: 0 3px;
+		cursor: pointer;
 	}
 	/*保存时机 勾选框：方框内名称，左上角小勾。勾选彩色，未选灰色*/
 	.rec-box{
@@ -318,7 +319,34 @@
 				tPoint.load({"image":pointData.image},{"noClear":true});
 			}
 		});
+	}).on("click",".s-tag",function (){
+		var tagCode = this.innerText;
+		var triggerParam = {"deviceId":-5,"member":tagCode};
+		common.jsonModel("sysTrigger",triggerParam,function (json){
+			var trigger = json.list[0];
+			if(trigger){
+				openTriggerWork(trigger.id);
+			}else {
+				layer.confirm("还未配置标签【"+tagCode+"】的解析，要创建吗？", {icon: 3}, function(index){
+					layer.close(index);
+					triggerParam.name = "点位标签";
+					common.jsonModel("sysTrigger",triggerParam,function (json){
+						openTriggerWork(json.data.id);
+					},{action:"save"});
+				});
+			}
+		});
 	});
+
+	function openTriggerWork(wordId){
+		layer.open({
+			type: 2,
+			title: false,
+			shadeClose:true,
+			area: ["90%", "90%"],
+			content: "${base}/base/editor/workflow?PROTOCOL=tWorkflow-SysTrigger/"+wordId
+		});
+	}
 
 	function loadLabel(imgPath){
 		common.jsonModel("tPoint",{"image":imgPath},function (json){
