@@ -633,7 +633,11 @@
 			for(var i=0;i<tagList.length;i++){
 				var a = tagList[i].split(/[,\s]/);
 				if(a.length > 7){
-					addLabel(textToTarget(a.slice(2).join(",")));
+					//标签 可信度 4点坐标*2
+					var target = textToTarget(a.slice(2).join(","));
+					target.label = a[0];
+					target.confidence = a[1];
+					addLabel(target);
 				}else{
 					var b = {
 						label		: a[0],
