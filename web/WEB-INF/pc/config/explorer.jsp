@@ -347,7 +347,7 @@
 				btn : false,
 				shade : 0,
 				title: this.data.name,
-				content : "${base}/view" + pathName,
+				content : "${base}/view" + pathName + "?MODE=preview",
 				area : ["80%","80%"],
 				scrollbar: false,
 				maxmin: true,

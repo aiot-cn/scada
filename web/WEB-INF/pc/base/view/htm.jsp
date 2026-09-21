@@ -5,7 +5,7 @@
 <head>
 	<title>${SRes.name}</title>
 	<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
-	<script src="${res}/layui/layui.all.js"></script>
+	<script src="${res}/layui/layui.js"></script>
 	<link href="${res}/layui/css/layui.css" rel="stylesheet" >
 	<script src="${res}/js/common.js"></script>
 	<script type="text/javascript">

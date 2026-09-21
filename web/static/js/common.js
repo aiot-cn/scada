@@ -883,6 +883,7 @@ var common = {
 				var u = src.substring(0,src.indexOf("?")).split("/").filter(Boolean).slice(2);
 				path = u.join("/");
 			}
+			path += "?MODE=preview";
 			var name = path.substring(path.lastIndexOf("/")+1);
 			var suffix = name.substring(name.lastIndexOf(".")+1).toLowerCase();
 			var area = ["80%","80%"];
@@ -891,7 +892,7 @@ var common = {
 
 			var tagPos = this.getAttribute("data-pos");
 			if(tagPos)
-				path += "?tagPos="+tagPos;
+				path += "&tagPos="+tagPos;
 			layer.open({
 				type : 2,
 				btn : false,

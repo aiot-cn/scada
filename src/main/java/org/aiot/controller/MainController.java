@@ -59,7 +59,14 @@ public class MainController {
 		String path = req.getServletPath().substring(6);
 		SRes sRes = new SRes(path);
 		req.setAttribute("SRes",sRes);
-		String view = Constants.prop.get("view."+sRes.getSuffix(),"file");
+		String viewKey = "view."+sRes.getSuffix();
+		String view = Constants.prop.get(viewKey,"file");
+		//打开方式/模式 preview预览（资源管理器默认） edit编辑
+		String openMode = req.getParameter("MODE");
+		if(Strings.isNotBlank(openMode)){
+			view = Constants.prop.get(viewKey+"."+openMode,view);
+		}
+		//view 是一个MIME类型
 		if(view.contains("/")){
 			resp.setContentType(view);
 			new RawView("pdf").render(req, resp, sRes.getBytes());

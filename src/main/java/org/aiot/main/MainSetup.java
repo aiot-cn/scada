@@ -40,7 +40,7 @@ public class MainSetup implements Setup{
 
 		ServletContext servletContext = nc.getServletContext();
 		String contextName = servletContext.getContextPath().replace("/","");
-		HOME_PATH += File.separator + prop.get("HOME_PATH_SUB",Strings.sBlank(contextName, "aiot"));
+		HOME_PATH += File.separator + prop.get("HOME_PATH_SUB",Strings.sBlank(contextName, "aiot")+"-data");
 
 		SysUtil.addLibraryPath(PathEnum.lib.p());//JNI
 		SysUtil.addLibraryPath(PathEnum.lib.p()+"FFmpeg");

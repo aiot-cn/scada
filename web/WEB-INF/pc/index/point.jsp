@@ -260,7 +260,7 @@
 	var imgWin,imgData;
 	$("#tPoint").on("click","img[data-target]",function (){
 		var pointData = this.parentNode.parentNode.data;
-		var url = "${base}/view"+pointData.image;
+		var url = "${base}/view"+pointData.image+ "?MODE=preview";
 		layer.open({
 			type: 2,
 			title: false,
