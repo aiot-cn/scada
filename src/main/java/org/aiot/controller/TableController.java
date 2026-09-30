@@ -7,7 +7,8 @@ import org.aiot.model.DataRes;
 import org.aiot.model.enums.CompareEnum;
 import org.aiot.model.table.TBase;
 import org.aiot.model.table.TBaseSeq;
-import org.aiot.mvc.CheckLevel;
+import org.aiot.mvc.RoleActionFilter;
+import org.aiot.mvc.RoleTableFilter;
 import org.aiot.service.BaseService;
 import org.nutz.castor.Castors;
 import org.nutz.dao.Chain;
@@ -32,14 +33,11 @@ import java.util.Optional;
 import static org.aiot.main.Constants.ioc;
 
 @At("/table")
-@Filters
 public class TableController {
 
-	@At("/?")
-	public void getList2(String tableName,HttpServletRequest r,HttpServletResponse res) throws Throwable {
-		getList(tableName,r,res);
-	}
-
+	/**
+	 *	用 /? 的路径，会导致path统计条目太多
+	 */
 	@At("/getList")
 	public void getList(String tableName,HttpServletRequest r,HttpServletResponse res) throws Throwable {
 		BaseService bs = ioc.get(BaseService.class);
@@ -132,7 +130,7 @@ public class TableController {
 		NutMap map = new NutMap();
 		Enumeration<String> paramNames = r.getParameterNames();
 		while (paramNames.hasMoreElements()) {
-		      String paramName = (String) paramNames.nextElement();
+		      String paramName = paramNames.nextElement();
 		      String paramValue = r.getParameter(paramName);
 		      switch (paramName) {
 		      	case "pageNum":
@@ -159,16 +157,17 @@ public class TableController {
 
 	/**
 	 *  清除缓存
-	 * @return
 	 */
 
 	@At
+	@Filters(@By(type= RoleActionFilter.class,args = "SYS_SET"))
 	public @Ok("json") DataRes refreshSqlCode(){
 		ioc.get(BaseService.class).initSqlCode();
 		return new DataRes();
 	}
 
 	@At
+	@Filters(@By(type= RoleActionFilter.class,args = "SYS_SET"))
 	public @Ok("json") DataRes initSqlCode(){
 		BaseService bs = ioc.get(BaseService.class);
 		bs.clearSqlCode();
@@ -177,6 +176,7 @@ public class TableController {
 	}
 
 	@At("/doSave")
+	@Filters(@By(type= RoleTableFilter.class))
 	public @Ok("json") DataRes doSave(String tableName,HttpServletRequest r){
 		String fieldFilter = "UK";
 		Enumeration<String> paramNames = r.getParameterNames();
@@ -206,6 +206,7 @@ public class TableController {
 	}
 
 	@At("/doDel")
+	@Filters(@By(type= RoleTableFilter.class))
 	public @Ok("json") DataRes doDel(String tableName,String primaryKey,HttpServletRequest r){
 		if(primaryKey == null){
 			primaryKey = "id";
@@ -225,7 +226,8 @@ public class TableController {
 		return new DataRes();
 	}
 
-	@At("/doClear/?")
+	@At("/doClear")
+	@Filters(@By(type= RoleTableFilter.class))
 	public @Ok("json") DataRes doClear(String tableName){
 		BaseService bs = ioc.get(BaseService.class);
 		Class<?> c = bs.getModelClass(tableName);
@@ -234,6 +236,7 @@ public class TableController {
 	}
 
 	@At("/doOrder")
+	@Filters(@By(type= RoleTableFilter.class))
 	@AdaptBy(type=JsonAdaptor.class)//String tableName,String order(排序字段全小写),
 	public @Ok("json") DataRes doOrder(@Param("..") List<JSONObject> list,HttpServletRequest request){
 		String primaryKey = Optional.ofNullable(request.getParameter("primaryKey")).orElse("id");
@@ -263,6 +266,7 @@ public class TableController {
 	}
 
 	@At("/execSql")
+	@Filters(@By(type= RoleActionFilter.class,args = "SYS_SET"))
 	public @Ok("json") DataRes execSql(String sql){
 		String[] sqls = sql.split(";");
 		String msg = null;

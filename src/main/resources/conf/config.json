@@ -12,29 +12,18 @@
 		{"type":"dataType","name":"遥控",	"value":"2","color": "#0B75E0"},
 		{"type":"dataType","name":"遥调",	"value":"3","color": "#FF5722"},
 
-		{"type":"hisStatus","name":"正常",	"value":"0","color": "#008000"},
-		{"type":"hisStatus","name":"预警",	"value":"1","color": "#FF8000"},
-		{"type":"hisStatus","name":"报警",	"value":"2","color": "#FF0000"},
+		{"type":"dataClassify","name":"环境",	"value":"0"},
+		{"type":"dataClassify","name":"消防",	"value":"1"},
+		{"type":"dataClassify","name":"安防",	"value":"2"},
+
+		{"type":"alarmStatus","name":"正常",	"value":"0","color": "#008000"},
+		{"type":"alarmStatus","name":"预警",	"value":"1","color": "#FF8000"},
+		{"type":"alarmStatus","name":"报警",	"value":"2","color": "#FF0000"},
 
 		{"type":"rate", "name":"2400",	"value":"2400"},
 		{"type":"rate", "name":"9600",	"value":"9600"},
 		{"type":"rate", "name":"19200",	"value":"19200"},
 		{"type":"rate", "name":"115200","value":"115200"},
-
-
-		{"type":"devStatus","name":"状态正常",	"value":".alarm[data-state='0']","color": "#FFFFFF","backColor": "#008000"},
-		{"type":"devStatus","name":"状态预警",	"value":".alarm[data-state='1']","color": "#000000","backColor": "#F5D808"},
-		{"type":"devStatus","name":"状态报警",	"value":".alarm[data-state='2']","color": "#FFFFFF","backColor": "#FF0000"},
-
-		{"type":"devStatus","name":"关闭",	"value":".onoff[data-v='0']","color": "#FFFFFF","backColor": "#666666"},
-		{"type":"devStatus","name":"打开",	"value":".onoff[data-v='1']","color": "#FFFFFF","backColor": "#0000FF"},
-
-		{"type":"devStatus","name":"值正常",	"value":".alarm-v[data-v='0']","color": "#FFFFFF","backColor": "#40CF22"},
-		{"type":"devStatus","name":"值报警",	"value":".alarm-v[data-v='1']","color": "#FFFFFF","backColor": "#FF0000"},
-
-		{"type":"dataClassify","name":"环境",	"value":"0"},
-		{"type":"dataClassify","name":"消防",	"value":"1"},
-		{"type":"dataClassify","name":"安防",	"value":"2"},
 
 		{"type":"sysDevice","name":"以太网",	"value":"ethernet","v2":"PCI\\VEN_10EC&DEV_8168"},
 		{"type":"sysDevice","name":"无线网",	"value":"wireless","V2":"USB\\VID_148F&PID_7601"},
@@ -42,6 +31,7 @@
 		{"type":"hikCode","name":"门禁主机报警信息",	"value":"5002"},
 		{"type":"hikCode","name":"移动侦测、视频丢失、遮挡、IO信号量等报警信息",	"value":"4000"}
 	],
+
 	"SysScript" : [
 		{"type" : "normal", "name": "测试",		"code" : "test",	"function": "return arg0 + arg1 + arg2 + arg3 + arg4;"},
 		{"type" : "normal", "name": "系统启动",	"code" : "initCall","function": "var sysUtil = org.aiot.util.SysUtil;\nsysUtil.runExec(\"taskkill /f /im mshta.exe\");\n//return sysUtil.runApp('127.0.0.1:8080/station','--kiosk');"},
@@ -62,42 +52,10 @@
 
 		{"type" : "url","name": "URL代理",	"code" : "urlProxy",		"function": "if(url instanceof Packages.SysUrl){\n   print(\"来源\")\n}\nif(url instanceof org.jsoup.helper.HttpConnection){\n   url.header(\"X-Requested-With\", \"XMLHttpRequest\") //标识为AJAX请求\n   url.header(\"Content-Type\",\"application/x-www-form-urlencoded\");\n}\nif(url instanceof org.jsoup.helper.HttpConnection.Response){\n   print(\"返回处理\")\n}\nreturn null;"}
 	],
+
 	"SysUser" : [
-		{"id":0,"login":"admin","password":"123456","personId": 1,"isDefault":1},
-		{"id":1,"login":"guest","password":"","personId": 2}
-	],
-	"TPerson" : [
-		{"id":1,"name":"管理员"},
-		{"id":2,"name":"游客"}
-	],
-	"SysSite" : [
-		{"id": 1,"name":"AIOT站点","sysName":"智能监控系统","style": "skin-state-grid"}
-	],
-	"SysRole" : [
-		{"id": 1,"name":"系统管理"}
-	],
-	"MRoleMenu" : [
-		{"roleId": 1,"menuId": 1},
-		{"roleId": 1,"menuId": 2},
-		{"roleId": 1,"menuId": 3},
-		{"roleId": 1,"menuId": 4},
-		{"roleId": 1,"menuId": 5},
-		{"roleId": 1,"menuId": 6}
-	],
-	"MRoleAction" : [
-		{"roleId": 1,"actionCode": "SYS_SET"},
-		{"roleId": 1,"actionCode": "DEV_SET"},
-		{"roleId": 1,"actionCode": "DEV_ADD"},
-		{"roleId": 1,"actionCode": "DEV_EDIT"},
-		{"roleId": 1,"actionCode": "DEV_DEL"},
-		{"roleId": 1,"actionCode": "PRESET_SET"},
-		{"roleId": 1,"actionCode": "ACTION_SET"},
-		{"roleId": 1,"actionCode": "ACTION_ADD"},
-		{"roleId": 1,"actionCode": "ACTION_EDIT"},
-		{"roleId": 1,"actionCode": "ACTION_DEL"}
-	],
-	"MUserSiteRole" : [
-		{"id": 1,"userId": 0,"siteId": 1,"roleId": 1,"isDefault":1}
+		{"id":0,"login":"admin","password":"123456","name": "管理员","isDefault":1},
+		{"id":1,"login":"guest","password":"123456","name": "游客"}
 	]
 
 }

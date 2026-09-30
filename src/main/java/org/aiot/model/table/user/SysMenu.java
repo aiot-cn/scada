@@ -1,7 +1,9 @@
 
-package org.aiot.model.table;
+package org.aiot.model.table.user;
 
 import org.aiot.lang.annotation.AoTbase;
+import org.aiot.model.table.TBaseSeq;
+import org.aiot.model.table.TDevice;
 import org.nutz.dao.entity.annotation.Table;
 
 @Table

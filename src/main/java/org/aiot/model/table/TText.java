@@ -3,7 +3,7 @@ package org.aiot.model.table;
 import org.nutz.dao.entity.annotation.Table;
 
 @Table
-public class TText extends TClass{
+public class TText extends TBaseClass {
 
 	private String content;
 

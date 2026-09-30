@@ -90,9 +90,6 @@
               <cite>${principal }</cite>
             </a>
             <dl class="layui-nav-child">
-              <dd><a>${sysRole.name}</a></dd>
-              <hr>
-              <dd><a href="javascript:common.personEdit(${user.personId })">基本资料</a></dd>
               <dd><a lay-href="${base }/user/password">修改密码 </a></dd>
               <hr>
               <dd layadmin-event="logout" style="text-align: center;"><a>退出</a></dd>
@@ -142,10 +139,10 @@
                 <cite>配置</cite>
                 <span class="layui-nav-more"></span></a>
               <dl class="layui-nav-child">
-                <dd data-name="dict"><a lay-href="${base }/config/dict">字典</a></dd>
-                <dd data-name="url"><a lay-href="${base }/config/url">URL</a></dd>
-                <dd data-name="script"><a lay-href="${base }/config/script">脚本</a></dd>
-                <dd data-name="workflow"><a lay-href="${base }/config/workflow">工作流</a></dd>
+                <dd><a lay-href="${base}/config/dict">字典</a></dd>
+                <dd><a lay-href="${base}/config/url">URL</a></dd>
+                <dd><a lay-href="${base}/config/script">脚本</a></dd>
+                <dd><a lay-href="${base}/config/workflow">工作流</a></dd>
                <%-- <dd data-name="workflow"><a lay-href="${base }/config/action">动作连</a></dd>
                 <dd data-name="workflow"><a lay-href="${base }/config/crontab">定时任务</a></dd>--%>
               </dl>
@@ -157,9 +154,14 @@
                 <cite>系统</cite>
                 <span class="layui-nav-more"></span></a>
               <dl class="layui-nav-child">
-                <dd><a lay-href="${base }/config/sysParam">参数</a></dd>
-                <dd><a lay-href="${base }/config/sqlCode">SQLCode</a></dd>
-                <dd><a lay-href="${base }/index/debug">调试</a></dd>
+                <dd><a lay-href="${base}/config/sys/user">用户</a></dd>
+                <dd><a lay-href="${base}/config/sys/role">角色</a></dd>
+                <dd><a lay-href="${base}/config/sysParam">参数</a></dd>
+                <dd><a lay-href="${base}/druid/index.html">连接池</a></dd>
+                <dd><a lay-href="${base}/config/sys/dataSource">数据源</a></dd>
+                <dd><a lay-href="${base}/config/sys/model">实体表</a></dd>
+                <dd><a lay-href="${base}/config/sys/sqlCode">SQLCode</a></dd>
+                <dd><a lay-href="${base}/index/debug">调试</a></dd>
               </dl>
             </li>
 

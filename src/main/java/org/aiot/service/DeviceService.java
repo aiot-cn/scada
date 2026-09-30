@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.aiot.device.BaseDevice;
-import org.aiot.infc.device.DevData;
 import org.aiot.infc.device.DeviceInfc;
 import org.aiot.lang.Command;
 import org.aiot.lang.NotifyEvent;
@@ -218,7 +217,6 @@ public class DeviceService implements Observer {
 
 							d = new TDevice();
 							d.setParentId(dev.getId());
-							d.setSiteId(dev.getSiteId());
 							d.setName(ao.value());
 							d.setDeviceType(dt.getCode());
 							bs.daoSave(d);
@@ -283,10 +281,6 @@ public class DeviceService implements Observer {
 	//------------------------------------------tDevice --------------------------------------------------------------
 	public List<TDevice> getDeviceList() {
 		return bs.getTCache(TDevice.class);
-	}
-
-	public List<TDevice> getDeviceBySite(Long siteId){
-		return bs.getTCache(TDevice.class,v->siteId.equals(v.getSiteId()));
 	}
 
 	public List<TDevice> getDeviceByCommu(Long cid) {
@@ -394,34 +388,6 @@ public class DeviceService implements Observer {
 		}
 		return dp;
 	}
-
-	//-------------------------------------------报警联动-------------------------------------------------------------
-	/**
-	 * 判断是否符合报警联动规则
-	 * @param deviceAction 联动规则
-	 * @param device 设备
-	 * @return -2故障 -1 挂牌 0 不符合 1、预警 2、报警
-	 */
-
-	public int conditionHolds(DeviceAction deviceAction,TDevice device) {
-		if(deviceAction == null)
-			return 0;
-		DeviceInfc bd = getInstance(device.getId());
-		if(bd == null)
-			return 0;
-
-		Object value = bd.getDevData(deviceAction.getAnalysis()).getValue();
-		return deviceAction.getCompare().eval(value, deviceAction.getValue(), deviceAction.getHysteresis());
-	}
-
-	/**
-	 *  根据设备及解析 获取对应的报警联动规则
-	 */
-	public DeviceAction getDeviceAction(TDevice device, String analysis) {
-		return bs.getTCacheFirst(DeviceAction.class,v->v.getAlarm() > 0 && Strings.equals(analysis,v.getAnalysis()) && (
-				v.getDeviceId() == null ? Strings.equals(v.getDeviceType(),device.getDeviceType()) : (v.getDeviceId().equals(device.getId()) || v.getDeviceId().equals(device.getParentId()))
-		));
-	}
 	
 	//----------------------------------------方法详情-----------------------------------------------------------------
 	public List<MethodBean> methodsDetail(String klass){
@@ -515,21 +481,6 @@ public class DeviceService implements Observer {
 					deviceInfc.destroy();
 			}
 
-		}else if(arg instanceof DeviceAction){//重新刷新设备报警状态
-			DeviceAction da = (DeviceAction) arg;
-			if(da.getAlarm() == 0)
-				return;
-			List<TDevice> deviceList = bs.getTCache(TDevice.class, v->
-					(da.getDeviceId() == null && Strings.equals(v.getDeviceType(),da.getDeviceType()) ) ||
-							(da.getDeviceId() != null && da.getDeviceId().equals(v.getId()) )
-			);
-			for(TDevice d : deviceList){
-				int state = Math.max(0,conditionHolds(da,d));
-				DeviceInfc bd = getInstance(d);
-				DevData data = bd.getDevData(da.getAnalysis());
-				if(data != null)
-					data.setState(state);
-			}
 		}else if(arg instanceof TParam){
 			TParam param = (TParam) arg;
 			if(param.getType() == 1){

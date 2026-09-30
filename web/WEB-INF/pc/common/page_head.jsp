@@ -26,7 +26,7 @@
 var base = '${base}';
 var siteId = '${site.id}';
 var userId = "${user.id}";
-var login_user = "${user.loginName}";
+var login_user = "${user.login}";
 var resCache = '${resCache}';
 var $ = layui.$;
 //layui.use('layer');

@@ -15,7 +15,9 @@
 %>	
 <!DOCTYPE html>
 
-<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html lang="cn">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta charset="utf-8">
   <title>系统登录</title>
   <meta name="author" content="taojin">
@@ -23,9 +25,14 @@
   <%@include file="../common/page_head.jsp" %>
   <style type="text/css">
   
-  	html,body{ 
+  	html,body{
 		width:100%;
 		height:100%;
+	}
+
+	html{
+		background:#020c1c;
+		background:linear-gradient(160deg,#031633 0%,#052a55 45%,#021024 100%);
 	}
 
 	canvas{
@@ -33,53 +40,67 @@
 	  vertical-align:bottom;
 	}
 
-.count-particles{
-  background: #000022;
-  position: absolute;
-  top: 48px;
-  left: 0;
-  width: 80px;
-  color: #13E8E9;
-  font-size: .8em;
-  text-align: left;
-  text-indent: 4px;
-  line-height: 14px;
-  padding-bottom: 2px;
-  font-family: Helvetica, Arial, sans-serif;
-  font-weight: bold;
-}
-
-.js-count-particles{
-  font-size: 1.1em;
-}
-
-#stats,.count-particles{
-  -webkit-user-select: none;
-  margin-top: 5px;
-  margin-left: 5px;
-}
-
-#stats{
-  border-radius: 3px 3px 0 0;
-  overflow: hidden;
-}
-
-.count-particles{
-  border-radius: 0 0 3px 3px;
-}
-
-
 #particles-js{
 	width: 100%;
 	height: 100%;
 	position: relative;
-	background-image: url(${base}/resources/images/bg-2.jpg);
 	background-position: 50% 50%;
 	background-size: cover;
 	background-repeat: no-repeat;
 	margin-left: auto;
 	margin-right: auto;
 }
+
+/* 科技网格线 + 节点光点 */
+#particles-js::before{
+	content:"";
+	position:absolute;
+	top:0;
+	left:0;
+	width:100%;
+	height:100%;
+	z-index:0;
+	background-image:
+		radial-gradient(circle at 0 0,rgba(0,195,255,.35) 1.5px,transparent 2px),
+		linear-gradient(rgba(0,195,255,.08) 1px,transparent 1px),
+		linear-gradient(90deg,rgba(0,195,255,.08) 1px,transparent 1px);
+	background-size:45px 45px;
+	-webkit-mask-image:radial-gradient(ellipse at 50% 45%,#000 20%,transparent 75%);
+	mask-image:radial-gradient(ellipse at 50% 45%,#000 20%,transparent 75%);
+}
+
+/* 漂浮光晕 */
+body::before,body::after{
+	content:"";
+	position:fixed;
+	border-radius:50%;
+	z-index:-1;
+	pointer-events:none;
+}
+body::before{
+	width:520px;
+	height:520px;
+	top:-160px;
+	left:-140px;
+	background:radial-gradient(circle,rgba(0,140,255,.28) 0%,transparent 70%);
+	filter:blur(30px);
+	animation:iot-float 13s ease-in-out infinite alternate;
+}
+body::after{
+	width:640px;
+	height:640px;
+	right:-200px;
+	bottom:-220px;
+	background:radial-gradient(circle,rgba(81,0,255,.27) 0%,transparent 70%);
+	filter:blur(40px);
+	animation:iot-float 16s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes iot-float{
+	0%{transform:translate(0,0);}
+	100%{transform:translate(70px,45px);}
+}
+
 
 .sk-rotating-plane {
 	display: none;
@@ -122,7 +143,7 @@
 	}
 }
 
-.login{z-index: 2;position:absolute;width: 350px;border-radius: 5px;height: 500px;background: white;box-shadow: 0px 0px 5px #333333;top: 50%;left: 50%;margin-top: -250px;margin-left: -175px;transition: all 1s;-moz-transition: all 1s;	/* Firefox 4 */-webkit-transition: all 1s;	/* Safari 和 Chrome */-o-transition: all 1s;	/* Opera */}
+.login{z-index: 2;position:absolute;width: 350px;border-radius: 5px;height: 500px;background: white;box-shadow: 0px 0px 5px #333333, 0 0 40px rgba(0,195,255,.35);top: 50%;left: 50%;margin-top: -250px;margin-left: -175px;transition: all 1s;-moz-transition: all 1s;	/* Firefox 4 */-webkit-transition: all 1s;	/* Safari 和 Chrome */-o-transition: all 1s;	/* Opera */}
 .login-top{font-size: 24px;margin-top: 50px;padding-left: 40px;box-sizing: border-box;color: #333333;margin-bottom: 50px;}
 .login-center{width: 100%;box-sizing: border-box;padding: 0 40px;margin-bottom: 30px;}
 .login-center-img{width: 20px;height: 20px;float: left;margin-top: 5px;}
@@ -175,7 +196,7 @@ a{color:#333;text-decoration:none;}
 <input type="hidden" name="url" value="${obj.url }">
 		<div class="login">
 			<div class="logo">
-				<img src="${empty config.favicon ? res.concat('/images/favicon.ico') : base.concat('/json/file?name=').concat(config.favicon)}" style="height: 48px">
+				<img src="${res}/images/logo.png" style="height: 48px">
 			</div>
 			<div class="login-top">
 				登录
@@ -207,8 +228,6 @@ a{color:#333;text-decoration:none;}
 <canvas class="particles-js-canvas-el" width="1920" height="935" style="width: 100%; height: 100%;"></canvas>
 </form>
 
-<!-- scripts -->
-<script src="${base}/resources/js/single/particles.min.js"></script>
 
 <script type="text/javascript">
 $(function(){
@@ -231,22 +250,10 @@ loginForm.onsubmit = function(e){
 	
 	common.ajax("${base}/user/doLogin",common.formJSON("#particles-js"),function(json){
 		if(json.success){
-			debugger
-			var site = json.data.site;
-			if(site){
-				common.ajax( base +"/user/setSite",{"siteId":site.id},function(json){
-					if(json.success){
-						if(location.pathname.indexOf("/user/login") > -1)
-							location.href = "${base}";
-						else
-							location.reload();
-					}
-					return true;
-				});
-			}else{
-				common.selectSite();
-			}
-
+			if(location.pathname.indexOf("/user/login") > -1)
+				location.href = "${base}";
+			else
+				location.reload();
 		}else{
 			layer.alert(json.message,{icon:2});
 			loginForm.password.value = "";
@@ -276,137 +283,9 @@ loginForm.onsubmit = function(e){
 		
 	});
 
-		/* -----------------------------------------------
-		/* How to use? : Check the GitHub README
-		/* ----------------------------------------------- */
-
-		/* To load a config file (particles.json) you need to host this demo (MAMP/WAMP/local)... */
-		/*
-		particlesJS.load('particles-js', 'particles.json', function() {
-		  console.log('particles.js loaded - callback');
-		});
-		*/
-
-		/* Otherwise just put the config content (json): */
-
-		particlesJS('particles-js',
-
-			{
-				"particles": {
-					"number": {
-						"value": 40,
-						"density": {
-							"enable": true,
-							"value_area": 800
-						}
-					},
-					"color": {
-						"value": "#ffffff"
-					},
-					"shape": {
-						"type": "circle",
-						"stroke": {
-							"width": 0,
-							"color": "#000000"
-						},
-						"polygon": {
-							"nb_sides": 5
-						},
-						"image": {
-							"src": "img/github.svg",
-							"width": 100,
-							"height": 100
-						}
-					},
-					"opacity": {
-						"value": 0.7,
-						"random": false,
-						"anim": {
-							"enable": false,
-							"speed": 1,
-							"opacity_min": 0.1,
-							"sync": false
-						}
-					},
-					"size": {
-						"value": 3,
-						"random": true,
-						"anim": {
-							"enable": false,
-							"speed": 40,
-							"size_min": 0.1,
-							"sync": false
-						}
-					},
-					"line_linked": {
-						"enable": true,
-						"distance": 150,
-						"color": "#ffffff",
-						"opacity": 0.6,
-						"width": 1
-					},
-					"move": {
-						"enable": true,
-						"speed": 6,
-						"direction": "none",
-						"random": false,
-						"straight": false,
-						"out_mode": "out",
-						"bounce": false,
-						"attract": {
-							"enable": false,
-							"rotateX": 600,
-							"rotateY": 1200
-						}
-					}
-				},
-				"interactivity": {
-					"detect_on": "canvas",
-					"events": {
-						"onhover": {
-							"enable": true,
-							"mode": "grab"
-						},
-						"onclick": {
-							"enable": true,
-							"mode": "push"
-						},
-						"resize": true
-					},
-					"modes": {
-						"grab": {
-							"distance": 200,
-							"line_linked": {
-								"opacity": 1
-							}
-						},
-						"bubble": {
-							"distance": 400,
-							"size": 40,
-							"duration": 2,
-							"opacity": 8,
-							"speed": 3
-						},
-						"repulse": {
-							"distance": 200,
-							"duration": 0.4
-						},
-						"push": {
-							"particles_nb": 4
-						},
-						"remove": {
-							"particles_nb": 2
-						}
-					}
-				},
-				"retina_detect": false
-			}
-
-		);
-		
 </script>
-
 
 </body>
 </html>
+
 <%}%>

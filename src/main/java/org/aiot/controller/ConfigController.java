@@ -2,14 +2,11 @@ package org.aiot.controller;
 
 import org.aiot.main.Constants;
 import org.aiot.model.DataRes;
-import org.aiot.model.enums.DictTypeEnum;
 import org.aiot.model.enums.PropEnum;
 import org.aiot.model.enums.ServletEnum;
 import org.aiot.model.enums.VarRuntimeEnum;
-import org.aiot.model.table.SysDict;
 import org.aiot.model.table.TParam;
 import org.aiot.service.ConfigService;
-import org.aiot.util.CommonUtil;
 import org.aiot.util.SysUtil;
 import org.nutz.mvc.adaptor.JsonAdaptor;
 import org.nutz.mvc.annotation.AdaptBy;
@@ -17,7 +14,6 @@ import org.nutz.mvc.annotation.At;
 import org.nutz.mvc.annotation.Filters;
 import org.nutz.mvc.annotation.Ok;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

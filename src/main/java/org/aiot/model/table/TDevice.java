@@ -21,8 +21,7 @@ public class TDevice extends TBaseSeq{
     private String exp2;//扩展2
 	@AoTbase("坐标")
     private String point;//坐标
-	@AoTbase(from = SysSite.class)
-	private Long siteId;//站点ID
+
 	@AoTbase("分组")
 	private Long groupId;
 
@@ -116,15 +115,6 @@ public class TDevice extends TBaseSeq{
 
 	public void setPoint(String point) {
 		this.point = point;
-	}
-
-
-	public Long getSiteId() {
-		return siteId;
-	}
-
-	public void setSiteId(Long siteId) {
-		this.siteId = siteId;
 	}
 
 	public Long getGroupId() {

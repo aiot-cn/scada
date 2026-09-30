@@ -5,13 +5,12 @@ import com.sun.jna.NativeLong;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
 import com.sun.jna.ptr.IntByReference;
-
 import org.aiot.lang.annotation.AoReflect;
 import org.aiot.lang.device.HCNetSDK;
 import org.aiot.model.table.DeviceProperty;
 import org.aiot.model.table.SysDict;
 import org.aiot.model.table.TCard;
-import org.aiot.model.table.TPerson;
+import org.aiot.model.table.user.SysUser;
 import org.aiot.util.CalcUtil;
 import org.aiot.util.CommonUtil;
 import org.nutz.json.Json;
@@ -337,7 +336,7 @@ public class HikDoor extends HikBase {
 			if(employeeNo != 0){
 				if(Strings.isin(new String[]{"5:1","5:26","5:4b"},prop))
 					putData("employee",employeeNo);
-				TPerson tPerson = bs.getTCacheFirst(TPerson.class, v->(employeeNo+"").equals(v.getEmployeeNo()));
+				SysUser tPerson = bs.getTCacheFirst(SysUser.class, v->(employeeNo+"").equals(v.getEmployeeNo()));
 				employee = tPerson != null ?  tPerson.getName() : employeeNo + "";
 			}
 			sendSocket((dp != null ? dp.getName() : prop) + " 门编号:"+eventInfo.dwDoorNo+
@@ -504,11 +503,11 @@ public class HikDoor extends HikBase {
 					String json = new String(ptrOutuff.byValue, StandardCharsets.UTF_8).trim();
 
 					JSONObject jsonObject = JSONObject.parseObject(json).getJSONObject("UserInfoSearch");
-					List<TPerson> list = Json.fromJsonAsList(TPerson.class,jsonObject.getString("UserInfo"));
-					for(TPerson person : list){
+					List<SysUser> list = Json.fromJsonAsList(SysUser.class,jsonObject.getString("UserInfo"));
+					for(SysUser person : list){
 						if(Strings.isBlank(person.getEmployeeNo()))
 							continue;
-						TPerson p0 = bs.getTCacheFirst(TPerson.class,v->person.getEmployeeNo().equals(v.getEmployeeNo()));
+						SysUser p0 = bs.getTCacheFirst(SysUser.class,v->person.getEmployeeNo().equals(v.getEmployeeNo()));
 						if(p0 == null){
 							bs.daoSave(person);
 							continue;

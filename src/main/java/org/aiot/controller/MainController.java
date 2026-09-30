@@ -1,29 +1,24 @@
 package org.aiot.controller;
 
 import org.aiot.handler.protocol.TTemplateProtocol;
-import org.aiot.handler.protocol.TTextProtocol;
 import org.aiot.main.Constants;
 import org.aiot.main.MainSetup;
-import org.aiot.model.enums.DictTypeEnum;
 import org.aiot.model.enums.PathEnum;
 import org.aiot.model.lang.SRes;
-import org.aiot.model.table.*;
-import org.aiot.mvc.CheckLevel;
+import org.aiot.model.table.SysTrigger;
+import org.aiot.model.table.SysUrl;
+import org.aiot.model.table.TTemplate;
 import org.aiot.mvc.PcMobileViewMaker;
 import org.aiot.mvc.ProxyView;
+import org.aiot.mvc.RoleActionFilter;
 import org.aiot.service.BaseService;
 import org.aiot.util.*;
-import org.commonmark.ext.gfm.tables.TablesExtension;
 import org.nutz.dao.QueryResult;
 import org.nutz.json.Json;
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
 import org.nutz.lang.util.NutMap;
-import org.commonmark.node.Image;
-import org.commonmark.node.Node;
-import org.commonmark.parser.Parser;
-import org.commonmark.renderer.html.HtmlRenderer;
 import org.nutz.mvc.View;
 import org.nutz.mvc.annotation.*;
 import org.nutz.mvc.view.*;
@@ -33,7 +28,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.*;
+import java.util.Enumeration;
+import java.util.List;
 
 @Fail("jsp:pc.common.error")
 @Views({PcMobileViewMaker.class})
@@ -50,10 +46,9 @@ import java.util.*;
 			"*async"// 异步执行aop
 		})
 
-@Filters(@By(type= CheckLevel.class, args="0"))
+@Filters(@By(type= RoleActionFilter.class))
 public class MainController {
 
-	@Filters
 	@At("/view/*")
 	public View view(HttpServletRequest req,HttpServletResponse resp) throws Throwable {
 		String path = req.getServletPath().substring(6);
@@ -122,135 +117,7 @@ public class MainController {
 		new JspView( "pc/base/view/"+(template.getType() == 0 ? "html" : "graph")).render(req,resp,null);
 	}
 
-	@At("/docs/*")
-	public @Ok("pm:base.docs") void docs(HttpServletRequest req,HttpServletResponse resp) throws Throwable{
-		BaseService bs = Constants.ioc.get(BaseService.class);
-		String path = req.getServletPath().substring(5); // /aiot/index
-		if(Strings.isBlank(path) || path.equals("/"))
-			path = "/aiot/index";
-
-		path = path.substring(1);
-		if(!path.contains("/"))
-			path += "/index";
-
-		int i = path.indexOf("/");
-		String proCode = path.substring(0,i);//项目
-		String path2 = path.substring(i);	//路径
-
-		TDoc doc = bs.getTCacheFirst(TDoc.class,v->Strings.equals(proCode,v.getProCode()) && Strings.equals(path2,v.getPath()));
-		if(doc == null)
-			throw new RuntimeException(proCode+"文档不存在 "+path2+" 内容");
-		List<TDoc> docList = bs.getTCache(TDoc.class,v->Strings.equals(proCode,v.getProCode()));
-
-		SRes sRes = new SRes(new TTextProtocol("doc-"+doc.getId()));
-
-		List<SysDict> docProjects = DictTypeEnum.docProject.getList();
-		SysDict docProject = new SysDict();
-		docProject.setCode("aiot");
-		docProject.setName("aiot");
-		docProjects.add(0,docProject);
-
-		String projectName = proCode;
-		for(SysDict dict : docProjects){
-			if(Strings.equals(proCode,dict.getCode())){
-				projectName = dict.getName();
-				break;
-			}
-		}
-		// 将 Markdown 内容渲染为 HTML
-		String mdContent = sRes.getContent();
-		Parser parser = Parser.builder()
-				.extensions(Collections.singletonList(TablesExtension.create()))
-				.build();
-		Node document = parser.parse(Strings.sBlank(mdContent));
-		String contextPath = req.getContextPath();
-		HtmlRenderer renderer = HtmlRenderer.builder()
-				.extensions(Collections.singletonList(TablesExtension.create()))
-				.attributeProviderFactory(ctx -> (node, tagName, attributes) -> {
-					if (node instanceof Image) {
-						String src = attributes.get("src");
-						String fixed = fixDocImage(src, contextPath);
-						if (fixed != null) attributes.put("src", fixed);
-					}
-				})
-				.build();
-		String htmlContent = renderer.render(document);
-		req.setAttribute("doc",doc);
-		req.setAttribute("docList",docList);
-		req.setAttribute("docTree",buildDocTree(docList,proCode));
-		req.setAttribute("docProject",docProjects);
-		req.setAttribute("docProjectName",projectName);
-		req.setAttribute("docProCode", proCode);
-		req.setAttribute("SRes",sRes);
-		req.setAttribute("docContentHtml", htmlContent);
-	}
-
-	/**
-	 * 文档 Markdown 图片路径补全 Tomcat 项目目录（contextPath）
-	 */
-	private static String fixDocImage(String src, String contextPath){
-		if(Strings.isBlank(src))
-			return src;
-		if(src.startsWith("//") || src.startsWith("#"))
-			return src;
-		if(src.matches("^[a-zA-Z][a-zA-Z0-9+.-]*:.*")) // http/https/data/其他协议
-			return src;
-		if(Strings.isNotBlank(contextPath) && (src.equals(contextPath) || src.startsWith(contextPath + "/")))
-			return src;
-		return (src.startsWith("/") ? contextPath : contextPath + "/") + src;
-	}
-
-	/**
-	 * 将扁平文档列表按 parentId 组装成树，深度优先遍历拍平，level 表示层级（0 为根）
-	 */
-	private List<NutMap> buildDocTree(List<TDoc> docList, String proCode){
-		Set<Long> ids = new HashSet<>();
-		Map<Long,List<TDoc>> childrenMap = new HashMap<>();
-		for(TDoc d : docList){
-			ids.add(d.getId());
-			if(d.getParentId() != null){
-				List<TDoc> children = childrenMap.computeIfAbsent(d.getParentId(), k -> new ArrayList<>());
-				children.add(d);
-			}
-		}
-		List<NutMap> result = new ArrayList<>();
-		Set<Long> visited = new HashSet<>();
-		for(TDoc d : docList){
-			if("/index".equals(d.getPath()))
-				continue;
-			// 根节点：无上级，或上级不在当前文档列表中
-			if(d.getParentId() == null || !ids.contains(d.getParentId())){
-				appendDocNode(d,childrenMap,0,proCode,visited,result);
-			}
-		}
-		return result;
-	}
-
-	private void appendDocNode(TDoc node, Map<Long,List<TDoc>> childrenMap, int level, String proCode, Set<Long> visited, List<NutMap> out){
-		if(!visited.add(node.getId())){
-			return; // 防止循环引用
-		}
-		NutMap nm = new NutMap();
-		nm.put("id",node.getId());
-		nm.put("name",node.getName());
-		if(Strings.isNotBlank(node.getPath()))
-			nm.put("url",proCode + node.getPath());
-		nm.put("level",level);
-		out.add(nm);
-		List<TDoc> children = childrenMap.get(node.getId());
-		if(children != null){
-			children.sort(null); // 按 sequence 排序
-			for(TDoc c : children){
-				appendDocNode(c,childrenMap,level + 1,proCode,visited,out);
-			}
-		}
-	}
-
-
-
-
 	@At("/*")
-	@Filters
 	public void api(HttpServletRequest req, HttpServletResponse resp) throws Throwable {
 		String path = req.getServletPath();
 		String protocol = req.getParameter("PROTOCOL");
@@ -277,7 +144,6 @@ public class MainController {
 		SysUrl url = bs.getTCacheFirst(SysUrl.class, v-> Strings.equals(path,v.getUrl()));
 		if(url == null){
 			url = new SysUrl();
-			url.setRole(2);
 		}
 
 		/*if(!us.autoLogon(url.getRole(),req.getParameter("token"))){

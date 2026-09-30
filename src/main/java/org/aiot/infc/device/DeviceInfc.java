@@ -1,7 +1,6 @@
 package org.aiot.infc.device;
 
 import org.aiot.lang.Command;
-import org.aiot.lang.CommonAction;
 import org.aiot.model.table.TDevice;
 import org.nutz.aop.MethodInterceptor;
 
@@ -28,6 +27,5 @@ public interface DeviceInfc extends MethodInterceptor {
     void setEnv(TDevice device, DeviceInfc target);
 
     Object invoke(String method,Map<String,Object> args);
-    Object invoke(String method, String args, CommonAction commonAction);
 
 }

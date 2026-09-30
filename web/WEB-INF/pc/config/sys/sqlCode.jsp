@@ -3,7 +3,7 @@
 <!doctype html>
 <html>
 	<head>
-	<%@include file="../common/page_head.jsp" %>
+	<%@include file="../../common/page_head.jsp" %>
 	<script src="${res}/plugin/code-prettify/prettify.js"></script>
 	<script src="${res}/plugin/code-prettify/lang-sql.js"></script>
 	<link href="${res}/plugin/code-prettify/prettify.css" rel="stylesheet" >

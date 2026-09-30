@@ -71,7 +71,7 @@
             <!-- *.XXX 忽略后缀 -->
             <!-- /XX/* 忽略前缀 -->
             <!-- /cc   忽略固定路径 -->
-            <param-value>/static/*,/druid/*,/media/*,/websocket,/install.ps1,/install.sh</param-value>
+            <param-value>/static/*,/druid/*,/media/*,/websocket</param-value>
         </init-param>
     </filter>
     <filter-mapping>

@@ -3,14 +3,15 @@ package org.aiot.controller;
 import org.aiot.model.DataRes;
 import org.aiot.model.enums.SessionEnum;
 import org.aiot.model.project.Token;
-import org.aiot.model.table.*;
-import org.aiot.mvc.CheckLevel;
+import org.aiot.model.table.TDevice;
+import org.aiot.model.table.TLog;
+import org.aiot.model.table.user.SysMenu;
+import org.aiot.model.table.user.SysUser;
 import org.aiot.service.BaseService;
 import org.aiot.service.UserService;
 import org.aiot.util.HttpUtil;
 import org.aiot.util.SysUtil;
 import org.nutz.json.Json;
-import org.nutz.lang.Lang;
 import org.nutz.lang.util.NutMap;
 import org.nutz.mvc.annotation.At;
 import org.nutz.mvc.annotation.By;
@@ -18,12 +19,11 @@ import org.nutz.mvc.annotation.Filters;
 import org.nutz.mvc.annotation.Ok;
 import org.nutz.mvc.filter.CrossOriginFilter;
 
-
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
+
 import static org.aiot.main.Constants.ioc;
 @At("/user")
 public class UserController {
@@ -62,7 +62,7 @@ public class UserController {
 				HttpUtil.addCookie(resp, "loginName", loginName, 30*24*60*60,null);
 				HttpUtil.addCookie(resp, "password", password, 30*24*60*60,null);
 			}
-			NutMap nm = new NutMap().addv("user",user).addv("site",us.getUserDefSite(user.getId()));
+			NutMap nm = new NutMap().addv("user",user);
 			return new DataRes(nm);
 		}catch (RuntimeException e){
 			bs.daoSave(new TLog(e.getMessage()));
@@ -82,37 +82,6 @@ public class UserController {
 		session.invalidate();
 	}
 
-	@At
-	@Filters(@By(type= CheckLevel.class, args="1"))
-	public @Ok("pm:user.selectSite") void selectSite() {
-
-	}
-
-	/**
-	 * 选择站点
-	 */
-	@At
-	@Filters(@By(type=CheckLevel.class, args="1"))
-	public @Ok("json") DataRes setSite(Long siteId) {
-		UserService users = ioc.get(UserService.class);
-		BaseService bs = ioc.get(BaseService.class);
-		SysSite site = bs.getTCache(SysSite.class,siteId);
-		if(site == null){
-			throw Lang.makeThrow("不存在站点:%d",siteId);
-		}
-		users.inSite(site);
-		return new DataRes();
-	}
-
-	/**
-	 * 获取用户权限动作
-	 */
-	@At
-	public @Ok("json") Map<String, Integer> getAction(){
-		SysUser user = SessionEnum.user.val();
-		UserService users = ioc.get(UserService.class);
-		return users.getAction(user.getId(),SessionEnum.siteIds.val());
-	}
 
 	/**
 	 * 获取权限菜单
@@ -130,7 +99,7 @@ public class UserController {
 					return true;
 
 				TDevice d = bs.getTCache(TDevice.class, v.getDeviceId());
-				return d != null && siteId.equals(d.getSiteId());
+				return d != null;
 			}).collect(Collectors.toList());
 		return menus;
 	}

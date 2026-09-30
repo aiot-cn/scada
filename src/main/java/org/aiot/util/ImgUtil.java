@@ -331,9 +331,9 @@ public class ImgUtil {
 	public static BufferedImage fileToBufImg(File file, int w, int h){
 		BufferedImage bi = null;
 		try {
-			bi = file.isFile() ?  ImageIO.read(file) : Images.read("../../resources/images/noImage.jpg");
+			bi = file.isFile() ?  ImageIO.read(file) : Images.read("../../static/images/noImage.jpg");
 		} catch (IOException e) {
-			bi = Images.read("../../resources/images/noImage.jpg");
+			bi = Images.read("../../static/images/noImage.jpg");
 			e.printStackTrace();
 		}finally {
 			if((w != 0 || h != 0) && bi != null && w < bi.getWidth())

@@ -32,12 +32,6 @@ public class ProxyConfig implements Serializable {
     public static String serverSslKeyManagerPassword = "123456";
     public static boolean serverSslNeedsClientAuth = false;
 
-    /** 配置服务绑定主机host */
-    private String configServerBind = "0.0.0.0";
-
-    /** 配置服务端口 */
-    private Integer configServerPort = 8090;
-
 
     /** 代理客户端，支持多个客户端 */
     public static List<Client> clients = new ArrayList<>();
@@ -53,8 +47,8 @@ public class ProxyConfig implements Serializable {
 
     private ProxyConfig(){
         logger.info(
-                "config init serverBind {}, serverPort {}, configServerBind {}, configServerPort {}",
-                serverBind, serverPort, configServerBind, configServerPort);
+                "config init serverBind {}, serverPort {}",
+                serverBind, serverPort);
     }
 
     public Integer getServerPort() {
@@ -67,22 +61,6 @@ public class ProxyConfig implements Serializable {
 
     public void setServerBind(String serverBind) {
         this.serverBind = serverBind;
-    }
-
-    public String getConfigServerBind() {
-        return configServerBind;
-    }
-
-    public void setConfigServerBind(String configServerBind) {
-        this.configServerBind = configServerBind;
-    }
-
-    public Integer getConfigServerPort() {
-        return configServerPort;
-    }
-
-    public void setConfigServerPort(Integer configServerPort) {
-        this.configServerPort = configServerPort;
     }
 
     public void setServerPort(Integer serverPort) {

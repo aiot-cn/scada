@@ -34,7 +34,7 @@
 										<th data-field="url">URL</th>
 										<th data-field="resParam">参数</th>
 										<th data-field="script" data-translate="select">脚本</th>
-										<th data-field="role" data-translate="select">权限</th>
+										<th data-field="actionCode" data-translate="select">权限</th>
 										<th data-type="edit" class="tac" data-class="tac" width="70">编辑</th>
 									</tr>
 								</thead>
@@ -64,11 +64,7 @@
 		<input class="layui-input" name="name">
 	    <input class="layui-input" name="resParam">
 		<select class="layui-input" name="script"></select>
-		<select class="layui-input" name="role">
-			<option value="0">游客</option>
-			<option value="1">用户</option>
-			<option value="2">站点</option>
-		</select>
+		<select class="layui-input" name="actionCode"></select>
 		<select class="layui-input" name="type">
 			<option value="0">页面</option>
 			<option value="1">JSON</option>
@@ -90,6 +86,12 @@
 	var url = "/";
 	common.jsonModel("sysScript",{type:"url"},function(json){
 		common.renderSelect("[name='script']",json.list,{value:"code",dft:""});
+	});
+	common.jsonEnum("RoleAction",function(list){
+		common.renderSelect("[name='actionCode']",list,{value:"code",dft:""});
+	});
+
+	common.ajaxStop(function (){
 		tUrl.load();
 	});
 

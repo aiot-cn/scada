@@ -21,7 +21,7 @@
 <header class="header">
     <div class="nav-bar">
         <a href="${base}" class="nav-logo">
-            <img src="${res}/app/index/image/logo-dark.png"  alt="aiot-logo" style="height: 40px">
+            <img src="${res}/images/logo-dark.png"  alt="aiot-logo" style="height: 40px">
             <span>文档</span>
         </a>
 

@@ -1,14 +1,19 @@
 <%@ page import="org.aiot.util.HttpUtil" %>
-<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+<%@ page contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%
 	Object obj = request.getAttribute("obj");
+	String errorMsg = "";
+	if(obj instanceof Exception){
+		errorMsg = ((Exception)obj).getMessage();
+	}else if(obj instanceof String){
+		errorMsg = (String)obj;
+	}
 	if(HttpUtil.isAjax(request)){
-		response.setContentType("text/json");
+		response.setContentType("text/json; charset=utf-8");
 		com.alibaba.fastjson.JSONObject json = new com.alibaba.fastjson.JSONObject();
 		json.put("success", false);
-		//json.put("obj", obj);
-		json.put("message", ((Exception)obj).getMessage());
+		json.put("message", errorMsg);
 		out.print(json);
 		out.flush();
 	}else{
@@ -40,8 +45,8 @@ img { border:none;}
 <div class="error-page">
 	<div class="error-page-left">&nbsp;</div>
     <div class="error-page-right">
-    	<h3>抱歉！可能由于以下原因执行错误！</h3>
-    	<p class="error-page-title">>>${obj}</p>
+    	<h3>抱歉！由于以下原因执行错误：</h3>
+    	<p class="error-page-title"> >> ${errorMsg} </p>
     </div>
 </div>
 </body>

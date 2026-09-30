@@ -4,7 +4,12 @@ import org.aiot.lang.NotifyEvent;
 import org.aiot.lang.annotation.AoReflect;
 import org.aiot.main.Constants;
 import org.aiot.model.enums.*;
-import org.aiot.model.table.*;
+import org.aiot.model.table.SysDict;
+import org.aiot.model.table.SysScript;
+import org.aiot.model.table.TBase;
+import org.aiot.model.table.TParam;
+import org.aiot.model.table.user.MRoleMenuAction;
+import org.aiot.model.table.user.SysMenu;
 import org.aiot.util.SysUtil;
 import org.nutz.ioc.loader.annotation.Inject;
 import org.nutz.ioc.loader.annotation.IocBean;
@@ -100,7 +105,7 @@ public class ConfigService implements Observer {
 
 		TBase t = bs.daoSave(menu);
 		//新注册的菜单默认对 角色 授权
-		MRoleMenu m = new MRoleMenu();
+		MRoleMenuAction m = new MRoleMenuAction();
 		m.setRoleId(1L);
 		m.setMenuId(t.getId());
 		bs.daoSave(m);
@@ -147,24 +152,6 @@ public class ConfigService implements Observer {
 			p.setValue(v.getValue());
 			bs.daoSave(p);
 		}
-	}
-
-	//-----------------------------------动作链--------------------------------------------
-	public List<TAction> getAction(TBase tBase){
-		return getAction(tBase.getClass().getName(),tBase.getId());
-	}
-
-	public List<TAction> getAction(String plass, Long pid){
-		return bs.getTCache(TAction.class, v->
-				(v.getParentId() == null || v.getParentId() == 0) && //只获取根节点的
-				(v.getType() == 0 || v.getType() == 1) &&
-				Strings.equals(plass,v.getPlass()) &&
-				pid.equals(v.getPid())
-		);
-	}
-
-	public List<TAction> getAction(Long parentId){
-		return bs.getTCache(TAction.class, v->parentId.equals(v.getParentId()));
 	}
 
 	//-----------------------------------字典--------------------------------------------

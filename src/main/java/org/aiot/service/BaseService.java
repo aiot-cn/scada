@@ -10,6 +10,7 @@ import org.aiot.model.enums.EventEnum;
 import org.aiot.model.enums.PatternEnum;
 import org.aiot.model.enums.SessionEnum;
 import org.aiot.model.table.*;
+import org.aiot.model.table.user.SysUser;
 import org.nutz.dao.*;
 import org.nutz.dao.entity.annotation.Table;
 import org.nutz.dao.impl.NutDao;
@@ -57,7 +58,8 @@ public final class BaseService extends Observable {
 	private final Map<Class<?>,Field[]> modelFields = new HashMap<>();//所有表
 	private final Map<String,Class<?>> tName = new HashMap<>();
 
-	private final Map<String,Boolean> packMap = new HashMap<>();
+	//防止多个设备初始化
+	private final Map<Package,Boolean> packMap = new ConcurrentHashMap<>();
 
 	private JSONObject modelJson;
 	private JSONObject builtInJson;
@@ -68,7 +70,7 @@ public final class BaseService extends Observable {
 		String str2 = Files.read("conf/builtIn.json");
 		modelJson = JSONObject.parseObject(str);
 		builtInJson = JSONObject.parseObject(str2);
-		initTable("org.aiot.model.table");
+		initTable(TBase.class);
 		initSqlCode();
 		loadSqlCode();
 		for(SysDataSource src :  getTCache(SysDataSource.class)){
@@ -101,24 +103,29 @@ public final class BaseService extends Observable {
 	}
 	/**
 	 * 自动建表，初始化表字段
-	 * @param pack 包名
+	 * 会多线程调用
 	 */
-	public synchronized void initTable(String pack){
-		if(packMap.containsKey(pack))
+	public void initTable(Class<?> pack){
+		// 使用 putIfAbsent 的原子性操作，如果已存在则直接返回，避免重复初始化
+		if(packMap.putIfAbsent(pack.getPackage(), Boolean.TRUE) != null)
 			return;
-		packMap.put(pack,true);
 
-		Daos.createTablesInPackage(dao, pack, false);//自动建表		
-		Daos.migration(dao, pack,true,false,false);//表自动增减字段  pojo含非表字段 sqlite索引会报错
+		List<Class<?>> tableList = new ArrayList<>();
+		for(Class<?> klass: Scans.me().scanPackage(pack)) {
+			if (klass.getAnnotation(Table.class) != null){
+				tableList.add(klass);
+
+				tName.put(klass.getSimpleName(), klass);
+				modelFields.put(klass,Mirror.me(klass).getFields());
+
+				dao.create(klass,false);
+				//表自动增减字段  pojo含非表字段 sqlite索引会报错
+				Daos.migration(dao, klass,true,false,false);
+			}
+		}
 
 		initModel(pack);
-		for(Class<?> klass: Scans.me().scanPackage(pack)) {
-			Table aot = klass.getAnnotation(Table.class);
-			if(aot == null)
-				continue;
-			tName.put(klass.getSimpleName(),klass);
-			modelFields.put(klass,Mirror.me(klass).getFields());
-
+		for(Class<?> klass: tableList) {
 			if (isTCache(klass)) {
 				tCache.put(klass,new HashMap<>());
 				List<TBase> list = (List<TBase>)dao.query(klass,null);
@@ -165,23 +172,21 @@ public final class BaseService extends Observable {
 
 	/**
 	 * 初始化表数据
+	 * 在建表之后调用，防止没表
 	 */
-	public void initModel(String pack) {
+	private void initModel(Class<?> pack){
+		String packName = pack.getPackage().getName();
 		modelJson.forEach((k,v)->{
+			Class<?> c = tName.get(Strings.upperFirst(k));
 			try {
-				if(k.startsWith(pack)){
-					//TODO 重复加载
-					Class<?> c = Lang.loadClass(k);
-					if(dao.count(c) == 0) {
-						JSONArray arr = (JSONArray)v;
-						arr.forEach(m->{
-							JSONObject j = (JSONObject) m;
-							TBase base = (TBase) j.toJavaObject(c);
-							daoInsert(base);
-						});
-					}
+				if(c != null && c.getPackage().getName().startsWith(packName) && dao.count(c) == 0){
+					JSONArray arr = (JSONArray)v;
+					arr.forEach(m->{
+						JSONObject j = (JSONObject) m;
+						TBase base = (TBase) j.toJavaObject(c);
+						daoInsert(base);
+					});
 				}
-
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -200,17 +205,13 @@ public final class BaseService extends Observable {
 		PK.put(klass,new AtomicLong(getMaxId(klass)));
 	}
 
+	//TODO 这里需要依赖sqlCode，不通用
 	public <T> List<T> getParent(Class<T> klass,Long... id){
 		NutMap nm = NutMap.NEW().setv("id",id);
 		nm.setv("name",Strings.hump2Line(klass.getSimpleName()));
 		return querySqlCode("sysParent",nm,klass,null);
 	}
 
-	public <T> List<T> getSub(Class<T> klass,Long... id){
-		NutMap nm = NutMap.NEW().setv("id",id);
-		nm.setv("name",Strings.hump2Line(klass.getSimpleName()));
-		return querySqlCode("sysSub",nm,klass,null);
-	}
 	/**
 	 * ID不为空执行更新，忽略null<br>
 	 * ID为空执行新增，忽略null及空白字符串
@@ -472,9 +473,7 @@ public final class BaseService extends Observable {
 					}
 					if("┌".equals(con.getGro())){
 						group = Cnd.exps(con.getName(), con.getOp(), parameter);
-						if(cnd == null){
-							cnd =Cnd.where(group);
-						}else if("OR".equals(con.getAo())) {
+						if("OR".equals(con.getAo())) {
 							cnd.or(group);
 						}else if("andNot".equals(con.getAo())){
 							cnd.andNot(group);
@@ -490,9 +489,7 @@ public final class BaseService extends Observable {
 					}else if("InBySql".equals(con.getOp())){
 						cnd.where().andInBySql(con.getName(), con.getSql(), parameter);
 					}else {
-						if(cnd == null) {
-							cnd =Cnd.where(con.getName(), con.getOp(), parameter);
-						}else if("OR".equals(con.getAo())){
+						if("OR".equals(con.getAo())){
 							cnd.or(con.getName(), con.getOp(), parameter);
 						}else if("andNot".equals(con.getAo())){
 							cnd.andNot(con.getName(), con.getOp(), parameter);
@@ -528,7 +525,7 @@ public final class BaseService extends Observable {
 		
 	}
 
-	public <T> T queryCode(Class<T> classOfT, String code, NutMap p){
+	public <T> T queryCode(Class<T> classOfT, String code, Map<String,Object> p){
 		List<T> list = querySqlCode(code,p,classOfT,null);
 		if(list == null || list.size() == 0)
 			return null;
@@ -639,8 +636,9 @@ public final class BaseService extends Observable {
 											 Predicate<T> predicate,
 											 Function<T,K> keyMapper){
 		return getTCacheStream(classOfT).filter(predicate).collect(Collectors.groupingBy(keyMapper));
-	};
+	}
 
+	@SuppressWarnings("unchecked")
 	public <T> Stream<T> getTCacheStreamAll(Class<T> classOfT){
 		Map<Long,TBase> map =  getTCacheMap(classOfT);
 		return map.values().stream().map(v -> (T) v);

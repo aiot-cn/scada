@@ -43,7 +43,7 @@ public class DeviceController {
 	@At
 	public @Ok("json") List<TDevice> getDevice(Long siteId,String klass) throws ClassNotFoundException {
 		BaseService bs = ioc.get(BaseService.class);
-		List<TDevice> list = bs.getTCache(TDevice.class,v->siteId == null || siteId.equals(v.getSiteId()));
+		List<TDevice> list = bs.getTCache(TDevice.class,v->siteId == null);
 		if(Strings.isNotBlank(klass)){
 			DeviceService ds = ioc.get(DeviceService.class);
 			Class<?> c = Lang.loadClass(klass);

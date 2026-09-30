@@ -5,32 +5,23 @@ import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-import org.aiot.infc.ImgAbstract;
 import org.aiot.infc.ImgInfc;
-import org.aiot.infc.device.DeviceInfc;
 import org.aiot.lang.Cache;
 import org.aiot.main.Constants;
-import org.aiot.model.DataRes;
-import org.aiot.model.enums.ConfigEnum;
 import org.aiot.model.lang.RecognitionRes;
 import org.aiot.model.lang.Target;
-import org.aiot.model.table.TDevice;
-import org.aiot.service.DeviceService;
-import org.aiot.util.*;
+import org.aiot.util.CommonUtil;
+import org.aiot.util.ImgUtil;
+import org.aiot.util.OpenCVUtil;
+import org.aiot.util.SiftUtil;
 import org.nutz.img.Images;
 import org.nutz.lang.Files;
-import org.nutz.lang.Lang;
-import org.nutz.lang.Streams;
 import org.nutz.lang.Strings;
-import org.nutz.lang.util.NutMap;
-import org.nutz.log.Logs;
-import org.nutz.mvc.View;
 import org.nutz.mvc.annotation.At;
 import org.nutz.mvc.annotation.Ok;
 import org.nutz.mvc.annotation.Param;
 import org.nutz.mvc.view.HttpStatusView;
 import org.nutz.mvc.view.RawView;
-import org.nutz.mvc.view.UTF8JsonView;
 import org.opencv.core.Mat;
 
 import javax.imageio.ImageIO;
@@ -38,9 +29,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.*;
-
-import static org.aiot.main.Constants.ioc;
+import java.util.Hashtable;
 
 @At("/image")
 public class ImageController {

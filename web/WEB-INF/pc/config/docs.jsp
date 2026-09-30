@@ -91,13 +91,25 @@
 		render : {
 			"path" : function(tr,data){
 				if(data.path){
-					var path = data.proCode+data.path;
-					return "<a href='${base}/docs/"+path+"' target='_blank'>"+data.path+"</a>";
+					return $("<a>"+data.path+"</a>").click(function(e){
+						openDoc(data);
+					});
 				}
-
 			}
 		}
 	});
+
+	function openDoc(data){
+		var path = [data.path];
+		var parentTr = tDoc.rows[data.parentId];
+		while(parentTr){
+			var parentData = parentTr.data;
+			path.push(parentData.path);
+			parentTr = tDoc.rows[parentData.parentId];
+		}
+		path.push(data.proCode);
+		window.open("${base}/docs/"+path.reverse().join("/"));
+	}
 
 
 </script>

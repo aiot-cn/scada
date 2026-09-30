@@ -6,7 +6,6 @@ import org.aiot.infc.device.BaseExtend;
 import org.aiot.infc.device.DevData;
 import org.aiot.infc.device.DeviceInfc;
 import org.aiot.lang.Command;
-import org.aiot.lang.CommonAction;
 import org.aiot.lang.CriQueue;
 import org.aiot.lang.annotation.AoReflect;
 import org.aiot.main.Constants;
@@ -16,7 +15,6 @@ import org.aiot.model.table.*;
 import org.aiot.service.*;
 import org.aiot.util.BaseUtils;
 import org.aiot.util.CalcUtil;
-import org.aiot.util.SysUtil;
 import org.nutz.aop.InterceptorChain;
 import org.nutz.aop.MethodInterceptor;
 import org.nutz.castor.Castors;
@@ -40,10 +38,8 @@ import static org.aiot.main.Constants.ioc;
  * implements Observer 实现观察者 Observable被观察者
  * bs.addObserver( this); 添加观察者
  */
-@AoReflect("基础设备")
 public class BaseDevice extends Observable implements DeviceInfc,MethodInterceptor {
 	protected Log log = Logs.get();
-
 	private   DeviceInfc target;
 	private   Mirror<BaseDevice> mirror;
 
@@ -188,46 +184,7 @@ public class BaseDevice extends Observable implements DeviceInfc,MethodIntercept
 	}
 
 	public void initTable(Class<?> klass){
-		initTable(klass.getPackage().getName());
-	}
-
-	public void initTable(String pack){
-		ioc.get(BaseService.class).initTable(pack);
-	}
-
-	/**
-	 * 根据名称执行设备方法
-	 * @param method 方法名称
-	 * @param arg	方法参数，逗号分隔
-	 * @param action	对象参数，被执行方法参数名必须为action 参数名为 pid，值为空的将使用ActionChain的ID
-	 * @return 所执行的方法返回值
-	 */
-	public Object invoke(String method, String arg, CommonAction action){
-		Method m = getMethod(method);
-		if(m == null)
-			throw Lang.makeThrow("设备 %s 没有方法 %s",device.getName(),method);
-		return invoke(m,arg,action);
-	}
-
-
-	public Object invoke(Method method,String arg,CommonAction action){
-		List<String> pname = getParamNames(method);
-		Map<String,Object> map = new HashMap<>();
-		if(Strings.isNotBlank(arg)){
-			String[] args = arg.split(",");
-				for (int i=0;i<args.length && i < pname.size();i++){
-					String a = args[i];
-					map.put(pname.get(i),a);
-					if(a.indexOf("#") == 0){
-						map.put(pname.get(i),action.evalEl(Strings.removeFirst(a)));
-					}
-				}
-		}
-		map.put(CommonAction.class.getName(),action);
-		Object pid2 = map.get("pid");
-		if(pid2 == null || Strings.isBlank(pid2.toString()))
-			map.put("pid",action.getChain().getId());
-		return invoke(method.getName(),map);
+		ioc.get(BaseService.class).initTable(klass);
 	}
 
 	public Object invoke(String method,Map<String,Object> arg){
@@ -281,34 +238,28 @@ public class BaseDevice extends Observable implements DeviceInfc,MethodIntercept
 			String param = pname.get(i);
 			//Lang.getTypeClass(p[i].getParameterizedType());
 			Class<?> paramClass = p[i].getType();
-			if(paramClass.equals(CommonAction.class)){
-				o[i] = arg.get(CommonAction.class.getName());
-			}else{//有参数的
-				Object argVal = arg.get(param);
-				if(argVal == null || Strings.isBlank(argVal.toString())){
-					AoReflect ao = p[i].getAnnotation(AoReflect.class);
-					if(ao != null && ao.type() == AstEnum.param){
-						o[i] = Castors.me().castTo(arg,paramClass);
-					}else if(paramClass.equals(int.class))
-						o[i] = 0;
-					else if(paramClass.equals(boolean.class))
-						o[i] = false;
-				}else if(argVal instanceof String){
-					String argStr = (String) argVal;
-					argStr = argStr.replaceAll("~",",");
-					if(paramClass.equals(String.class)){
-						o[i] = argStr;
-					}else if(Strings.isQuoteBy(argStr,'{','}')){
-						o[i] = JSONObject.parseObject(argStr,paramClass);
-					}else{
-						o[i] = Castors.me().castTo(argStr,paramClass);
-					}
+			Object argVal = arg.get(param);
+			if(argVal == null || Strings.isBlank(argVal.toString())){
+				AoReflect ao = p[i].getAnnotation(AoReflect.class);
+				if(ao != null && ao.type() == AstEnum.param){
+					o[i] = Castors.me().castTo(arg,paramClass);
+				}else if(paramClass.equals(int.class))
+					o[i] = 0;
+				else if(paramClass.equals(boolean.class))
+					o[i] = false;
+			}else if(argVal instanceof String){
+				String argStr = (String) argVal;
+				argStr = argStr.replaceAll("~",",");
+				if(paramClass.equals(String.class)){
+					o[i] = argStr;
+				}else if(Strings.isQuoteBy(argStr,'{','}')){
+					o[i] = JSONObject.parseObject(argStr,paramClass);
 				}else{
-					o[i] = Castors.me().castTo(argVal,paramClass);
+					o[i] = Castors.me().castTo(argStr,paramClass);
 				}
-
+			}else{
+				o[i] = Castors.me().castTo(argVal,paramClass);
 			}
-
 		}
 
 		try {
@@ -589,117 +540,6 @@ public class BaseDevice extends Observable implements DeviceInfc,MethodIntercept
 		//符合条件就联动，和状态没有关系
 		linkAction(code);*/
 		return data;
-	}
-
-
-	/**
-	 * 联动触发执行，注意这不是一个安全的执行操作
-	 */
-	public void linkAction(String attr){
-
-		List<DeviceAction> daList = bs.getTCache(DeviceAction.class);
-		for(int i = 0;i< daList.size();i++){
-			DeviceAction v = daList.get(i);
-			//System.out.println(v.getSequence()+"---1---"+v.getDeviceType()+v.getValue());
-			if(Strings.equals(v.getAnalysis(),attr) && (
-					(v.getDeviceId() == null && Strings.equals(device.getDeviceType(), v.getDeviceType())) ||
-					(v.getDeviceId() != null && device.getId().equals(v.getDeviceId()))
-			)){
-				//System.out.println(v.getSequence()+"  └---2---"+v.getDeviceType()+v.getValue());
-				Object val = getDataVal(attr);
-				DevData data = dataMap.get(attr);
-				int state = -2;
-				List<TAction> chain = new ArrayList<>();
-				if(v.getPid() == null && (v.getGro() == 1 || v.getGro() == 4)){ //上层联动在上层执行
-					chain = new ArrayList<>();
-					int start = 0;
-					int end = 0;
-					String evl = null;
-					for(int j = i;j<daList.size();j++){
-						i++;
-						DeviceAction da = daList.get(j);
-						chain.addAll(cs.getAction(da));
-
-						boolean b = false;
-						List<TDevice> devList = new ArrayList<>();
-						if(da.getDeviceId() != null) {
-							TDevice dev = bs.getTCache(TDevice.class,da.getDeviceId());
-							devList.add(dev);
-						}else{
-							devList = ds.getDeviceByType(da.getDeviceType());
-						}
-
-						for(TDevice dev : devList) {
-							int s2 = ds.conditionHolds(da, dev);
-							//回差为0表示不计入总状态
-							if(da.getHysteresis() == null || da.getHysteresis() != 0)
-								state = Math.max(state,s2);
-							if(s2 >= 0)
-								b = true;
-						}
-
-						String c = b+"";
-						String symbol = da.getAo() == null ? "||" : da.getAo().getSymbol();
-
-						if(da.getGro() == 1){
-							c = "( " + c;
-							start ++;
-						}else if(da.getGro() == 4){
-							c = "(( " + c;
-							start += 2;
-						}else if(da.getGro() == 3){
-							c = c + " )";
-							end++;
-						}else if(da.getGro() == 5){
-							c = c + " ))";
-							end += 2;
-						}
-
-						if(evl == null){
-							evl = c;
-						}else{
-							evl += " "+ symbol + " " + c;
-						}
-						//System.out.println(da.getSequence()+"    └---3---"+da.getDeviceType()+da.getValue() + "   "+evl);
-						if((da.getGro() == 3 || da.getGro() == 5) && end >= start){
-							boolean s = (boolean) SysUtil.jsEval(evl);
-							if(!s)
-								state = -1;
-							break;
-						}
-					}
-					i--;
-				}else{
-					state = ds.conditionHolds(v,device);
-				}
-
-				int stateBefore = Constants.condGroup.computeIfAbsent(v.getId(), d->0);
-				if(	  (v.getTrigger() == 0 && state > 0 && stateBefore <= 0)//到符合时
-					||(v.getTrigger() == 1 && state <=0 && stateBefore >  0)//到不符合
-					||(v.getTrigger() == 2 && state != stateBefore) 		//状态变化
-					||(v.getTrigger() == 3 && state > 0) 					//每次符合
-					||(v.getTrigger() == 4 && state <=0) 					//每次不符
-					|| v.getTrigger() == 5									//每次
-				){
-					DeviceProperty dp = getDeviceProperty(attr);
-					String title = device.getName() + ":" + (dp == null ? attr : dp.getName()) + val + v.getCompare().getName() +v.getValue();
-					CommonAction ca = new CommonAction();
-					ca.setArg("bd",this);
-					ca.setArg("title",title);
-					ca.setArg("state",state);
-					ca.setArg("value",val);
-					ca.setArg("valBefore", data.getPrevVal());
-					ca.setArg("stateBefore",stateBefore);
-					if(v.getGro() == 0){
-						//sendSocket("触发联动->"+title);
-						ca.chainRun(v);
-					}else{
-						ca.chainRun(chain);
-					}
-				}
-				Constants.condGroup.put(v.getId(),state);
-			}
-		};
 	}
 
 	//数据超时

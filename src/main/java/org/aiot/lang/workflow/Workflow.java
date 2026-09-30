@@ -36,6 +36,7 @@ public class Workflow {
     private TWorkflow tWorkflow;
     private List<WorkflowMethod> workflowMethods;
     private List<WorkflowConnection> workflowConnections;
+    //执行了哪几步
     private List<WorkflowConnection> connectionsActive = new ArrayList<>();
 
     public static Object getGlobal(String uri){

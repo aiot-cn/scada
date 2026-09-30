@@ -13,8 +13,6 @@ public enum SessionEnum {
 	/** SysUser对象 */
 	user,
 
-	person,
-
 	/** Session描述 */
 	principal,
 

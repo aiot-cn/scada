@@ -1,10 +1,11 @@
 package org.aiot.service;
 
-import org.aiot.model.enums.ActionEnum;
 import org.aiot.model.enums.ConfigEnum;
+import org.aiot.model.enums.RoleActionEnum;
 import org.aiot.model.enums.SessionEnum;
 import org.aiot.model.project.Token;
-import org.aiot.model.table.*;
+import org.aiot.model.table.user.MRoleMenuAction;
+import org.aiot.model.table.user.SysUser;
 import org.aiot.util.SysUtil;
 import org.nutz.dao.Cnd;
 import org.nutz.ioc.loader.annotation.Inject;
@@ -12,12 +13,8 @@ import org.nutz.ioc.loader.annotation.IocBean;
 import org.nutz.json.Json;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
-import org.nutz.lang.util.NutMap;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @IocBean
 public class UserService {
@@ -66,90 +63,47 @@ public class UserService {
 	public void sessionUser(SysUser user) {
 		SessionEnum.user.val(user);
 		String info = user.getLogin();
-		if(user.getPersonId() != null){
-			TPerson person = bs.getTCache(TPerson.class, user.getPersonId());
-			if(person != null){
-				SessionEnum.person.val(person);
-				info += "[" + person.getName() + "]";
-			}
-
+		if(Strings.isNotBlank(user.getName())){
+			info += "[" +user.getName() + "]";
 		}
 		SessionEnum.principal.val(info);
 	}
 
-	/**
-	 * 获取用户默认站点
-	 */
-	public SysSite getUserDefSite(Long userId){
-		List<MUserSiteRole> roles = bs.getTCache(MUserSiteRole.class, v->userId.equals(v.getUserId()));
-		MUserSiteRole role;
-		if(roles.size() == 1){
-			role = roles.get(0);
-		}else{
-			role = roles.stream().filter(v->v.getIsDefault()==1).findFirst().orElse(null);
-		}
-		if(role != null)
-			return bs.getTCache(SysSite.class,role.getSiteId());
-		return null;
-	}
-	
-	public SysSite inSite(SysSite site) {
-		NutMap pm = new NutMap().setv("siteId", site.getId());
-		List<SysSite> siteList = bs.querySqlCode("getSiteParent", pm, SysSite.class, null);
-		String sites = siteList.stream().map(v -> v.getId().toString()).collect(Collectors.joining(","));
 
-		SessionEnum.site.val(site);
-		SessionEnum.siteIds.val(sites);
-
-		SysUser user = SessionEnum.user.val();
-		if(user != null)
-			SessionEnum.role.val(getAction(user.getId(),sites));
-		
-		return site;
-	}
-
-	public Map<String, Integer> getAction(Long userId,String siteIds){
-		NutMap pm = new NutMap().setv("siteIds", siteIds).setv("userId",userId);
-		List<MRoleAction> roleActionList = bs.querySqlCode("getRoleAction", pm, MRoleAction.class, null);
-		Map<String, Integer> raMap = new HashMap<>();
-		for(MRoleAction ra : roleActionList){
-			ActionEnum action = ra.getActionCode();
-			if(action != null)
-				raMap.put(action.name(), 1);
-		}
-		return raMap;
-	}
-
-	public boolean autoLogon(int level,String token){
-		if(level == 0)
-			return true;
-
-		SysUser user = SessionEnum.user.val();
-		if(level == 1 && user != null)
-			return true;
-
-		SysSite site = SessionEnum.site.val();
-		if(level == 2 && site != null)
-			return true;
-
-		user = Strings.isNotBlank(token) ? authToken(token) :  bs.getTCacheFirst(SysUser.class,v->v.getIsDefault() == 1);
-		if(user == null)
+	public boolean hasRoleAction(Long roleId, RoleActionEnum action){
+		if (roleId == null)
 			return false;
-
-		sessionUser(user);
-		if(level == 1)
+		if (action == null)
 			return true;
+		MRoleMenuAction ma = bs.getTCacheFirst(MRoleMenuAction.class,
+				v-> roleId.equals(v.getRoleId()) && v.getActionCode() == action);
+		return ma != null;
+	}
 
-		if(level == 2){
-			site = getUserDefSite(user.getId());
-			if(site != null){
-				inSite(site);
+	//检查角色是否有某个表的权限 表通过 RoleActionEnum 关联到权限动作 拥有其中任意一个动作即可
+	public boolean hasRoleTable(Long roleId, Class<?> table){
+		if (roleId == null)
+			return false;
+		if (table == null)
+			return true;
+		List<RoleActionEnum> actions = RoleActionEnum.getByTable(table);
+		if (actions.isEmpty())
+			return true; //表未配置在任何权限动作中 不做限制
+		for (RoleActionEnum action : actions) {
+			if (hasRoleAction(roleId, action))
 				return true;
-			}
 		}
-
 		return false;
+	}
 
+	//这里修改用户后，需要重新登录，这里缓存的是登录时的用户
+	public boolean hasRoleTable(Class<?> table){
+		SysUser user = SessionEnum.user.val();
+		if (user == null)
+			return false;
+		if (user.getId() == 0)
+			return true;
+		return hasRoleTable(user.getRoleId(), table);
 	}
 
 }

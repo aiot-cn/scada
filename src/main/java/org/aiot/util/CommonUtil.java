@@ -2,7 +2,6 @@ package org.aiot.util;
 
 import org.aiot.infc.device.DeviceInfc;
 import org.aiot.lang.Cache;
-import org.aiot.lang.CommonAction;
 import org.aiot.lang.annotation.AoReflect;
 import org.aiot.lang.workflow.Workflow;
 import org.aiot.main.Constants;
@@ -11,9 +10,6 @@ import org.aiot.model.project.ArgBean;
 import org.aiot.model.project.MethodBean;
 import org.aiot.service.PointService;
 import org.nutz.castor.Castors;
-import org.nutz.http.Http;
-import org.nutz.http.Response;
-import org.nutz.lang.Files;
 import org.nutz.lang.Mirror;
 import org.nutz.lang.Strings;
 import org.nutz.lang.util.MethodParamNamesScaner;
@@ -26,9 +22,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.util.*;
-import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class CommonUtil {
 	
@@ -254,11 +247,6 @@ public class CommonUtil {
 
 		if(uri.endsWith(".cache"))
 			return Cache.getFromUri(uri);
-
-		if(uri.endsWith(".chain")){
-			String[] s= uri.split("\\.");
-			return CommonAction.getActionState(Long.parseLong(s[0])).getResult();
-		}
 
 		if(uri.endsWith(".point")){
 			String[] s= uri.split("\\.");

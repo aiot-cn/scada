@@ -4,15 +4,14 @@ import org.aiot.main.Constants;
 import org.aiot.model.DataRes;
 import org.aiot.model.enums.VarRuntimeEnum;
 import org.aiot.model.table.TFile;
+import org.aiot.mvc.RoleActionFilter;
 import org.aiot.service.BaseService;
 import org.aiot.util.FileUtil;
 import org.aiot.util.ZipUtil;
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
 import org.nutz.log.Logs;
-import org.nutz.mvc.annotation.AdaptBy;
-import org.nutz.mvc.annotation.At;
-import org.nutz.mvc.annotation.Ok;
+import org.nutz.mvc.annotation.*;
 import org.nutz.mvc.upload.UploadAdaptor;
 
 import javax.servlet.http.HttpServletRequest;
@@ -91,6 +90,7 @@ public class FileController {
     }
 
     @At
+    @Filters(@By(type= RoleActionFilter.class, args="FILE_DELETE"))
     @AdaptBy(type = UploadAdaptor.class, args = { "${app.root}/WEB-INF/tmp" })
     public @Ok("json") DataRes upload(File file, String path, String name) throws IOException {
         String pathName = path + "/" +name;
@@ -101,6 +101,7 @@ public class FileController {
     }
 
     @At
+    @Filters(@By(type= RoleActionFilter.class, args="FILE_DELETE"))
     public @Ok("json") void del(String name){
         File f = new File(Constants.HOME_PATH,name);
         if(f.isFile())

@@ -1,6 +1,6 @@
 package org.aiot.model.table;
 
-public class TClass extends TBase{
+public class TBaseClass extends TBase{
 	private Long pid;//上层ID
 	private String plass;//上层class
 

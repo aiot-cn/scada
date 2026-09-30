@@ -1,22 +1,21 @@
 package org.aiot.controller;
 
 import com.fazecast.jSerialComm.SerialPort;
+import org.aiot.communication.CommunicationInfc;
 import org.aiot.device.BaseDevice;
 import org.aiot.infc.ProtocolInfc;
-import org.aiot.communication.CommunicationInfc;
 import org.aiot.infc.device.BaseExtend;
 import org.aiot.infc.device.DevData;
 import org.aiot.infc.device.DeviceInfc;
 import org.aiot.lang.Command;
-import org.aiot.lang.CommonAction;
 import org.aiot.lang.annotation.AoReflect;
 import org.aiot.lang.workflow.Workflow;
 import org.aiot.main.Constants;
 import org.aiot.model.DataRes;
 import org.aiot.model.enums.DictTypeEnum;
-import org.aiot.model.lang.SRes;
 import org.aiot.model.lang.PointData;
 import org.aiot.model.lang.RecognitionRes;
+import org.aiot.model.lang.SRes;
 import org.aiot.model.project.ArgBean;
 import org.aiot.model.project.MethodBean;
 import org.aiot.model.table.*;
@@ -193,11 +192,11 @@ public class JsonController {
 		if(deviceId != null){
 			for(Long did : deviceId){
 				TDevice d = (TDevice) deviceMap.get(did);
-				if(d != null && (siteId == null || siteId.equals(d.getSiteId())))
+				if(d != null && (siteId == null))
 					devices.add(d);
 			}
 		}else{
-			devices = bs.getTCache(TDevice.class,v->siteId == null || siteId.equals(v.getSiteId()));
+			devices = bs.getTCache(TDevice.class,v->siteId == null);
 		}
 
 		Map<Long, NutMap> map = new HashMap<>();
@@ -374,47 +373,6 @@ public class JsonController {
 		nm.put("klass",klass);
 		nm.put("connection",Workflow.connectionsMap.get(id));
 		return nm;
-	}
-
-	//==================== 动作链 =============================
-	//执行动作连
-	@At
-	public @Ok("json") DataRes action(String klass,Long id,HttpServletRequest r) {
-		CommonAction ca = new CommonAction();
-
-		Enumeration<String> paramNames = r.getParameterNames();
-		while (paramNames.hasMoreElements()) {
-			String paramName = paramNames.nextElement();
-			String paramValue = r.getParameter(paramName);
-			ca.setArg(paramName,paramValue);
-		}
-		Object o = ca.chainRun(klass, id);
-
-		return new DataRes(o);
-	}
-	//执行单条动作链
-	@At
-	public @Ok("json") DataRes devMethod(Long id){
-		TAction ac = ioc.get(BaseService.class).getTCache(TAction.class,id);
-		CommonAction action = new CommonAction();
-		action.setIgnoreException(false);
-		return new DataRes(action.chainRun(ac));
-	}
-	//获取动作链状态
-	@At
-	public @Ok("json") Object getActionState(Long[] id){
-		if(id.length == 1)
-			return CommonAction.getActionState(id[0]);
-		Map<Long,Object> res = new HashMap<>();
-		for(Long i : id){
-			CommonAction.ActionState actionState = CommonAction.getActionState(i);
-			if(actionState == null || actionState.getResult() == null)
-				continue;
-			Object o = actionState.getResult();
-			if(CommonUtil.isDirectlyDisplayable(o.getClass()))
-				res.put(i,o);
-		}
-		return res;
 	}
 
 	//==================== 定时任务 =============================
