@@ -52,7 +52,7 @@ public final class BaseService extends Observable {
 	private Map<Long,List<SqlCondition>> sqlConditionMap;
 
 	private final Map<Class<?>,Map<Long,TBase>> tCache = new ConcurrentHashMap<>();//基础表缓存
-	private final Map<Class<?>,AtomicLong> PK = new HashMap<>();
+	private final Map<Class<?>,AtomicLong> PK = new ConcurrentHashMap<>();
 
 	private final Map<Class<?>,List<Field>> tField = new HashMap<>();//关联表缓存
 	private final Map<Class<?>,Field[]> modelFields = new HashMap<>();//所有表
@@ -202,7 +202,8 @@ public final class BaseService extends Observable {
 	}
 
 	public void rePK(Class<?> klass){
-		PK.put(klass,new AtomicLong(getMaxId(klass)));
+		//只升不降，防止并发中把序列重置到已发出的id之下
+		PK.merge(klass,new AtomicLong(getMaxId(klass)),(seq,newSeq)-> seq.get() >= newSeq.get() ? seq : newSeq);
 	}
 
 	//TODO 这里需要依赖sqlCode，不通用
@@ -315,7 +316,7 @@ public final class BaseService extends Observable {
 		tBase.setCreateDate(new Date());
 		if(tBase.getId() == null){
 			tBase.setId(getPK(tBase.getClass()));
-		}	
+		}
 		dao.insert(tBase,true,false,true);
 	}
 
@@ -326,11 +327,10 @@ public final class BaseService extends Observable {
 		for(TBase b : list){
 			if(b.getCreateDate() == null)
 				b.setCreateDate(date);
+			if(b.getId() == null)
+				b.setId(getPK(b.getClass()));
 		}
 		dao.fastInsert(list);
-
-		TBase t = list.get(0);
-		rePK(t.getClass());
 	}
 
 	public  boolean isTCache(Class<?> classOfT){
@@ -545,6 +545,16 @@ public final class BaseService extends Observable {
 		Object first = Lang.first(var1);
 		if(first == null)
 			return null;
+
+		//统一由内存序列发号，避免SQLite自动取rowid与序列发出相同的id
+		if(var1 instanceof Collection){
+			for(Object o : (Collection<?>) var1){
+				if(o instanceof TBase && ((TBase) o).getId() == null)
+					((TBase) o).setId(getPK(o.getClass()));
+			}
+		}else if(var1 instanceof TBase && ((TBase) var1).getId() == null){
+			((TBase) var1).setId(getPK(var1.getClass()));
+		}
 
 		T  t =  dao.fastInsert(var1);
 		rePK(first.getClass());
