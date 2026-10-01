@@ -22,8 +22,10 @@
 				<th data-field="isRemoved" data-type="switch" width="40" data-class="tac switch-contrary">状态</th>
 				<th data-field="name">名称</th>
 				<th data-field="code">CODE</th>
-				<th data-field="unit" width="45">单位</th>
+				<th data-field="address">地址</th>
 				<th data-field="type" data-translate="select" width="45">类型</th>
+				<th data-field="calcScript">计算</th>
+				<th data-field="unit" width="45">单位</th>
 				<%--<th data-field="valType" data-translate="select" width="90">值类型</th>
 				<th data-field="scale" width="40">精度</th>
 				<th data-field="deviation" width="45">偏差</th>--%>
@@ -40,7 +42,8 @@
 	    <input type="hidden" name="id">
 	    <input type="text" class="layui-input" name="name">
 		<input type="text" class="layui-input" name="code" list="prop" required>
-		<input type="text" class="layui-input" name="alarmRule">
+		<input type="text" class="layui-input" name="address">
+		<input type="text" class="layui-input" name="calcScript">
 		<%--<select name="pointTypeId" class="layui-input"></select>--%>
 		<select name="type" class="layui-input" data-clear="false">
 			<option value="">--</option>

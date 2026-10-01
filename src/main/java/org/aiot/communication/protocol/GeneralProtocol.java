@@ -6,7 +6,10 @@ import org.aiot.lang.Command;
 import org.aiot.lang.annotation.AoReflect;
 import org.aiot.main.Constants;
 import org.aiot.model.enums.CdataEnum;
-import org.aiot.model.table.*;
+import org.aiot.model.table.DeviceAnalysis;
+import org.aiot.model.table.DeviceCommand;
+import org.aiot.model.table.DeviceProperty;
+import org.aiot.model.table.TDevice;
 import org.aiot.service.BaseService;
 import org.aiot.service.DeviceService;
 import org.aiot.util.CalcUtil;
@@ -15,10 +18,7 @@ import org.nutz.lang.Strings;
 import org.nutz.log.Logs;
 
 import java.text.MessageFormat;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -28,6 +28,23 @@ import static org.aiot.main.Constants.ioc;
 @AoReflect("通用")
 public class GeneralProtocol implements ProtocolInfc {
     public static final Map<String,Long> lastBuildTime = new HashMap<>();
+
+    /**
+     * 按设备类型与指令类型的 DeviceCommand 配置构建指令
+     */
+    @Override
+    public List<Command> buildCommands(TDevice device, String commandType, String remark, Object... format) {
+        BaseService bs = ioc.get(BaseService.class);
+        List<DeviceCommand> l = bs.getTCache(DeviceCommand.class, v-> device.getDeviceType().equals(v.getDeviceType()) &&
+                Strings.equals(commandType,v.getCode())
+        );
+        List<Command> commandList = new ArrayList<>();
+        for(DeviceCommand devCom : l){
+            commandList.add(new Command(device,devCom,remark, format));
+        }
+        return commandList;
+    }
+
     @Override
     public void build(Command command){
         Object[] format = command.getArgs();

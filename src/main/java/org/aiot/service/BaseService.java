@@ -330,9 +330,7 @@ public final class BaseService extends Observable {
 		dao.fastInsert(list);
 
 		TBase t = list.get(0);
-		AtomicLong l = PK.get(t.getClass());
-		if(l != null)
-			l.set(dao.getMaxId(t.getClass()));
+		rePK(t.getClass());
 	}
 
 	public  boolean isTCache(Class<?> classOfT){

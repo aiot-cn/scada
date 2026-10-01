@@ -381,8 +381,8 @@
 			var dJson = json[this.dataset.id] || {};
 			var dMap = dJson.dataMap || {};
 			var data = dMap[this.dataset.code] || {};
-			this.dataset.val = data.value || "";
-			this.dataset.state = data.state || "";
+			this.dataset.val = data.value == undefined ? "" : data.value;
+			this.dataset.state = data.state == undefined ? "" : data.state;
 		});
 	}
 

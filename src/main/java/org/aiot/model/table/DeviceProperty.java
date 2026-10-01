@@ -15,47 +15,21 @@ public class DeviceProperty extends TBaseSeq{
 
 	private String devField;
 
-	//用于默认的报警、保存
-	//private Long pointTypeId;
-
 	private String name;
    	private String code;
-
-	//报警规则
-	//private String alarmRule;
+	//modbus 104为hex
+	private String address;
+	/**
+	 * 二次计算脚本(js)，原始值用@符号代替
+	 * 如 @/100
+	 */
+	private String calcScript;
 
 	//0数值（遥测） 1状态(遥信) 2开关（遥控）
 	private Integer type;
 
-	//0环境 1消防 2安防
-	//private Integer classify;
-
-
 	private String unit;
 	private String remark;
-
-	/**
-	 * 0 周期保存
-	 */
-	//private boolean recOnTime;
-	/**
-	 * 是否状态变化保存
-	 */
-	//private boolean recOnState;
-
-	/**
-	 * 是否每次保存
-	 */
-	//private boolean recOnEvery;
-	/**
-	 * 数值变化保存
-	 */
-	//private Float recOnValue;
-
-	/**
-	 * 数值变化触发
-	 */
-	//private Float notifyOnValue;
 
 	public String getName() {
 		return name;
@@ -125,4 +99,19 @@ public class DeviceProperty extends TBaseSeq{
 		this.deviceId = deviceId;
 	}
 
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public String getCalcScript() {
+		return calcScript;
+	}
+
+	public void setCalcScript(String calcScript) {
+		this.calcScript = calcScript;
+	}
 }
