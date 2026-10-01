@@ -20,6 +20,23 @@
 	.itable tfoot td{
 		padding: 3px;
 	}
+	.dev-all,.dev-un-group{
+		padding: 2px 4px;
+		margin: 2px 0;
+		border: 1px solid transparent;
+		border-radius: 4px;
+		line-height: 20px;
+		color: #333;
+		cursor: pointer;
+	}
+	.dev-all:hover,.dev-un-group:hover,
+	.dev-all.selected,.dev-un-group.selected{
+		border-color: #c9d0e2;
+		background: linear-gradient(to bottom, #fdfeff, #eff9ff 90%);
+	}
+	.dev-all.selected,.dev-un-group.selected{
+		font-weight: bold;
+	}
 </style>
 </head>
 <body class="page-device">
@@ -32,6 +49,8 @@
 						<span data-toolbar="iTree"></span>
 					</div>
 					<div class="layui-card-body">
+						<div class="dev-all selected" onclick="devFilter(this,{})"><i class="layui-icon layui-icon-home"></i> 全部</div>
+						<div class="dev-un-group" onclick="devFilter(this,{'groupId_is':'NULL'})"><i class="layui-icon layui-icon-tips"></i> 未知</div>
 						<ul id="iTree"></ul>
 					</div>
 				</div>
@@ -121,7 +140,7 @@ common.ajaxStop(function(){
 });
 
 //common.selectFromDict("rate","[name='rate']",{dft:""});
-//common.selectFromDict("devGroup","[name='groupId']",{dft:"",value:"id"});
+common.selectFromDict("devGroup","[name='groupId']",{dft:"",value:"id"});
 
 var itableDevice = new iTables("#itableDevice",{"pageSize":0},{
 	baseOption : common.iTableModel("tDevice","sequence"),
@@ -189,6 +208,7 @@ var iTree = new iTrees("#iTree",{type:"devGroup"},{
 
 	},
 	onSelect : function (data,li){
+		$(".dev-all,.dev-un-group").removeClass("selected");
 		itableDevice._form.groupId.value = data.id;
 		var ids = data.id;
 		$(li).find("li").each(function (){
@@ -198,7 +218,15 @@ var iTree = new iTrees("#iTree",{type:"devGroup"},{
 	}
 });
 
-
+function devFilter(el,params){
+	$(".dev-all,.dev-un-group").removeClass("selected");
+	$(el).addClass("selected");
+	iTree.olul.find("li span").removeClass("selected");
+	iTree.selected = null;
+	iTree.data = null;
+	itableDevice._form.groupId.value = "";
+	itableDevice.load(params);
+}
 
 //$(":input").not("select").virtualkeyboard();
 
