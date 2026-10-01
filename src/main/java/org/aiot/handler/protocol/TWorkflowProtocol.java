@@ -4,6 +4,7 @@ import org.aiot.infc.SResProtocol;
 import org.aiot.main.Constants;
 import org.aiot.model.table.TWorkflow;
 import org.aiot.service.BaseService;
+import org.aiot.service.UserService;
 import org.nutz.json.Json;
 import org.nutz.lang.util.NutMap;
 
@@ -54,8 +55,14 @@ public class TWorkflowProtocol implements SResProtocol {
 
 	@Override
 	public void saveContent(String content){
-		tWorkflow.setContent(content);
-		Constants.ioc.get(BaseService.class).daoSave(tWorkflow);
+		UserService us = Constants.ioc.get(UserService.class);
+		if(us.hasRoleTable(TWorkflow.class)){
+			tWorkflow.setContent(content);
+			Constants.ioc.get(BaseService.class).daoSave(tWorkflow);
+		}else{
+			throw new RuntimeException("没有权限修改工作流");
+		}
+
 	}
 
 }

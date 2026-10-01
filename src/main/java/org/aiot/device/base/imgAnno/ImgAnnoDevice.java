@@ -13,7 +13,9 @@ import org.aiot.model.enums.CdataEnum;
 import org.aiot.model.enums.PathEnum;
 import org.aiot.model.lang.Target;
 import org.aiot.model.table.TFile;
-import org.aiot.util.*;
+import org.aiot.util.FileUtil;
+import org.aiot.util.MathUtil;
+import org.aiot.util.OpenCVUtil;
 import org.nutz.dao.Chain;
 import org.nutz.dao.Cnd;
 import org.nutz.img.Images;
@@ -378,7 +380,7 @@ public class ImgAnnoDevice extends BaseDevice implements BaseExtend.RMenu {
 					height = mat.height();
 					Mat mat2 = OpenCVUtil.resizeToTargetHeight(mat,64);
 					Mat mat3 = OpenCVUtil.fillToSquare(mat2,640);
-					OpenCVUtil.writeImg(mat3,toFile);
+					OpenCVUtil.write(mat3,toFile);
 					OpenCVUtil.release(mat,mat2,mat3);
 				}else{
 					if(maskAnno.size() > 0){
@@ -973,7 +975,7 @@ public class ImgAnnoDevice extends BaseDevice implements BaseExtend.RMenu {
 							new Size(w, h),pos.r // 旋转角度（顺时针）
 					);
 					Mat m2 = OpenCVUtil.rotateCrop(srcIm,rotatedRect);
-					OpenCVUtil.writeImg(m2,taIm);
+					OpenCVUtil.write(m2,taIm);
 					m2.release();
 				} catch (Exception e) {
 					e.printStackTrace();

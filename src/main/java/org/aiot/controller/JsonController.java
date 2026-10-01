@@ -19,6 +19,7 @@ import org.aiot.model.lang.SRes;
 import org.aiot.model.project.ArgBean;
 import org.aiot.model.project.MethodBean;
 import org.aiot.model.table.*;
+import org.aiot.mvc.RoleActionFilter;
 import org.aiot.service.*;
 import org.aiot.util.*;
 import org.nutz.lang.Files;
@@ -314,6 +315,7 @@ public class JsonController {
 
 	//执行脚本,用方法体包裹
 	@At
+	@Filters(@By(type= RoleActionFilter.class, args="WORK_SCRIPT"))
 	public @Ok("json") DataRes execScript(Long id,String text,String args,boolean run){
 		BaseService bs = ioc.get(BaseService.class);
 		ConfigService cs = ioc.get(ConfigService.class);

@@ -121,15 +121,19 @@ public class OpenCVUtil {
 		return  list;
 	}
 
-	public static boolean writeImg(Mat mat,File file){
-		//Imgcodecs.imwrite(file.getAbsolutePath(), mat);
+	public static boolean write(Object img,File file){
+		Mat mat = read(img);
 		try {
 			String fileName = file.getName();
 			byte[] bytes = toBytes(mat,fileName.substring(fileName.lastIndexOf(".")));
+			//Imgcodecs.imwrite(file.getAbsolutePath(), mat);
 			Files.write(file.toPath(), bytes);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return false;
+		}finally {
+			if(!(img instanceof Mat))
+				release(mat);
 		}
 		return true;
 	}
@@ -674,7 +678,7 @@ public class OpenCVUtil {
 					new Point(10, maxHeight * 2 - 10), Imgproc.FONT_HERSHEY_SIMPLEX,
 					0.7, new Scalar(0, 255, 0), 2);
 
-			writeImg(resultImg,result);
+			write(resultImg,result);
 			release(image1Resized,image2Resized,diffResized,threshResized,image1Contours,resultImg,
 					roi1,roi2,roi3,diffColor,roi4,threshColor);
 		}
