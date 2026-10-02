@@ -82,6 +82,10 @@
 	          <div class="layui-card-header">
 				  <span class="title">点位</span>
 				  <input data-search="tPoint" placeholder="搜索">
+				  <a class="layui-btn layui-btn-normal layui-btn-sm" onclick="openPointType()">
+					  <i class="layui-icon layui-icon-template-1"></i>
+					  点位类型
+				  </a>
 				  <a class="layui-btn layui-btn-normal layui-btn-sm" onclick="devPropToPoint()">
 					  <i class="layui-icon layui-icon-addition"></i>
 					  设备属性
@@ -101,12 +105,13 @@
 								<th data-field="id" width="20">ID</th>
 								<th data-field="name" data-edit="true">名称</th>
 								<th data-field="code" data-edit="true">编号</th>
+								<th data-field="address" data-edit="true">地址</th>
 								<th data-field="image" data-class="p-img" width="80">图像</th>
-								<th data-render="renderImg" data-class="p-img-target" width="80">目标</th>
+								<th data-field="target" data-class="p-img-target" width="80">目标</th>
 								<th data-render="renderVal">值</th>
-								<%--<th data-field="typeId" data-translate="select" data-edit="true">类型</th>
-								<th data-field="placeId" data-translate="select" data-edit="true">位置</th>--%>
+								<%--<th data-field="placeId" data-translate="select" data-edit="true">位置</th>--%>
 								<th data-field="unit" data-edit="true">单位</th>
+								<th data-field="typeId" data-translate="select" data-edit="true">类型</th>
 								<th data-render="renderRec" data-class="tac" width="140">保存时机</th>
 								<th data-field="recOnValue" data-edit="true">差异保存</th>
 								<th data-field="alarmRule" data-edit="true">报警规则</th>
@@ -131,7 +136,7 @@
 		<select class="layui-input" name="typeId" data-clear="false"></select>
 		<select class="layui-input" name="placeId" data-clear="false"></select>
 		<input class="layui-input" name="code">
-		<input class="layui-input" name="alarmRule">
+		<input class="layui-input" name="address">
 		<input class="layui-input" name="remark">
 		<input class="layui-input" name="unit">
 		<input class="layui-input" name="recOnValue" type="number" step="0.0001">
@@ -147,21 +152,25 @@
 			<option value="false">否</option>
 			<option value="true">是</option>
 		</select>
+		<textarea class="layui-input" name="alarmRule" rows="2" style="line-height: 12px;"></textarea>
 	</form>
 </div>
 </body>
 <script type="text/javascript">
-	/*var typeMap = {};
-	common.jsonModel("tPointType",{},function(json){
-		common.renderSelect("[name='typeId']",json.list);
-		$(json.list).each(function (){
-			typeMap[this.id] = this;
+	/*类型下拉：编辑表单与表格"类型"列翻译都取自 [name='typeId'] 的选项*/
+	function loadPointType(){
+		common.jsonModel("tPointType",{},function(json){
+			common.renderSelect("[name='typeId']",json.list);
 		});
-	});*/
+	}
+	loadPointType();
+	common.ajaxStop(function () {
+		tPoint.load();
+	});
 
 	var tPoint = new iTables("#tPoint",{pageSize:0},{
 		baseOption : common.iTableModel("TPoint"),
-		//loadOnInit:false,
+		loadOnInit:false,
 		render : {
 			code : function (td,data){
 				var code = data.code || '';
@@ -175,6 +184,14 @@
 						"src":"${base}/image"+data.image+"?width=100",
 						"data-target" : data.target || ""
 					});
+			},
+			target : function (td,data){
+				if(!data.target)
+					return;
+				$("<img>").appendTo(td).attr({
+					"src":"${base}/image"+data.image+"?target="+data.target
+				});
+				$(td).append("<span class='s-tag'>"+data.target.split(",")[0]+"</span>");
 			}
 		},
 		renderVal : function (td,data){
@@ -183,14 +200,7 @@
 			/*var type = typeMap[data.typeId] || {};
 			$(td).append("<span class='p-unit'> "+(type.unit || '')+"</span>");*/
 		},
-		renderImg : function (td,data){
-			if(!data.target)
-				return;
-			$("<img>").appendTo(td).attr({
-				"src":"${base}/image"+data.image+"?target="+data.target
-			});
-			$(td).append("<span class='s-tag'>"+data.target.split(",")[0]+"</span>");
-		},
+
 		/*保存时机：每次/定时/状态 三个勾选框，单击切换并保存*/
 		renderRec : function (td,data,icolumn){
 			var _self = this;
@@ -227,10 +237,6 @@
 		}
 	});
 
-	common.ajaxStop(function () {
-		tPoint.load();
-	});
-
 	function loadData(){
 		common.jsonCont("getPointData",{},function (list){
 			$(list).each(function (){
@@ -252,8 +258,24 @@
 	}
 
 	function devPropToPoint(){
-		common.ajax("${base}/device/propToPoint",{},function (json){
-			tPoint.load();
+		layer.confirm("确定要导入设备属性生成点位吗？<br>不会覆盖已存在的点", {icon: 3}, function(index){
+			layer.close(index);
+			common.ajax("${base}/device/propToPoint",{},function (json){
+				tPoint.load();
+			});
+		});
+	}
+
+	/*点位类型弹窗，关闭后刷新类型下拉与表格（列翻译依赖下拉选项）*/
+	function openPointType(){
+		layer.open({
+			type: 2,
+			title: "点位类型",
+			area: ["90%","90%"],
+			content: "${base}/index/pointType",
+			end: function(){
+				loadPointType();
+			}
 		});
 	}
 

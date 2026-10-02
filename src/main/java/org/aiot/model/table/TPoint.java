@@ -5,27 +5,28 @@ import org.nutz.dao.entity.annotation.Table;
 
 @Table
 @AoTbase
-public class TPoint extends TBase {
-	private String name;
+public class TPoint extends TPointType {
 	/**
 	 * 设备属性编码规则 dev-id-attr
+	 * 默认设备id为负
 	 */
 	private String code;
-	//private Long typeId;
+	/**
+	 * 地址，用于modbus、iec104 等上传
+	 */
+	private String address;
+
+	private Long typeId;
 	private Long placeId;
 
 	private String image;
 	private String target;//label,confidence,left,top,width,height,rotate
 
-	private String unit;//单位
-	private String alarmRule;//报警规则
-	private boolean recOnEvery;//每次保存
-	private boolean recOnTime;//周期保存
-	private boolean recOnState;//状态变化保存
-	private Double recOnValue;//数值变化保存
-
-	//left,top,width,height,rotate
-	private String shape; //形状，用于显示、描述
+	/**
+	 * 形状，用于显示、描述 比如原始框
+	 * left,top,width,height,rotate
+	 */
+	private String shape;
 
 	public TPoint() {
 	}
@@ -36,14 +37,6 @@ public class TPoint extends TBase {
 		this.target = target;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
 	public String getCode() {
 		return code;
 	}
@@ -52,60 +45,20 @@ public class TPoint extends TBase {
 		this.code = code;
 	}
 
+	public Long getTypeId() {
+		return typeId;
+	}
+
+	public void setTypeId(Long typeId) {
+		this.typeId = typeId;
+	}
+
 	public Long getPlaceId() {
 		return placeId;
 	}
 
 	public void setPlaceId(Long placeId) {
 		this.placeId = placeId;
-	}
-
-	public String getUnit() {
-		return unit;
-	}
-
-	public void setUnit(String unit) {
-		this.unit = unit;
-	}
-
-	public String getAlarmRule() {
-		return alarmRule;
-	}
-
-	public void setAlarmRule(String alarmRule) {
-		this.alarmRule = alarmRule;
-	}
-
-	public boolean isRecOnEvery() {
-		return recOnEvery;
-	}
-
-	public void setRecOnEvery(boolean recOnEvery) {
-		this.recOnEvery = recOnEvery;
-	}
-
-	public boolean isRecOnTime() {
-		return recOnTime;
-	}
-
-	public void setRecOnTime(boolean recOnTime) {
-		this.recOnTime = recOnTime;
-	}
-
-	public boolean isRecOnState() {
-		return recOnState;
-	}
-
-	public void setRecOnState(boolean recOnState) {
-		this.recOnState = recOnState;
-	}
-
-	public Double getRecOnValue() {
-		return recOnValue;
-	}
-
-	public void setRecOnValue(Double recOnValue) {
-		this.recOnValue = recOnValue;
 	}
 
 	public String getImage() {
@@ -130,5 +83,13 @@ public class TPoint extends TBase {
 
 	public void setShape(String shape) {
 		this.shape = shape;
+	}
+
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
 	}
 }

@@ -6,11 +6,11 @@ import org.aiot.model.lang.RecognitionRes;
 import org.aiot.model.lang.Target;
 import org.aiot.model.table.SysTrigger;
 import org.aiot.model.table.TPoint;
+import org.aiot.model.table.TPointType;
 import org.aiot.model.table.TRecord;
 import org.aiot.util.*;
 import org.nutz.ioc.loader.annotation.Inject;
 import org.nutz.ioc.loader.annotation.IocBean;
-import org.nutz.json.Json;
 import org.nutz.lang.Strings;
 import org.nutz.lang.util.NutMap;
 import org.nutz.log.Log;
@@ -56,24 +56,18 @@ public class PointService implements Observer  {
 
 	public PointData put(TPoint point, Object data){
 		long id = point.getId();
-		String alarmRule = point.getAlarmRule();
 		PointData pd = pointDataMap.computeIfAbsent(id,v->new PointData());
 		pd.setValue(data);
 
+		String alarmRule = getAlarmRule(point);
 		if(Strings.isNotBlank(alarmRule)){
 			Object v = data;
 			if(data instanceof ValInfc)
 				v = ((ValInfc)data).getValue();
-			String s = v + alarmRule;
-			Object v2 = SysUtil.jsEval(s);
-			if(v2 instanceof Number){
-				pd.setState(((Number)v2).intValue());
-			}else if(v2 instanceof Boolean){
-				pd.setState(((Boolean)v2) ? 2 : 0);
-			}
+			pd.setState(evalState(v, alarmRule));
 		}
 
-		if(point.isRecOnEvery() || (point.isRecOnState() && pd.changedState()) || pd.changedVal(point.getRecOnValue())){
+		if(isRecOnEvery(point) || (isRecOnState(point) && pd.changedState()) || pd.changedVal(getRecOnValue(point))){
 			TRecord tRecord = new TRecord();
 			if(data instanceof RecognitionRes){
 				tRecord = ((RecognitionRes) data).toRecord();
@@ -86,6 +80,92 @@ public class PointService implements Observer  {
 		}
 
 		return pd;
+	}
+
+	/*点位配置的生效值：报警规则、差异保存阈值取点位自身未设置时取点位类型（typeId）的，保存开关为自身或类型任一开启*/
+
+	private TPointType pointType(TPoint point){
+		return point.getTypeId() == null ? null : bs.getTCache(TPointType.class,point.getTypeId());
+	}
+
+	/**
+	 * 报警规则：点位自身未设置时取点位类型的
+	 */
+	public String getAlarmRule(TPoint point){
+		String rule = point.getAlarmRule();
+		if(Strings.isBlank(rule)){
+			TPointType t = pointType(point);
+			if(t != null)
+				rule = t.getAlarmRule();
+		}
+		return rule;
+	}
+
+	/**
+	 * 差异保存阈值：点位自身未设置时取点位类型的
+	 */
+	public Double getRecOnValue(TPoint point){
+		Double v = point.getRecOnValue();
+		if(v == null){
+			TPointType t = pointType(point);
+			if(t != null)
+				v = t.getRecOnValue();
+		}
+		return v;
+	}
+
+	/**
+	 * 每次保存：点位或点位类型任一开启即为开启
+	 */
+	public boolean isRecOnEvery(TPoint point){
+		TPointType t = pointType(point);
+		return point.isRecOnEvery() || (t != null && t.isRecOnEvery());
+	}
+
+	/**
+	 * 定时保存：点位或点位类型任一开启即为开启
+	 */
+	public boolean isRecOnTime(TPoint point){
+		TPointType t = pointType(point);
+		return point.isRecOnTime() || (t != null && t.isRecOnTime());
+	}
+
+	/**
+	 * 状态变化保存：点位或点位类型任一开启即为开启
+	 */
+	public boolean isRecOnState(TPoint point){
+		TPointType t = pointType(point);
+		return point.isRecOnState() || (t != null && t.isRecOnState());
+	}
+
+	/**
+	 * 报警规则判定
+	 * 换行分隔、从重到轻：第1行=报警(2)、第2行=预警(1)，未命中=正常(0)
+	 * 三元式规则直接返回其状态值；规则执行异常记日志按正常处理，不影响数据入库
+	 */
+	private int evalState(Object v,String alarmRule){
+		try{
+			int i = 0;
+			for(String rule : alarmRule.split("\\s*\\n\\s*")){ //\s* 顺带清掉 Windows 的 \r
+				if(Strings.isBlank(rule))
+					continue;
+				if(i >= 2)
+					break;
+				Object r = SysUtil.ruleEval(v,rule);
+				if(r instanceof Boolean){
+					if((Boolean)r)
+						return 2 - i;
+				}else if(r instanceof Number){
+					int state = ((Number)r).intValue();
+					if(state != 0)
+						return state;
+				}
+				i++;
+			}
+		}catch (Exception e){
+			log.error("报警规则执行错误："+alarmRule,e);
+		}
+		return 0;
 	}
 
 	public PointData put(Long id, Object data){

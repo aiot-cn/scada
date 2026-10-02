@@ -78,8 +78,8 @@
 									<th data-field="name" data-edit="true">名称</th>
 									<th data-field="deviceType" data-edit="true">类型</th>
 									<th data-field="communication" width="80" data-edit="true" data-translate="select">通信方式</th>
-									<th data-field="address" data-edit="true">地址</th>
 									<th data-field="dec" width="60">十进制</th>
+									<th data-field="address" data-edit="true">地址</th>
 									<%--<th data-field="exp1" data-edit="true">exp1</th>
 									<th data-field="exp2" data-edit="true" data-show="false">exp2</th>--%>
 									<th data-type="edit" width="70" class="tac">编辑</th>
@@ -202,7 +202,7 @@ $("[name='dec']").blur(function (){
 	$('[name="address"]').val(hex);
 });
 
-var iTree = new iTrees("#iTree",{type:"devGroup"},{
+var iTree = new iTrees("#iTree",{type:"devGroup",ASC:"sequence"},{
 	baseOption : common.iTableModel("sysDict"),
 	callback : function(){
 

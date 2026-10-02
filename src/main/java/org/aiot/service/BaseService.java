@@ -202,6 +202,7 @@ public final class BaseService extends Observable {
 	}
 
 	public void rePK(Class<?> klass){
+		//PK.put(klass,new AtomicLong(getMaxId(klass)));
 		//只升不降，防止并发中把序列重置到已发出的id之下
 		PK.merge(klass,new AtomicLong(getMaxId(klass)),(seq,newSeq)-> seq.get() >= newSeq.get() ? seq : newSeq);
 	}

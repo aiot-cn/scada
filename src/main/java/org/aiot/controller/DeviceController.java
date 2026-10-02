@@ -158,7 +158,7 @@ public class DeviceController {
 	@At
 	public @Ok("json") DataRes propToPoint(){
 		BaseService bs = ioc.get(BaseService.class);
-		bs.getTCache(TDevice.class).forEach(t -> {
+		bs.getTCache(TDevice.class,d -> d.getId() > 0).forEach(t -> {
 			bs.getTCache(DeviceProperty.class,p -> Strings.equals(t.getDeviceType(),p.getDeviceType())).forEach(p -> {
 				String pointCode = "dev-"+t.getId()+"-"+p.getCode();
 				TPoint point = bs.getTCacheFirst(TPoint.class,v -> Strings.equals(pointCode,v.getCode()));

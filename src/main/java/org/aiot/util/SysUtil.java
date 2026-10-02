@@ -1,13 +1,9 @@
 package org.aiot.util;
 
-import org.aiot.lang.annotation.AoReflect;
 import org.aiot.main.Constants;
-import org.aiot.model.enums.AstEnum;
 import org.aiot.model.enums.ServletEnum;
 import org.aiot.model.enums.VarRuntimeEnum;
-import org.aiot.model.project.ArgBean;
 import org.aiot.model.project.License;
-import org.aiot.model.project.MethodBean;
 import org.aiot.model.table.SysScript;
 import org.aiot.service.BaseService;
 import org.nutz.json.Json;
@@ -16,7 +12,6 @@ import org.nutz.lang.Lang;
 import org.nutz.lang.Strings;
 import org.nutz.lang.Times;
 import org.nutz.lang.util.Context;
-import org.nutz.lang.util.MethodParamNamesScaner;
 import org.nutz.repo.Base64;
 
 import javax.crypto.Cipher;
@@ -32,14 +27,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Parameter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
 
 public class SysUtil {
 	
@@ -264,6 +257,15 @@ public class SysUtil {
 			val = SysUtil.jsEval(calc);
 		}
 		return val;
+	}
+
+	/**
+	 * 报警规则求值：值拼在行首（兼容旧格式"值+规则"），并将 || && ( , : ? 之后的裸比较补全为以 v 开头的比较式，再交给 jsEval
+	 * 如 v=6、规则 "<5||>10" → "6 <5||6 >10" → false
+	 */
+	public static Object ruleEval(Object v,String rule){
+		String expr = (v+" "+rule).replaceAll("(\\|\\||&&|\\(|,|:|\\?)\\s*([<>]=?|==|!=)", "$1"+Matcher.quoteReplacement(v.toString())+" $2");
+		return jsEval(expr);
 	}
 
 	/**
