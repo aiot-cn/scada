@@ -129,7 +129,7 @@ public class FileController {
 
     @At
     public @Ok("json") DataRes unzip(String name) throws IOException {
-        int i = ZipUtil.unzip(FileUtil.toFile(name),null);
+        int i = ZipUtil.unzip(FileUtil.toFile(name));
         return new DataRes(i);
     }
 
