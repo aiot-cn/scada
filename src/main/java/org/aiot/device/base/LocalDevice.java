@@ -151,7 +151,7 @@ public class LocalDevice extends BaseDevice {
         PointService ps = ioc.get(PointService.class);
 
         List<TRecord> list = new ArrayList<>();
-        bs.getTCache(TPoint.class, p->ps.isRecOnTime(p)).forEach(v->{
+        bs.getTCache(TPoint.class, TPoint::isRecOnTime).forEach(v->{
             PointData data = ps.getPointData(v.getId());
             if(data != null && data.getValue() != null){
                 TRecord record = new TRecord();

@@ -6,7 +6,6 @@ import org.aiot.model.lang.RecognitionRes;
 import org.aiot.model.lang.Target;
 import org.aiot.model.table.SysTrigger;
 import org.aiot.model.table.TPoint;
-import org.aiot.model.table.TPointType;
 import org.aiot.model.table.TRecord;
 import org.aiot.util.*;
 import org.nutz.ioc.loader.annotation.Inject;
@@ -49,7 +48,6 @@ public class PointService implements Observer  {
 			return point;
 		point = new TPoint();
 		point.setCode(code);
-		//point.setTypeId(typeId);
 		bs.daoSave(point);
 		return point;
 	}
@@ -59,7 +57,7 @@ public class PointService implements Observer  {
 		PointData pd = pointDataMap.computeIfAbsent(id,v->new PointData());
 		pd.setValue(data);
 
-		String alarmRule = getAlarmRule(point);
+		String alarmRule = point.getAlarmRule();
 		if(Strings.isNotBlank(alarmRule)){
 			Object v = data;
 			if(data instanceof ValInfc)
@@ -67,7 +65,7 @@ public class PointService implements Observer  {
 			pd.setState(evalState(v, alarmRule));
 		}
 
-		if(isRecOnEvery(point) || (isRecOnState(point) && pd.changedState()) || pd.changedVal(getRecOnValue(point))){
+		if(point.isRecOnEvery() || (point.isRecOnState() && pd.changedState()) || pd.changedVal(point.getRecOnValue())){
 			TRecord tRecord = new TRecord();
 			if(data instanceof RecognitionRes){
 				tRecord = ((RecognitionRes) data).toRecord();
@@ -80,62 +78,6 @@ public class PointService implements Observer  {
 		}
 
 		return pd;
-	}
-
-	/*点位配置的生效值：报警规则、差异保存阈值取点位自身未设置时取点位类型（typeId）的，保存开关为自身或类型任一开启*/
-
-	private TPointType pointType(TPoint point){
-		return point.getTypeId() == null ? null : bs.getTCache(TPointType.class,point.getTypeId());
-	}
-
-	/**
-	 * 报警规则：点位自身未设置时取点位类型的
-	 */
-	public String getAlarmRule(TPoint point){
-		String rule = point.getAlarmRule();
-		if(Strings.isBlank(rule)){
-			TPointType t = pointType(point);
-			if(t != null)
-				rule = t.getAlarmRule();
-		}
-		return rule;
-	}
-
-	/**
-	 * 差异保存阈值：点位自身未设置时取点位类型的
-	 */
-	public Double getRecOnValue(TPoint point){
-		Double v = point.getRecOnValue();
-		if(v == null){
-			TPointType t = pointType(point);
-			if(t != null)
-				v = t.getRecOnValue();
-		}
-		return v;
-	}
-
-	/**
-	 * 每次保存：点位或点位类型任一开启即为开启
-	 */
-	public boolean isRecOnEvery(TPoint point){
-		TPointType t = pointType(point);
-		return point.isRecOnEvery() || (t != null && t.isRecOnEvery());
-	}
-
-	/**
-	 * 定时保存：点位或点位类型任一开启即为开启
-	 */
-	public boolean isRecOnTime(TPoint point){
-		TPointType t = pointType(point);
-		return point.isRecOnTime() || (t != null && t.isRecOnTime());
-	}
-
-	/**
-	 * 状态变化保存：点位或点位类型任一开启即为开启
-	 */
-	public boolean isRecOnState(TPoint point){
-		TPointType t = pointType(point);
-		return point.isRecOnState() || (t != null && t.isRecOnState());
 	}
 
 	/**

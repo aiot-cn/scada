@@ -193,68 +193,77 @@ var common = {
 	},
 
 	/**
-	 * @author taojin
 	 * str   筛选器	  表单筛选(不会取disabled)
-	 * not	 筛选器	  排除不需要取值的	默认 null
-	 * empty boolean  是否清空		默认 false
-	 * nul 	 boolean  是否取空值 	默认 false
+	 * {
+	 *     not	 		排除		默认 null
+	 *     includeEmpty	包括空 	默认 false
+	 *     clear		是否清空	默认 false
+	 *     error  : function
+	 *     success: function
+	 * }
 	 * other : 支持 data-type="like",data-text="[name]",datetime-local自动去T,checkbox自动数组
 	 */
-	formJSON : function(str,not,empty,nul) {
+	formJSON : function(str,option) {
+		if(typeof option === 'function'){
+			option = { success: option };
+		}
+		option = option || {};
 		var json = {};
-		var fromlist = str.selector ? str : $(str).find("input,select,textarea").not(not);
+		var fromlist = str.selector ? str : $(str).find("input,select,textarea").not(option.not);
+		var msg = "";
 		fromlist.each(function() {
-			if (this.name && !this.disabled) {
-				var val = this.value.trim();
+			if (!this.name || this.disabled)
+				return true;
 
-				if (this.validity.valid) {
-					//this.placeholder = "";
-				} else {
-					json = null;
-					//this.placeholder = this.validationMessage;
-					//val = "";
-					this.focus();
-					return;
+			var val = this.value.trim();
+
+			if (this.validity.valid) {
+				//this.placeholder = "";
+			} else {
+				json = null;
+				msg = this.validationMessage;
+				this.focus();
+				return false;
+			}
+
+			if (this.type == "radio") {
+				if(this.checked)
+					json[this.name] = val;
+			}else if (this.type == "checkbox") {
+				if(this.checked){
+					if(json[this.name]){
+						if(json[this.name] instanceof Array){
+							json[this.name].push(val);
+						}else{
+							json[this.name] = [json[this.name]];
+							json[this.name].push(val);
+						}
+					}else{
+						json[this.name] = val;
+					}
+
 				}
 
-				if (this.type == "radio") {
-					if(this.checked)
-						json[this.name] = val;
-				}else if (this.type == "checkbox") {
-					if(this.checked){
-						if(json[this.name]){
-							if(json[this.name] instanceof Array){
-								json[this.name].push(val);
-							}else{
-								json[this.name] = [json[this.name]];
-								json[this.name].push(val);
-							}
-						}else{
-							json[this.name] = val;
-						}
+			}else if(this.type == "file"){
+				json[this.name] = new FormData(this);
+			}else if (option.includeEmpty || val) {
 
-					}
-
-				}else if(this.type == "file"){
-					json[this.name] = new FormData(this);
-				}else if (nul || val) {
-
-					if (this.type == "datetime-local"){
-						json[this.name] = val ? val.substring(0, 16).replace("T", " ")+":00.0" : "";
-					}else{
-						json[this.name] = this.dataset.type=="like" ? ("%" + val + "%") : val;
-					}
-					if(this.dataset.text){
-						json[this.dataset.text] = this.selectedOptions[0].text;
-					}
-					if(this.dataset.value){
-						json[this.dataset.value] = val;
-					}
+				if (this.type == "datetime-local"){
+					json[this.name] = val ? val.substring(0, 16).replace("T", " ")+":00.0" : "";
+				}else{
+					json[this.name] = this.dataset.type=="like" ? ("%" + val + "%") : val;
+				}
+				if(this.dataset.text){
+					json[this.dataset.text] = this.selectedOptions[0].text;
+				}
+				if(this.dataset.value){
+					json[this.dataset.value] = val;
 				}
 			}
+
 		});
 
-		if (empty) {
+		if (option.clear) {
 			fromlist.each(function() {
 				if (this.type == "radio" || this.type == "checkbox") {
 					this.checked = false;
@@ -264,10 +273,25 @@ var common = {
 			});
 		}
 
-		for(k in json){
-			return json;
+		var hasValue = false;
+		for(var k in json){
+			hasValue = true;
+			break;
 		}
-		return false;
+
+		if(hasValue){
+			if(option.success){
+				option.success(json);
+			}
+			return json;
+		}else{
+			if(option.error){
+				option.error();
+			}else{
+				layer.msg("参数错误："+msg);
+			}
+			return false;
+		}
 	},
 
 	submit : function(str,callback,option) {

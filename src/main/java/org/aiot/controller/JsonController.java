@@ -251,6 +251,62 @@ public class JsonController {
 		});
 		return nutMaps;
 	}
+
+	/**
+	 * 批量修改点位设置
+	 * 按编号包含与设备类型筛选点位，两者都填时同时匹配（交集）
+	 */
+	@At
+	public @Ok("json") DataRes batchSetPoint(TPoint  point,String deviceType){
+		BaseService bs = ioc.get(BaseService.class);
+		List<TPoint> points = bs.getTCache(TPoint.class, v-> {
+			if(v.getCode() != null && v.getCode().contains(point.getCode())){
+				if(Strings.isBlank(deviceType))
+					return true;
+				Long deviceId = v.getDeviceId();
+				if(deviceId ==  null)
+					return false;
+				TDevice d = bs.getTCache(TDevice.class,deviceId);
+				return deviceType.equals(d.getDeviceType());
+			}
+			return false;
+		});
+		if(points.isEmpty())
+			return DataRes.error("没有匹配到点位");
+		for(TPoint p : points){
+			if(Strings.isNotBlank(point.getUnit()))
+				p.setUnit("null".equals(point.getUnit())? null : point.getUnit());
+
+			if(Strings.isNotBlank(point.getAlarmRule()))
+				p.setAlarmRule("null".equals(point.getAlarmRule())? null : point.getAlarmRule());
+
+			if(point.getRecOnValue() != null)
+				p.setRecOnValue(point.getRecOnValue() > 0 ? point.getRecOnValue() : null);
+
+			if(point.getRecOnTime() != null)
+				p.setRecOnTime(point.getRecOnTime());
+			if(point.getRecOnState() != null)
+				p.setRecOnState(point.getRecOnState());
+			if(point.getRecOnEvery() != null)
+				p.setRecOnEvery(point.getRecOnEvery());
+			bs.daoSave(p,"unit|alarmRule|recOnValue|recOnTime|recOnState|recOnEvery");
+		}
+
+		return DataRes.success("共更新"+points.size()+"个点位");
+	}
+
+	//由点位编号解析所属设备类型：dev-{deviceId}-{属性code}
+	private String pointDeviceType(TPoint point, Map<Long,TBase> deviceMap){
+		String[] s = Strings.sNull(point.getCode()).split("-",3);
+		if(s.length < 3 || !"dev".equals(s[0]))
+			return null;
+		try{
+			TDevice d = (TDevice) deviceMap.get(Long.parseLong(s[1]));
+			return d == null ? null : d.getDeviceType();
+		}catch (NumberFormatException e){
+			return null;
+		}
+	}
 	//====================  通讯  =============================
 	@At
 	public @Ok("json") DataRes getCommunicationMode(){

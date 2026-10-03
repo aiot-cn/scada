@@ -18,10 +18,21 @@ public class TPointType extends TBase {
 	 *   <li>三元式，直接返回状态值   `>10?2:>5?1:0` → 1</li>
 	 */
 	private String alarmRule;
-	private boolean recOnEvery;//每次保存
-	private boolean recOnTime;//周期保存
-	private boolean recOnState;//状态变化保存
+
+	private Boolean recOnEvery;//每次保存
+	private Boolean recOnTime;//周期保存
+	private Boolean recOnState;//状态变化保存
 	private Double recOnValue;//数值变化保存
+
+	public boolean isRecOnEvery() {
+		return recOnEvery != null && recOnEvery;
+	}
+	public boolean isRecOnTime() {
+		return recOnTime  != null && recOnTime;
+	}
+	public boolean isRecOnState() {
+		return recOnState  != null && recOnState;
+	}
 
 	public String getName() {
 		return name;
@@ -47,27 +58,27 @@ public class TPointType extends TBase {
 		this.alarmRule = alarmRule;
 	}
 
-	public boolean isRecOnEvery() {
+	public Boolean getRecOnEvery() {
 		return recOnEvery;
 	}
 
-	public void setRecOnEvery(boolean recOnEvery) {
+	public void setRecOnEvery(Boolean recOnEvery) {
 		this.recOnEvery = recOnEvery;
 	}
 
-	public boolean isRecOnTime() {
+	public Boolean getRecOnTime() {
 		return recOnTime;
 	}
 
-	public void setRecOnTime(boolean recOnTime) {
+	public void setRecOnTime(Boolean recOnTime) {
 		this.recOnTime = recOnTime;
 	}
 
-	public boolean isRecOnState() {
+	public Boolean getRecOnState() {
 		return recOnState;
 	}
 
-	public void setRecOnState(boolean recOnState) {
+	public void setRecOnState(Boolean recOnState) {
 		this.recOnState = recOnState;
 	}
 

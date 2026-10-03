@@ -82,9 +82,9 @@
 	          <div class="layui-card-header">
 				  <span class="title">点位</span>
 				  <input data-search="tPoint" placeholder="搜索">
-				  <a class="layui-btn layui-btn-normal layui-btn-sm" onclick="openPointType()">
-					  <i class="layui-icon layui-icon-template-1"></i>
-					  点位类型
+				  <a class="layui-btn layui-btn-normal layui-btn-sm" onclick="openBatchSet()">
+					  <i class="layui-icon layui-icon-set-fill"></i>
+					  批量设置
 				  </a>
 				  <a class="layui-btn layui-btn-normal layui-btn-sm" onclick="devPropToPoint()">
 					  <i class="layui-icon layui-icon-addition"></i>
@@ -111,7 +111,7 @@
 								<th data-render="renderVal">值</th>
 								<%--<th data-field="placeId" data-translate="select" data-edit="true">位置</th>--%>
 								<th data-field="unit" data-edit="true">单位</th>
-								<th data-field="typeId" data-translate="select" data-edit="true">类型</th>
+								<%--<th data-field="typeId" data-translate="select" data-edit="true">类型</th>--%>
 								<th data-render="renderRec" data-class="tac" width="140">保存时机</th>
 								<th data-field="recOnValue" data-edit="true">差异保存</th>
 								<th data-field="alarmRule" data-edit="true">报警规则</th>
@@ -133,7 +133,7 @@
 		<input class="layui-input" name="image" onclick="common.openFile(this)">
 	    <input class="layui-input" name="name" required="required">
 		<select class="layui-input" name="deviceId" data-clear="false"></select>
-		<select class="layui-input" name="typeId" data-clear="false"></select>
+		<%--<select class="layui-input" name="typeId" data-clear="false"></select>--%>
 		<select class="layui-input" name="placeId" data-clear="false"></select>
 		<input class="layui-input" name="code">
 		<input class="layui-input" name="address">
@@ -155,15 +155,84 @@
 		<textarea class="layui-input" name="alarmRule" rows="2" style="line-height: 12px;"></textarea>
 	</form>
 </div>
+
+<%--批量设置弹窗：按编号包含、设备类型筛选点位，批量修改其单位、保存时机、差异保存，留空均不修改--%>
+<div class="lay-con d-batch-set">
+	<form name="fBatch" class="layui-form layui-form-pane" onsubmit="return false;">
+		<div class="layui-form-item">
+			<label class="layui-form-label">编号包含</label>
+			<div class="layui-input-block">
+				<input name="code" class="layui-input" required>
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">设备类型</label>
+			<div class="layui-input-block">
+				<select name="deviceType" class="layui-input" lay-ignore=""></select>
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">报警规则</label>
+			<div class="layui-input-block">
+				<input name="alarmRule" class="layui-input">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">每次保存</label>
+			<div class="layui-input-block">
+				<select name="recOnEvery" class="layui-input" lay-ignore="">
+					<option value="">--</option>
+					<option value="true">开启</option>
+					<option value="false">关闭</option>
+				</select>
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">定时保存</label>
+			<div class="layui-input-block">
+				<select name="recOnTime" class="layui-input" lay-ignore="">
+					<option value="">--</option>
+					<option value="true">开启</option>
+					<option value="false">关闭</option>
+				</select>
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">状态保存</label>
+			<div class="layui-input-block">
+				<select name="recOnState" class="layui-input" lay-ignore="">
+					<option value="">--</option>
+					<option value="true">开启</option>
+					<option value="false">关闭</option>
+				</select>
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">差异保存</label>
+			<div class="layui-input-block">
+				<input name="recOnValue" class="layui-input" type="number" step="0.0001">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">单位</label>
+			<div class="layui-input-block">
+				<input name="unit" class="layui-input">
+			</div>
+		</div>
+	</form>
+</div>
 </body>
 <script type="text/javascript">
+	common.jsonModel("deviceType",{},function (json){
+		common.renderSelect(fBatch.deviceType,json.list,{dft:"",value:"code"});
+	});
 	/*类型下拉：编辑表单与表格"类型"列翻译都取自 [name='typeId'] 的选项*/
-	function loadPointType(){
+	/*function loadPointType(){
 		common.jsonModel("tPointType",{},function(json){
 			common.renderSelect("[name='typeId']",json.list);
 		});
 	}
-	loadPointType();
+	loadPointType();*/
 	common.ajaxStop(function () {
 		tPoint.load();
 	});
@@ -266,15 +335,22 @@
 		});
 	}
 
-	/*点位类型弹窗，关闭后刷新类型下拉与表格（列翻译依赖下拉选项）*/
-	function openPointType(){
+	function openBatchSet(){
+
 		layer.open({
-			type: 2,
-			title: "点位类型",
-			area: ["90%","90%"],
-			content: "${base}/index/pointType",
-			end: function(){
-				loadPointType();
+			type: 1,
+			title: "批量设置",
+			btn: ["确定"],
+			area: ["400px","auto"],
+			content: $(".d-batch-set"),
+			yes: function (index){
+				common.formJSON(fBatch,function(p){
+					common.jsonCont("batchSetPoint",p,function(json){
+						layer.close(index);
+						layer.msg(json.message);
+						tPoint.load();
+					});
+				});
 			}
 		});
 	}

@@ -7,7 +7,7 @@ import org.nutz.dao.entity.annotation.Table;
 @AoTbase
 public class TPoint extends TPointType {
 	/**
-	 * 设备属性编码规则 dev-id-attr
+	 * 点位编码规则 dev-{deviceId}-{属性code}
 	 * 默认设备id为负
 	 */
 	private String code;
@@ -35,6 +35,17 @@ public class TPoint extends TPointType {
 		this.code = code;
 		this.image = image;
 		this.target = target;
+	}
+
+	public Long getDeviceId(){
+		if(code.startsWith("dev-")) {
+			try {
+				return Long.parseLong(code.substring(4, code.indexOf("-")));
+			} catch (Exception e) {
+				return null;
+			}
+		}
+		return null;
 	}
 
 	public String getCode() {
