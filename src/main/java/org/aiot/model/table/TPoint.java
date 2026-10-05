@@ -41,7 +41,8 @@ public class TPoint extends TPointType {
 	public Long getDeviceId(){
 		if(code.startsWith("dev-")) {
 			try {
-				return Long.parseLong(code.substring(4, code.indexOf("-")));
+				String deviceId = code.substring(4, code.lastIndexOf("-"));
+				return Long.parseLong(deviceId);
 			} catch (Exception e) {
 				return null;
 			}

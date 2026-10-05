@@ -53,7 +53,7 @@ public class ConfigService implements Observer {
 			try {
 				initScript(v);
 			}catch (Exception e){
-				log.error("脚本"+v.getFunction()+"编译错误 "+e.getMessage());
+				log.error(v.getType()+"脚本"+v.getCode()+"编译错误："+e.getMessage());
 			}
 		});
 

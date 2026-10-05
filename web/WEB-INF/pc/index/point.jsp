@@ -287,6 +287,7 @@
 		});
 	}
 	loadPointType();*/
+	var areaIds;//当前选中的区域(含子区域)，批量设置时作为筛选条件
 	var iTree = new iTrees("#iTree",{type:"area",ASC:"sequence"},{
 		baseOption : common.iTableModel("sysDict"),
 		callback : function(json){
@@ -295,11 +296,12 @@
 		onSelect : function (data,li){
 			$(".dev-all,.dev-un-group").removeClass("selected");
 			tPoint._form.areaId.value = data.id;
-			var ids = data.id;
+			var ids = [data.id];
 			$(li).find("li").each(function (){
-				ids += ","+this.data.id;
+				ids.push(this.data.id);
 			});
-			tPoint.load({"areaId_in":ids});
+			areaIds = ids.join(",");
+			tPoint.load({"areaId_in":areaIds});
 		}
 	});
 
@@ -344,8 +346,8 @@
 		renderRec : function (td,data,icolumn){
 			var _self = this;
 			var items = [
-				["recOnEvery","rec-every","每次","每次保存"],
 				["recOnTime","rec-time","定时","定时保存"],
+				["recOnEvery","rec-every","每次","每次保存"],
 				["recOnState","rec-state","状态","状态保存"]
 			];
 			$(items).each(function (){
@@ -386,6 +388,7 @@
 		iTree.olul.find("li span").removeClass("selected");
 		iTree.selected = null;
 		iTree.data = null;
+		areaIds = null;
 		tPoint._form.areaId.value = "";
 		tPoint.load(params);
 	}
@@ -429,6 +432,7 @@
 			content: $(".d-batch-set"),
 			yes: function (index){
 				common.formJSON(fBatch,function(p){
+					p.areaIds = areaIds;
 					common.jsonCont("batchSetPoint",p,function(json){
 						layer.close(index);
 						layer.msg(json.message);

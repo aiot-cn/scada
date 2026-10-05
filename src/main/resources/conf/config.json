@@ -48,8 +48,6 @@
 		{"type" : "crc","name": "累加和余256",	"code" : "CRC2",		"function": "var c = 0;\nfor(var i=0;i<arg0.length/2;i++){\n  var s = arg0.substr(i*2,2);\n  c += parseInt(s, 16);\n}\nc = (c%256).toString(16);\nif(c.length == 1)\n  c = '0'+c;\nreturn c;"},
 		{"type" : "crc","name": "ADD8",			"code" : "ADD8",		"function": "var CALC = Java.type('util.CalcUtil');\nreturn CALC.add8(arg0);"},
 
-		{"type" : "reflect","name": "设备数据",	"code" : "bdData",		"function": "/**\n * arg0 : deviceReflect\n * arg1 : 数据Data\n * arg2 : 实例baseDevicea\n * arg3 : 数据val\n */\nreturn arg1;"},
-
 		{"type" : "url","name": "URL代理",	"code" : "urlProxy",		"function": "if(url instanceof Packages.SysUrl){\n   print(\"来源\")\n}\nif(url instanceof org.jsoup.helper.HttpConnection){\n   url.header(\"X-Requested-With\", \"XMLHttpRequest\") //标识为AJAX请求\n   url.header(\"Content-Type\",\"application/x-www-form-urlencoded\");\n}\nif(url instanceof org.jsoup.helper.HttpConnection.Response){\n   print(\"返回处理\")\n}\nreturn null;"}
 	],
 

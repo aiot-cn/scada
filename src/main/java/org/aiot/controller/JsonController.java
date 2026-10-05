@@ -254,22 +254,27 @@ public class JsonController {
 
 	/**
 	 * 批量修改点位设置
-	 * 按编号包含与设备类型筛选点位，两者都填时同时匹配（交集）
+	 * 按编号包含、设备类型、所属区域筛选点位，多条件同时满足（交集），区域为空时不限制
 	 */
 	@At
-	public @Ok("json") DataRes batchSetPoint(TPoint  point,String deviceType){
+	public @Ok("json") DataRes batchSetPoint(TPoint  point,String deviceType,Long[] areaIds){
 		BaseService bs = ioc.get(BaseService.class);
 		List<TPoint> points = bs.getTCache(TPoint.class, v-> {
-			if(v.getCode() != null && v.getCode().contains(point.getCode())){
-				if(Strings.isBlank(deviceType))
-					return true;
-				Long deviceId = v.getDeviceId();
-				if(deviceId ==  null)
-					return false;
-				TDevice d = bs.getTCache(TDevice.class,deviceId);
-				return deviceType.equals(d.getDeviceType());
-			}
-			return false;
+			if(v.getCode() == null || !v.getCode().contains(point.getCode()))
+				return false;
+
+			if(areaIds != null && areaIds.length > 0 && !Arrays.asList(areaIds).contains(v.getAreaId()))
+				return false;
+
+			if(Strings.isBlank(deviceType))
+				return true;
+			
+			Long deviceId = v.getDeviceId();
+			if(deviceId ==  null)
+				return false;
+
+			TDevice d = bs.getTCache(TDevice.class,deviceId);
+			return deviceType.equals(d.getDeviceType());
 		});
 		if(points.isEmpty())
 			return DataRes.error("没有匹配到点位");

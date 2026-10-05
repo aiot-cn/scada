@@ -24,7 +24,6 @@
 	"Humiture" : {
 		"role" : "SENSOR",
 		"name" : "温湿度",
-		"klass":"org.aiot.device.BaseDevice",
 		"icon" : "aiot-icon aiot-icon-humiture",
 		"property" : [
 			{"code": "temperature",	"name": "温度","unit": "℃",	"type": 0},
