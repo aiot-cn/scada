@@ -16,8 +16,9 @@ public class TPoint extends TPointType {
 	 */
 	private String address;
 
-	private Long typeId;
-	private Long placeId;
+	private Long typeId;//暂无用
+
+	private Long areaId;//sysDict
 
 	private String image;
 	private String target;//label,confidence,left,top,width,height,rotate
@@ -64,12 +65,12 @@ public class TPoint extends TPointType {
 		this.typeId = typeId;
 	}
 
-	public Long getPlaceId() {
-		return placeId;
+	public Long getAreaId() {
+		return areaId;
 	}
 
-	public void setPlaceId(Long placeId) {
-		this.placeId = placeId;
+	public void setAreaId(Long areaId) {
+		this.areaId = areaId;
 	}
 
 	public String getImage() {

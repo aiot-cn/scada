@@ -50,7 +50,7 @@
 					</div>
 					<div class="layui-card-body">
 						<div class="dev-all selected" onclick="devFilter(this,{})"><i class="layui-icon layui-icon-home"></i> 全部</div>
-						<div class="dev-un-group" onclick="devFilter(this,{'groupId_is':'NULL'})"><i class="layui-icon layui-icon-tips"></i> 未知</div>
+						<div class="dev-un-group" onclick="devFilter(this,{'areaId_is':'NULL'})"><i class="layui-icon layui-icon-tips"></i> 未知</div>
 						<ul id="iTree"></ul>
 					</div>
 				</div>
@@ -74,7 +74,7 @@
 								<tr>
 									<th data-field="isRemoved" data-type="switch" width="40" data-class="tac switch-contrary-no">状态</th>
 									<th data-field="id" width="20" data-show="false">ID</th>
-									<th data-field="groupId" data-translate="select" data-edit="true" data-show="false">组别</th>
+									<th data-field="areaId" data-translate="select" data-edit="true" data-show="false">组别</th>
 									<th data-field="name" data-edit="true">名称</th>
 									<th data-field="deviceType" data-edit="true">类型</th>
 									<th data-field="communication" width="80" data-edit="true" data-translate="select">通信方式</th>
@@ -102,14 +102,14 @@
 			<select class="layui-input" name="communication"  data-clear="false"></select>
 			<select class="layui-input" name="deviceType" required="required"  data-clear="false"></select>
 			<select class="layui-input" name="rate" data-clear="false"></select>
-			<select class="layui-input" name="groupId" data-clear="false"></select>
+			<select class="layui-input" name="areaId" data-clear="false"></select>
 			<input class="layui-input" name="exp1">
 			<input class="layui-input" name="exp2">
 		</form>
 		<form data-for="iTree">
 			<input type="hidden" name="id">
 			<input type="hidden" name="parentId">
-			<input type="hidden" name="type" value="devGroup" data-clear="false">
+			<input type="hidden" name="type" value="area" data-clear="false">
 			<div class="layui-form-item">
 				<div class="layui-inline">
 					<label class="layui-form-label">名称</label>
@@ -135,12 +135,28 @@ common.jsonModel("tCommunication",{},function(data){
 	common.renderSelect("[name='communication']",data.list,{dft:""});
 });
 
+//common.selectFromDict("rate","[name='rate']",{dft:""});
+//common.selectFromDict("area","[name='areaId']",{dft:"",value:"id"});
+
+	var iTree = new iTrees("#iTree",{type:"area",ASC:"sequence"},{
+		baseOption : common.iTableModel("sysDict"),
+		callback : function(json){
+			common.renderSelect("[name='areaId']",json.list,{dft:""});
+		},
+		onSelect : function (data,li){
+			$(".dev-all,.dev-un-group").removeClass("selected");
+			itableDevice._form.areaId.value = data.id;
+			var ids = data.id;
+			$(li).find("li").each(function (){
+				ids += ","+this.data.id;
+			});
+			itableDevice.load({"areaId_in":ids});
+		}
+	});
+
 common.ajaxStop(function(){
 	itableDevice.load();
 });
-
-//common.selectFromDict("rate","[name='rate']",{dft:""});
-common.selectFromDict("devGroup","[name='groupId']",{dft:"",value:"id"});
 
 var itableDevice = new iTables("#itableDevice",{"pageSize":0},{
 	baseOption : common.iTableModel("tDevice","sequence"),
@@ -182,8 +198,8 @@ var itableDevice = new iTables("#itableDevice",{"pageSize":0},{
 		}
 	},
 	callForm : function (params){
-		if(iTree.data && !params.groupId)
-			params.groupId = iTree.data.id;
+		if(iTree.data && !params.areaId)
+			params.areaId = iTree.data.id;
 		var decInput = itableDevice._form.dec;
 		var nameInput = itableDevice._form.name;
 		var dec = decInput.valueAsNumber;
@@ -202,21 +218,7 @@ $("[name='dec']").blur(function (){
 	$('[name="address"]').val(hex);
 });
 
-var iTree = new iTrees("#iTree",{type:"devGroup",ASC:"sequence"},{
-	baseOption : common.iTableModel("sysDict"),
-	callback : function(){
 
-	},
-	onSelect : function (data,li){
-		$(".dev-all,.dev-un-group").removeClass("selected");
-		itableDevice._form.groupId.value = data.id;
-		var ids = data.id;
-		$(li).find("li").each(function (){
-			ids += ","+this.data.id;
-		});
-		itableDevice.load({"groupId_in":ids});
-	}
-});
 
 function devFilter(el,params){
 	$(".dev-all,.dev-un-group").removeClass("selected");
@@ -224,7 +226,7 @@ function devFilter(el,params){
 	iTree.olul.find("li span").removeClass("selected");
 	iTree.selected = null;
 	iTree.data = null;
-	itableDevice._form.groupId.value = "";
+	itableDevice._form.areaId.value = "";
 	itableDevice.load(params);
 }
 

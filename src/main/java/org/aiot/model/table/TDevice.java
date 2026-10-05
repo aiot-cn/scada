@@ -22,8 +22,8 @@ public class TDevice extends TBaseSeq{
 	@AoTbase("坐标")
     private String point;//坐标
 
-	@AoTbase("分组")
-	private Long groupId;
+	@AoTbase("区域")
+	private Long areaId; //sysDict
 
 	private String remark;
 
@@ -117,12 +117,12 @@ public class TDevice extends TBaseSeq{
 		this.point = point;
 	}
 
-	public Long getGroupId() {
-		return groupId;
+	public Long getAreaId() {
+		return areaId;
 	}
 
-	public void setGroupId(Long groupId) {
-		this.groupId = groupId;
+	public void setAreaId(Long areaId) {
+		this.areaId = areaId;
 	}
 
 	public String getRemark() {

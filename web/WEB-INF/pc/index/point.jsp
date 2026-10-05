@@ -5,7 +5,10 @@
 	<head>
 	<%@include file="../common/page_head.jsp" %>
 	<title>点位配置</title>
-		
+
+	<script src="${res}/plugin/iTrees/iTrees.js" type="text/javascript"></script>
+	<link href="${res}/plugin/iTrees/iTrees.css" rel="stylesheet" >
+
 <style type="text/css">
     html,body{
 		height: 100%;
@@ -71,13 +74,47 @@
 	.rec-every.on{background: #009688;border-color: #009688;}
 	.rec-time.on{background: #1e9fff;border-color: #1e9fff;}
 	.rec-state.on{background: #ffb800;border-color: #ffb800;}
+	.dev-all,.dev-un-group{
+		padding: 2px 4px;
+		margin: 2px 0;
+		border: 1px solid transparent;
+		border-radius: 4px;
+		line-height: 20px;
+		color: #333;
+		cursor: pointer;
+	}
+	.dev-all:hover,.dev-un-group:hover,
+	.dev-all.selected,.dev-un-group.selected{
+		border-color: #c9d0e2;
+		background: linear-gradient(to bottom, #fdfeff, #eff9ff 90%);
+	}
+	.dev-all.selected,.dev-un-group.selected{
+		font-weight: bold;
+	}
+	.tree-search{
+		width: 80px;
+	}
 </style>
 </head>
 <body>
 <div class="layui-fluid sty-auto-h">
 	<div class="layui-row layui-col-space15">
 
-	  <div class="layui-col-md12">
+	  <div class="layui-col-md2">
+		<div class="layui-card">
+			<div class="layui-card-header">
+				<span class="title">区域</span>
+				<span data-toolbar="iTree"></span>
+			</div>
+			<div class="layui-card-body">
+				<div class="dev-all selected" onclick="devFilter(this,{})"><i class="layui-icon layui-icon-home"></i> 全部</div>
+				<div class="dev-un-group" onclick="devFilter(this,{'areaId_is':'NULL'})"><i class="layui-icon layui-icon-tips"></i> 未知</div>
+				<ul id="iTree"></ul>
+			</div>
+		</div>
+	</div>
+
+	  <div class="layui-col-md10">
 		<div class="layui-card">
 	          <div class="layui-card-header">
 				  <span class="title">点位</span>
@@ -103,6 +140,7 @@
 							<tr>
 								<th data-field="isRemoved" data-type="switch" width="30" data-class="tac switch-contrary">状态</th>
 								<th data-field="id" width="20">ID</th>
+								<th data-field="areaId" data-translate="select" data-edit="true" data-show="false">区域</th>
 								<th data-field="name" data-edit="true">名称</th>
 								<th data-field="code" data-edit="true">编号</th>
 								<th data-field="address" data-edit="true">地址</th>
@@ -133,6 +171,7 @@
 		<input class="layui-input" name="image" onclick="common.openFile(this)">
 	    <input class="layui-input" name="name" required="required">
 		<select class="layui-input" name="deviceId" data-clear="false"></select>
+		<select class="layui-input" name="areaId" data-clear="false"></select>
 		<%--<select class="layui-input" name="typeId" data-clear="false"></select>--%>
 		<select class="layui-input" name="placeId" data-clear="false"></select>
 		<input class="layui-input" name="code">
@@ -155,6 +194,21 @@
 		<textarea class="layui-input" name="alarmRule" rows="2" style="line-height: 12px;"></textarea>
 	</form>
 </div>
+
+<%--区域树编辑表单--%>
+<form data-for="iTree">
+	<input type="hidden" name="id">
+	<input type="hidden" name="parentId">
+	<input type="hidden" name="type" value="area" data-clear="false">
+	<div class="layui-form-item">
+		<div class="layui-inline">
+			<label class="layui-form-label">名称</label>
+			<div class="layui-input-inline">
+				<input class="layui-input" name="name" required="required">
+			</div>
+		</div>
+	</div>
+</form>
 
 <%--批量设置弹窗：按编号包含、设备类型筛选点位，批量修改其单位、保存时机、差异保存，留空均不修改--%>
 <div class="lay-con d-batch-set">
@@ -233,6 +287,22 @@
 		});
 	}
 	loadPointType();*/
+	var iTree = new iTrees("#iTree",{type:"area",ASC:"sequence"},{
+		baseOption : common.iTableModel("sysDict"),
+		callback : function(json){
+			common.renderSelect("[name='areaId']",json.list,{dft:""});
+		},
+		onSelect : function (data,li){
+			$(".dev-all,.dev-un-group").removeClass("selected");
+			tPoint._form.areaId.value = data.id;
+			var ids = data.id;
+			$(li).find("li").each(function (){
+				ids += ","+this.data.id;
+			});
+			tPoint.load({"areaId_in":ids});
+		}
+	});
+
 	common.ajaxStop(function () {
 		tPoint.load();
 	});
@@ -301,10 +371,24 @@
 				});
 			});
 		},*/
+		callForm : function (params){
+			if(iTree.data && !params.areaId)
+				params.areaId = iTree.data.id;
+		},
 		callback : function (){
 			loadData();
 		}
 	});
+
+	function devFilter(el,params){
+		$(".dev-all,.dev-un-group").removeClass("selected");
+		$(el).addClass("selected");
+		iTree.olul.find("li span").removeClass("selected");
+		iTree.selected = null;
+		iTree.data = null;
+		tPoint._form.areaId.value = "";
+		tPoint.load(params);
+	}
 
 	function loadData(){
 		common.jsonCont("getPointData",{},function (list){

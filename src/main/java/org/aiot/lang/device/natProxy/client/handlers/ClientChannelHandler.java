@@ -66,7 +66,7 @@ public class ClientChannelHandler extends SimpleChannelInboundHandler<ProxyMessa
         Channel realServerChannel = ctx.channel().attr(Constants.NEXT_CHANNEL).get();
         logger.debug("handleDisconnectMessage, {}", realServerChannel);
         if (realServerChannel != null) {
-            ctx.channel().attr(Constants.NEXT_CHANNEL).remove();
+            ctx.channel().attr(Constants.NEXT_CHANNEL).set(null);
             ClientChannelMannager.returnProxyChanel(ctx.channel());
             realServerChannel.writeAndFlush(Unpooled.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
         }

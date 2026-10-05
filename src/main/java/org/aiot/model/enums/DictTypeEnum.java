@@ -15,7 +15,7 @@ import java.util.List;
  *
  */
 public enum DictTypeEnum {
-	devGroup("设备分组"),
+	area("区域"),
 	recStatus("记录状态"), //0正常 1预警 2报警
 	//devStatus("设备状态"),
 	args("实参"), //参数值 相当于全局动态参数配置

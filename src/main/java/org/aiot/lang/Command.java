@@ -1,7 +1,7 @@
 package org.aiot.lang;
 
-import org.aiot.infc.ProtocolInfc;
 import org.aiot.communication.CommunicationInfc;
+import org.aiot.infc.ProtocolInfc;
 import org.aiot.infc.device.DeviceInfc;
 import org.aiot.model.enums.CdataEnum;
 import org.aiot.model.enums.VarRuntimeEnum;
@@ -382,6 +382,8 @@ public class Command implements Comparable<Command> {
 		this.args = args;
 	}
 
+	//泛型擦除导致无法检查,由调用方保证类型正确
+	@SuppressWarnings("unchecked")
 	public <T> T getReceive() {
 		return (T)receive;
 	}

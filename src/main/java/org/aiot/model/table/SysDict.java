@@ -26,7 +26,6 @@ public class SysDict extends TBaseSeq{
 	private String v3;
 
 	private String helpCode;
-	private Long siteId;
 	
 	public String getType() {
 		return type;
@@ -96,21 +95,12 @@ public class SysDict extends TBaseSeq{
 		this.helpCode = helpCode;
 	}
 
-
 	public String getBackColor() {
 		return backColor;
 	}
 
 	public void setBackColor(String backColor) {
 		this.backColor = backColor;
-	}
-
-	public Long getSiteId() {
-		return siteId;
-	}
-
-	public void setSiteId(Long siteId) {
-		this.siteId = siteId;
 	}
 
 	public String getCode() {

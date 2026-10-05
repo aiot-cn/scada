@@ -65,7 +65,7 @@ public class ClientChannelMannager {
             proxyChanel.close();
         } else {
             proxyChanel.config().setOption(ChannelOption.AUTO_READ, true);
-            proxyChanel.attr(Constants.NEXT_CHANNEL).remove();
+            proxyChanel.attr(Constants.NEXT_CHANNEL).set(null);
             proxyChannelPool.offer(proxyChanel);
             logger.debug("return ProxyChanel to the pool, channel is {}, pool size is {} ", proxyChanel, proxyChannelPool.size());
         }
