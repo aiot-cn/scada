@@ -273,24 +273,18 @@ var common = {
 			});
 		}
 
-		var hasValue = false;
-		for(var k in json){
-			hasValue = true;
-			break;
-		}
-
-		if(hasValue){
-			if(option.success){
-				option.success(json);
-			}
-			return json;
-		}else{
+		if(json == null){
 			if(option.error){
 				option.error();
 			}else{
 				layer.msg("参数错误："+msg);
 			}
 			return false;
+		}else{
+			if(option.success){
+				option.success(json);
+			}
+			return json;
 		}
 	},
 
