@@ -280,7 +280,7 @@ var tDeviceType = new iTables("#tDeviceType",{},{
 					type: 2,
 					title : data.name + "["+data.code+"] 类型属性",
 					content: "${base}/config/deviceProp?type="+data.code,
-					area : ["800px","80%"]
+					area : ["80%","80%"]
 				});
 			});
 			a.appendTo(td);

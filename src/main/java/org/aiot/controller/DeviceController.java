@@ -235,7 +235,7 @@ public class DeviceController {
 		TDevice dev = ds.getDeviceFirst(device);
 		DeviceInfc d = ds.getInstance(dev.getId());
 		DeviceProperty dp = ds.getProperty(dev,code);
-		if(dp != null && dp.getType() == 2){
+		if(dp != null && dp.getType() != null && dp.getType() == 1){//遥控/开关走指令下发
 			d.comSet(code,Integer.parseInt(value));
 		}else{
 			d.putData(code,value);

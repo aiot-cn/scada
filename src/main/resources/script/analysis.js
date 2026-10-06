@@ -168,7 +168,7 @@ function script_IEC104(val,analysis,data,bd,command){
 			var address = a.slice(4,6) + a.slice(2,4) + a.slice(0,2);
 			var v = a.slice(7,8);
 			address = parseInt(address,16)+"";
-			bd.put(address,v).setType(1);
+			bd.put(address,v).setType(2);
 			msg += address + ":" + v + " ";
 		}
 	}else if(type == "0D"){
@@ -179,7 +179,7 @@ function script_IEC104(val,analysis,data,bd,command){
 			var b = a.slice(12,14) + a.slice(10,12) + a.slice(8,10) + a.slice(6,8);
 			address = parseInt(address,16)+"";
 			var v = hexToFloat32(b)+"";
-			bd.put(address,v).setType(0);
+			bd.put(address,v).setType(3);
 			msg += address + ":" + v + " ";
 		}
 	}else if(type == "2D"){
@@ -187,7 +187,7 @@ function script_IEC104(val,analysis,data,bd,command){
 		var address = a.slice(4,6) + a.slice(2,4) + a.slice(0,2);
 		var v = a.slice(7,8);
 		address = parseInt(address,16)+"";
-		bd.put(address,v).setType(2);
+		bd.put(address,v).setType(1);
 		msg += address + ":" + v + " ";
 	}else if(type == "32"){
 		var a = val.slice(24);
@@ -195,7 +195,7 @@ function script_IEC104(val,analysis,data,bd,command){
 		var b = a.slice(12,14) + a.slice(10,12) + a.slice(8,10) + a.slice(6,8);
 		address = parseInt(address,16)+"";
 		var v = hexToFloat32(b)+"";
-		bd.put(address,v).setType(3);
+		bd.put(address,v).setType(4);
 		msg += address + ":" + v + " ";
 	}
 	return msg;

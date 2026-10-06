@@ -2,7 +2,7 @@ package org.aiot.infc.device;
 
 public class DevData {
 	private Object value;//值
-	private Integer type;//0遥测 1遥信 2遥控 3遥调
+	private Integer type;//1遥控 2遥信 3遥测 4遥调
 	private Integer state;//状态 -1挂牌 0正常 1预警 2报警
 	private Long time;
 

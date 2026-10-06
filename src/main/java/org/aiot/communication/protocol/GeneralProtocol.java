@@ -6,6 +6,7 @@ import org.aiot.lang.Command;
 import org.aiot.lang.annotation.AoReflect;
 import org.aiot.main.Constants;
 import org.aiot.model.enums.CdataEnum;
+import org.aiot.model.enums.CommandTypeEnum;
 import org.aiot.model.table.DeviceAnalysis;
 import org.aiot.model.table.DeviceCommand;
 import org.aiot.model.table.DeviceProperty;
@@ -29,14 +30,11 @@ import static org.aiot.main.Constants.ioc;
 public class GeneralProtocol implements ProtocolInfc {
     public static final Map<String,Long> lastBuildTime = new HashMap<>();
 
-    /**
-     * 按设备类型与指令类型的 DeviceCommand 配置构建指令
-     */
     @Override
-    public List<Command> buildCommands(TDevice device, String commandType, String remark, Object... format) {
+    public List<Command> buildType(String type,TDevice device,String remark, Object... format){
         BaseService bs = ioc.get(BaseService.class);
         List<DeviceCommand> l = bs.getTCache(DeviceCommand.class, v-> device.getDeviceType().equals(v.getDeviceType()) &&
-                Strings.equals(commandType,v.getCode())
+                Strings.equals(type,v.getCode())
         );
         List<Command> commandList = new ArrayList<>();
         for(DeviceCommand devCom : l){
@@ -44,6 +42,23 @@ public class GeneralProtocol implements ProtocolInfc {
         }
         return commandList;
     }
+
+    @Override
+    public List<Command> buildSet(String code,TDevice device,String remark, Object... format){
+        BaseService bs = ioc.get(BaseService.class);
+        List<DeviceCommand> commands = bs.getTCache(DeviceCommand.class, v->
+                        device.getDeviceType().equals(v.getDeviceType()) &&
+                        CommandTypeEnum.comSet.name().equals(v.getCode()) &&
+                        bs.getTCacheStream(DeviceAnalysis.class).anyMatch(a->v.getId().equals(a.getCommandId()) && Strings.equals(code, a.getCode()))
+        );
+
+        List<Command> commandList = new ArrayList<>();
+        for(DeviceCommand devCom:commands){
+            commandList.add(new Command(device,devCom,remark,format));
+        }
+        return commandList;
+    }
+
 
     @Override
     public void build(Command command){

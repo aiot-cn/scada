@@ -7,7 +7,7 @@
 		icon : "图标",
 		protocol: "协议类",
 		property : [
-			{"code": "temperature",	"name": "温度","unit": "℃",	"type": 0}
+			{"code": "temperature",	"name": "温度","unit": "℃",	"type": 3}
 		],
 		command : [
 			{	code : "指令类型",content : "内容",isHex : "16进制",priority:"优先级",delay:"延迟",
@@ -26,8 +26,8 @@
 		"name" : "温湿度",
 		"icon" : "aiot-icon aiot-icon-humiture",
 		"property" : [
-			{"code": "temperature",	"name": "温度","unit": "℃",	"type": 0},
-			{"code": "humidity",	"name": "湿度","unit": "%RH","type": 0}
+			{"code": "temperature",	"name": "温度","unit": "℃",	"type": 3},
+			{"code": "humidity",	"name": "湿度","unit": "%RH","type": 3}
 		]
 	},
 

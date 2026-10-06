@@ -2,6 +2,7 @@ package org.aiot.device;
 
 import com.alibaba.fastjson.JSONObject;
 import org.aiot.communication.CommunicationInfc;
+import org.aiot.infc.ProtocolInfc;
 import org.aiot.infc.device.BaseExtend;
 import org.aiot.infc.device.DevData;
 import org.aiot.infc.device.DeviceInfc;
@@ -83,27 +84,39 @@ public class BaseDevice extends Observable implements DeviceInfc,MethodIntercept
 		this.mirror = Mirror.me(this);
 	}
 
+	/**
+	 * 设备初始化
+	 * 需考虑二次执行的情况
+	 */
+	public void init(){
+		//Logs.getLog(MainSetup.class).infof("设备 %s 初始化完成",device.getName());
+	}
+
+	public ProtocolInfc getProtocol(){
+		return ioc.get(CommuService.class).getProtocol(deviceType.getProtocol());
+	}
+
+	@Override
 	@AoReflect(value="巡检",type=AstEnum.command)
 	public List<Command> comPoll(){
 		return exec();
 	}
 
-	@AoReflect(value="执行",type=AstEnum.command)
-	public List<Command> comType(String type,Object... format){
-		List<Command> c = ds.buildCommands(device,type,null,format);
-		execCommand(c,format);
+	@Override
+	@AoReflect(value="设置",type=AstEnum.command)
+	public List<Command> comSet(String code,Object... p){
+		DeviceProperty a = ds.getProperty(device,code);
+		String codeName = "设置[" + (a != null ? a.getName() : code) + "]";
+		List<Command> c = getProtocol().buildSet(code,device,codeName,p);
+		execCommand(c,p);
 		return c;
 	}
 
-	@AoReflect(value="设置",type=AstEnum.command)
-	public List<Command> comSet(String analysis,Object... p){
-		List<DeviceCommand> commands = bs.getTCache(DeviceCommand.class, v->
-				device.getDeviceType().equals(v.getDeviceType()) && CommandTypeEnum.comSet.name().equals(v.getCode()) &&
-				bs.getTCacheStream(DeviceAnalysis.class).anyMatch(a->v.getId().equals(a.getCommandId()) && Strings.equals(analysis, a.getCode()))
-		);
-		DeviceProperty a = getDeviceProperty(analysis);
-		List<Command> c = ds.buildCommands(device,commands,"设置[" + (a != null ? a.getName() : analysis) + "]",p);
-		execCommand(c,p);
+	@Override
+	@AoReflect(value="执行",type=AstEnum.command)
+	public List<Command> comType(String type,Object... format){
+		List<Command> c = getProtocol().buildType(type,device,null,format);
+		execCommand(c,format);
 		return c;
 	}
 
@@ -120,6 +133,12 @@ public class BaseDevice extends Observable implements DeviceInfc,MethodIntercept
 
 	}
 
+	@Override
+	@AoReflect("获取值对象")
+	public DevData getDevData(String key){
+		return dataMap.get(key);
+	}
+
 	@AoReflect("获取值")
 	public Object getDataVal(String key){
 		if(Strings.isBlank(key))
@@ -127,25 +146,58 @@ public class BaseDevice extends Observable implements DeviceInfc,MethodIntercept
 		if(key.contains(Constants.devFiled)){
 			return getFieldVal(key.split("_")[1]);
 		}else{
-			DevData data = dataMap.get(key);
+			DevData data = getDevData(key);
 			if(data == null)
 				return null;
 			return data.getValue();
 		}
 	}
 
-	@Override
-	@AoReflect("获取值对象")
-	public DevData getDevData(String key){
-		return dataMap.get(key);
+	public void setValue(String code, Object value){
+		DeviceProperty dp = getDeviceProperty(code);
+		if(dp != null && dp.getType() == 1){
+			comSet(code,value);
+		}else{
+			putData(code,value);
+		}
 	}
 
 	/**
-	 * 设备初始化
-	 * 需考虑二次执行的情况
+	 * 注意：避免字段的set方法调用到自身
+	 * 比如 comSet 响应值会调此方法
 	 */
-	public void init(){
-		//Logs.getLog(MainSetup.class).infof("设备 %s 初始化完成",device.getName());
+	@Override
+	@AoReflect("设置值")
+	public DevData putData(String code, Object value){
+		if(Strings.isBlank(code) || value == null)
+			return null;
+
+		//设置值 没有会创建
+		DevData data = setDevData(code,value);
+		Integer stateNow = data.getState();//当前状态
+
+		String pointCode = "dev-"+device.getId()+"-"+code;
+		PointService ps = ioc.get(PointService.class);
+		PointData pointData = ps.put(pointCode,value);
+		if(pointData != null){
+			data.setState(pointData.getState());
+		}
+
+		DeviceProperty dp = getDeviceProperty(code);
+		if(dp != null){
+			//属性
+			if(Strings.isNotBlank(dp.getDevField())){
+				inject(dp.getDevField(),data);
+			}
+		}
+		return data;
+	}
+
+	//设置状态，用于解警...
+	public void setState(String code,Integer state){
+		DevData data = getDevData(code);
+		if(data != null)
+			data.setState(state);
 	}
 
 
@@ -325,10 +377,10 @@ public class BaseDevice extends Observable implements DeviceInfc,MethodIntercept
 		StackTraceElement[] ss = Thread.currentThread().getStackTrace();
 		String methodName = ss[2].getMethodName();
 		Method method = getMethod(methodName);
-		DeviceService ds =  ioc.get(DeviceService.class);
+
 		AoReflect ao = method.getAnnotation(AoReflect.class);
 		String remark = ao != null ? ao.value() : methodName;
-		List<Command> c = ds.buildCommands(device,methodName,remark,format);
+		List<Command> c = getProtocol().buildType(methodName,device,remark,format);
 		/*if(c.size() == 0)
 			throw Lang.makeThrow("设备类型【%s】还未配置 %s 指令",deviceType.getName(),remark);*/
 		execCommand(c,format);
@@ -468,80 +520,6 @@ public class BaseDevice extends Observable implements DeviceInfc,MethodIntercept
 		return dataMap;
 	}
 
-
-	/**
-	 * 注意：避免字段的set方法调用到自身
-	 * 如果仅到变量不需要注入到字段应该使用DATA.setVal
-	 */
-	@Override
-	@AoReflect("设置值")
-	public DevData putData(String code, Object value){
-		if(Strings.isBlank(code) || value == null)
-			return null;
-
-		//设置值 没有会创建
-		DevData data = setVal(code,value);
-		Integer stateNow = data.getState();//当前状态
-
-		String pointCode = "dev-"+device.getId()+"-"+code;
-		PointService ps = ioc.get(PointService.class);
-		PointData pointData = ps.put(pointCode,value);
-		if(pointData != null){
-			data.setState(pointData.getState());
-		}
-
-		DeviceProperty dp = getDeviceProperty(code);
-		if(dp != null){
-			//属性
-			if(Strings.isNotBlank(dp.getDevField())){
-				inject(dp.getDevField(),data);
-			}
-		}
-
-
-
-		/*List<DeviceAction> das = bs.getTCache(DeviceAction.class,v-> v.getAlarm() > 0 &&
-				Strings.equals(code,v.getAnalysis()) && Strings.equals(v.getDeviceType(),device.getDeviceType()) &&
-				(v.getDeviceId() == null || (v.getDeviceId().equals(device.getId()) || v.getDeviceId().equals(device.getParentId())))
-		);
-		int state = 0;
-		for(DeviceAction v : das){
-			state = Math.max(state,ds.conditionHolds(v,device));
-		}
-		data.setState(state);
-
-
-
-		boolean isRec = dp.isRecOnEvery();//是否保存历史记录
-
-		//状态改变
-		if(data.changedState()){
-			if(dp.isRecOnState())
-				isRec = true;
-			if(state == 2){//报警触发
-				//notify(new AlarmData(value+"", "", dp.getName()));
-			}
-		}
-		//数值差异保存
-		if(data.changedVal(dp.getRecOnValue())){
-			isRec = true;
-		}
-
-		//数值改变触发
-		if(data.changedVal(dp.getNotifyOnValue())){
-			notify(dp);
-		}
-
-
-		if(isRec){
-			//saveHistory(attr, value, state);
-		}
-
-		//符合条件就联动，和状态没有关系
-		linkAction(code);*/
-		return data;
-	}
-
 	//数据超时
 	public boolean isTimeOut(){
 		return System.currentTimeMillis() - lastTime > 30 * 1000;
@@ -565,16 +543,16 @@ public class BaseDevice extends Observable implements DeviceInfc,MethodIntercept
 		return alarmTotal;
 	}
 
-	public CriQueue<Object> getQueue(String key){
-		return queueMap.computeIfAbsent(key,v->new CriQueue<>(10));
-	}
-
-	public DevData setVal(String key,Object value){
+	private DevData setDevData(String key, Object value){
 		DevData d = dataMap.computeIfAbsent(key, v->new DevData());
 		d.setValue(value);
 		d.setTime(System.currentTimeMillis());
 		getQueue(key).push(value);
 		return d;
+	}
+
+	public CriQueue<Object> getQueue(String key){
+		return queueMap.computeIfAbsent(key,v->new CriQueue<>(10));
 	}
 
 	public String toJson(){

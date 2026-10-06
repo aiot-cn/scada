@@ -249,6 +249,11 @@ public final class BaseService extends Observable {
 
 		if(isCache){
 			TBase tBaseBefore = getTCache(tBase.getClass(),tBase.getId());
+			if(tBaseBefore != null){
+				TBase tmp = Mirror.me(tBaseBefore.getClass()).born();
+				Lang.copyProperties(tBaseBefore, tmp);
+				tBaseBefore = tmp;
+			}
 			tBase = dao.fetch(tBase.getClass(), tBase.getId());
 			setTCache(tBase);
 			setChanged();
@@ -614,17 +619,15 @@ public final class BaseService extends Observable {
 	//----------------------------------- 缓存 -------------------------------------------------------
 	/**
 	 * 设置基础表缓存
-
 	 */
 	public void setTCache(TBase tBase){
 		Map<Long, TBase> map = tCache.get(tBase.getClass());
-		map.put(tBase.getId(),tBase);
-		/*TBase cBase = map.get(tBase.getId());
+		TBase cBase = map.get(tBase.getId());
 		if(cBase == null){
 			map.put(tBase.getId(),tBase);
 		}else{
-			Lang.copyProperties(tBase, cBase); //这样之前的数据会丢失
-		}*/
+			Lang.copyProperties(tBase, cBase);
+		}
 	}
 
 	/**

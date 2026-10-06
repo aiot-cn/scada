@@ -29,6 +29,7 @@ import static org.aiot.main.Constants.ioc;
 public class Command implements Comparable<Command> {
 	Log log = Logs.get();
 	private final static AtomicLong commandNumber = new AtomicLong();
+
 	private final CountDownLatch countDownLatch = new CountDownLatch(1);
 	private final Long number;//顺序
 	private final Long[] ts = new Long[3];//[创建时间,发送时间,接收时间]
@@ -46,14 +47,10 @@ public class Command implements Comparable<Command> {
 	private DeviceCommand deviceCommand; // 指令
 	//private BaseDevice bd;//JSON会死循环
 
-
-
 	private boolean isHex;
 
 	private Integer responseTime; //响应时间
 	private Integer outTime; //接收超时
-
-
 
 	private String remark;
 
@@ -63,6 +60,7 @@ public class Command implements Comparable<Command> {
 		ts[0] = System.currentTimeMillis();
 		this.number = commandNumber.incrementAndGet();
 	}
+
 	public Command(String remark, Object[] format){
 		this();
 		this.remark = remark;
@@ -113,23 +111,6 @@ public class Command implements Comparable<Command> {
 		return commuService.getProtocol(protocolClass);
 	}
 
-	public byte[] getDataToSend() {
-		return dataToSend;
-	}
-
-	public void setDataToSend(byte[] dataToSend) {
-		this.dataToSend = dataToSend;
-	}
-
-	public byte[] getDataReceived() {
-		return dataReceived;
-	}
-
-	public void setDataReceived(byte[] dataReceived) {
-		this.dataReceived = dataReceived;
-	}
-
-
 	public byte[] sendCommand(Object... args){
 		if(args != null && args.length != 0)
 			this.args = args;
@@ -178,6 +159,27 @@ public class Command implements Comparable<Command> {
 			dataReceived = b;
 		}
 		return dataReceived;
+	}
+
+	/**
+	 * tx是发送(transport),rx是接收(receive)
+	 */
+	public void setRX(byte[] rX) {
+		ts[2] = System.currentTimeMillis();
+		dataReceived = rX;
+		countDownLatch.countDown();
+		String message = "NULL ";
+		if(rX != null){
+			message = byteToStr(rX);
+			if(deviceCommand.getIsHex())
+				message =  message.replaceAll("(.{2})", "$1 ");
+		}
+
+		if(rX != null)
+			message += " byte:"+rX.length;
+		if(ts[1] != null)
+			message += " ms:"+(ts[2]-ts[1]);
+		sendSocket(CdataEnum.Rx,message);
 	}
 
 	public byte[] errorSend(String msg){
@@ -294,28 +296,6 @@ public class Command implements Comparable<Command> {
 	}
 
 
-	/**
-	 * tx是发送(transport),rx是接收(receive)
-	 */
-	public void setRX(byte[] rX) {
-		ts[2] = System.currentTimeMillis();
-		dataReceived = rX;
-		countDownLatch.countDown();
-		String message = "NULL ";
-		if(rX != null){
-			message = byteToStr(rX);
-			if(deviceCommand.getIsHex())
-				message =  message.replaceAll("(.{2})", "$1 ");
-		}
-
-		if(rX != null)
-			message += " byte:"+rX.length;
-		if(ts[1] != null)
-			message += " ms:"+(ts[2]-ts[1]);
-		sendSocket(CdataEnum.Rx,message);
-	}
-
-
 	@Override
 	public String toString(){
 		String s = remark + " - " + content;
@@ -414,5 +394,22 @@ public class Command implements Comparable<Command> {
 
 	public long getCreateTime(){
 		return ts[0];
+	}
+
+
+	public byte[] getDataToSend() {
+		return dataToSend;
+	}
+
+	public void setDataToSend(byte[] dataToSend) {
+		this.dataToSend = dataToSend;
+	}
+
+	public byte[] getDataReceived() {
+		return dataReceived;
+	}
+
+	public void setDataReceived(byte[] dataReceived) {
+		this.dataReceived = dataReceived;
 	}
 }

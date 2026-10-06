@@ -168,14 +168,17 @@
 	.card-property [data-type='2'][data-val='1']{
 		background-color: #2075d7;
 	}
-	.card-property [data-type='0'][data-state='1']{
+	.card-property [data-type='3'][data-state='1']{
 		color: #d7860c;
 	}
-	.card-property [data-type='0'][data-state='2']{
+	.card-property [data-type='3'][data-state='2']{
 		color: red;
 	}
-	.card-property [data-type='0']:before{
+	.card-property [data-type='3']:before{
 		content: attr(data-val);
+		display: inline-block;
+		min-width: 15px;
+		border-bottom: 1px solid #999;
 	}
 	.card-menu a{
 		margin-right: 10px;
@@ -228,9 +231,9 @@
 			</div>
 			<div class="card-middle">
 				<div class="card-menu"></div>
-				<div class="card-data-t0"></div>
-				<div class="card-data-t1"></div>
+				<div class="card-data-t3"></div>
 				<div class="card-data-t2"></div>
+				<div class="card-data-t1"></div>
 			</div>
 			<div class="card-bottom">
 				<i class="layui-icon layui-icon-edit"></i>
@@ -381,8 +384,8 @@
 			var dJson = json[this.dataset.id] || {};
 			var dMap = dJson.dataMap || {};
 			var data = dMap[this.dataset.code] || {};
-			this.dataset.val = data.value == undefined ? "" : data.value;
-			this.dataset.state = data.state == undefined ? "" : data.state;
+			this.dataset.val = data.value === undefined ? "" : data.value;
+			this.dataset.state = data.state === undefined ? "" : data.state;
 		});
 	}
 
@@ -415,7 +418,7 @@
 		var dev = $(this).closest('li')[0].data;
 		var prop = this.parentNode.data
 		layer.prompt({title: prop.name}, function(text, index){
-			common.devExec(dev.id,"putData",{"code":prop.code,value:text},function (){
+			common.devExec(dev.id,"setValue",{"code":prop.code,value:text},function (){
 				layer.close(index);
 			})
 		});

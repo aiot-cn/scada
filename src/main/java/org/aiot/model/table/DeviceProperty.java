@@ -25,7 +25,13 @@ public class DeviceProperty extends TBaseSeq{
 	 */
 	private String calcScript;
 
-	//0数值（遥测） 1状态(遥信) 2开关（遥控）
+	/**
+     * 与 modbus 功能码 保持一致
+	 * <li> 01 线圈 		遥控 可写05/15</li>
+	 * <li> 02 离散量输入 遥信 只读	</li>
+	 * <li> 03 保持寄存器 遥测 可写06/16</li>
+	 * <li> 04 输入寄存器 暂无 只读	</li>
+	 */
 	private Integer type;
 
 	private String unit;
@@ -48,7 +54,7 @@ public class DeviceProperty extends TBaseSeq{
 	}
 
 	/**
-	 * 0遥测 1遥信 2遥控
+	 * 与 modbus 功能码 保持一致：1遥控/开关 2遥信/状态 3遥测/数值 4输入寄存器
 	 */
 	public Integer getType() {
 		return type;

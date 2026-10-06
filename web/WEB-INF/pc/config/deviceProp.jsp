@@ -23,7 +23,7 @@
 				<th data-field="name">名称</th>
 				<th data-field="code">CODE</th>
 				<th data-field="address">地址</th>
-				<th data-field="type" data-translate="select" width="45">类型</th>
+				<th data-field="type" data-translate="select" width="70">类型</th>
 				<th data-field="calcScript">计算</th>
 				<th data-field="unit" width="45">单位</th>
 				<%--<th data-field="valType" data-translate="select" width="90">值类型</th>
@@ -47,9 +47,9 @@
 		<%--<select name="pointTypeId" class="layui-input"></select>--%>
 		<select name="type" class="layui-input" data-clear="false">
 			<option value="">--</option>
-			<option value="0">数值</option>
-			<option value="1">状态</option>
-			<option value="2">开关</option>
+			<option value="1">遥控/开关</option>
+			<option value="2">遥信/状态</option>
+			<option value="3">遥测/数值</option>
 		</select>
 
 		<select name="valType" class="layui-input"></select>

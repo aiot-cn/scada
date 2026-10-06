@@ -5,8 +5,10 @@ package org.aiot.model.enums;
  *
  */
 public enum CommandTypeEnum {
+	comPoll("巡检"),
 	comRx("接收"),
-	comSet("设置")
+	comSet("设置"),
+	comType("执行")
 	;
 	
 	private String text;

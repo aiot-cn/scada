@@ -4,15 +4,11 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import org.aiot.device.BaseDevice;
-import org.aiot.infc.ProtocolInfc;
 import org.aiot.infc.device.DeviceInfc;
-import org.aiot.lang.Command;
 import org.aiot.lang.NotifyEvent;
 import org.aiot.lang.annotation.AoReflect;
-import org.aiot.main.Constants;
 import org.aiot.model.enums.ANSI;
 import org.aiot.model.enums.AstEnum;
-import org.aiot.model.enums.CommandTypeEnum;
 import org.aiot.model.enums.EventEnum;
 import org.aiot.model.project.ArgBean;
 import org.aiot.model.project.MethodBean;
@@ -341,32 +337,6 @@ public class DeviceService implements Observer {
 
 	//-------------------------------------------command 设备指令-------------------------------------------------------------
 
-	public List<Command> buildCommands(TDevice device, List<DeviceCommand> deviceCommands, String remark, Object... format){
-		List<Command> commandList = new ArrayList<>();
-		for(DeviceCommand devCom:deviceCommands){
-			commandList.add(new Command(device,devCom,remark, format));
-		}
-		return commandList;
-	}
-
-	/**
-	 * 根据设备与指令类型生成 指令
-	 * 此方法不允许在其它地方调用
-	 */
-	public List<Command> buildCommands(TDevice device,String commandType,String remark,Object... format){
-		DeviceType dt = bs.getTCacheFirst(DeviceType.class, v->Strings.equals(device.getDeviceType(), v.getCode()));
-		if(dt == null || Strings.isBlank(dt.getProtocol()))
-			return null;
-		ProtocolInfc protocol = Constants.ioc.get(CommuService.class).getProtocol(dt.getProtocol());
-		return protocol.buildCommands(device,commandType,remark,format);
-	}
-
-	/**
-	 * 根据设备与指令类型生成
-	 */
-	public List<Command> buildCommands(TDevice device, CommandTypeEnum commandType, Object... format){
-		return buildCommands(device,commandType.name(),null,commandType.getText(),format);
-	}
 
 	public DeviceProperty getProperty(TDevice device,String code){
 		DeviceProperty dp = bs.getTCacheFirst(DeviceProperty.class,v->

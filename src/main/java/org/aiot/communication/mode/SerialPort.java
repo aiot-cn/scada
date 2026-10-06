@@ -33,7 +33,10 @@ public class SerialPort extends CommunicationInfc {
     @AoReflect(value="校验位",type = AstEnum.param,select = "0:None,1:Odd,2:Even,3:Mark,4:Space")
     private int parity = 0;
 
-    @AoReflect(value="分包间隔",type = AstEnum.param)
+    @AoReflect(value="发送延迟",type = AstEnum.param)
+    private int sendDelay = 100;
+
+    @AoReflect(value="回复超时",type = AstEnum.param)
     private int timeout = 20;//信息回复超时,9600波特率需要20ms
 
     @AoReflect(value="打开时发送",type = AstEnum.param)
@@ -151,6 +154,9 @@ public class SerialPort extends CommunicationInfc {
         int ba = serialPort.bytesAvailable();
         if(ba > 0)
             serialPort.readBytes(new byte[ba], ba);
+
+        if(sendDelay > 0)
+            Lang.sleep(sendDelay);
 
         int numWrite = serialPort.writeBytes(b,b.length);
 

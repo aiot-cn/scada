@@ -21,6 +21,7 @@ public interface DeviceInfc extends MethodInterceptor {
     Method getMethod(String name);
 
     List<Command> comPoll();
+    List<Command> comType(String code,Object... p);
     List<Command> comSet(String key,Object... p);
     void comRx(Command command);
 
