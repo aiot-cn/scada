@@ -533,7 +533,7 @@
 		}
 		var rt = method.returnType || "";
 		this.tfoot.find(".i-variable").attr("title",rt).attr("placeholder",rt.substring(rt.lastIndexOf(".")+1));
-		jsPlumbInstance.setSuspendDrawing(false,true);
+		this.repaint();
 		//jsPlumbInstance.repaint(this.tfoot);//刷新样式
 		//jsPlumbInstance.revalidate(this.tfoot);//重绘某个元素
 	}
@@ -591,6 +591,15 @@
 			isTarget: true,
 			maxConnections: -1
 		})
+	};
+
+	DM.prototype.repaint = function (){
+		//revalidate必须传原生DOM（jQuery对象会在getId时生成随机id导致offset不重算）
+		jsPlumbInstance.revalidate(this.thead[0]);
+		jsPlumbInstance.revalidate(this.tfoot[0]);
+		this.tbody.find("tr").each(function (){
+			jsPlumbInstance.revalidate(this);
+		});
 	};
 
 	DM.prototype.active = function (){
@@ -975,6 +984,7 @@
 		if($(e.target).hasClass("rb-resize")){
 			reSizeEvent = {x:e.clientX,y:e.clientY};
 			var dm = getDm(e.target);
+			reSizeEvent.dm = dm;
 			reSizeEvent.div = dm.div;
 			reSizeEvent.width = dm.div.width();
 			reSizeEvent.height = dm.div.height();
@@ -1011,8 +1021,9 @@
 
 			var diffX = e.clientX - eClinet.x;
 			var diffY = e.clientY - eClinet.y;
-			$(".item.active").diff(diffX,diffY).fitArea();
-			jsPlumbInstance.setSuspendDrawing(false,true);
+			$(".item.active").diff(diffX,diffY).fitArea().each(function (){
+				this.dm.repaint();
+			});
 
 		}else if(selBoxPos != null){
 			if(e.clientX - selBoxPos.x > 3 && e.clientY - selBoxPos.y > 3){
@@ -1029,6 +1040,7 @@
 				reSizeEvent.div.css({"height":h}).attr("data-height",h);
 				reSizeEvent.div.find("iframe").css({"height":h - 57});
 			}
+			reSizeEvent.dm.repaint();//端点跟随大小变化重绘
 
 		}
 
@@ -1081,6 +1093,7 @@
 	});
 
 	var copyItem = [];
+	var copyConn = [];
 	var keyFun = {
 
 		27 : function (){// ESC
@@ -1099,11 +1112,21 @@
 			if(!e.ctrlKey)
 				return;
 			copyItem = [];
+			copyConn = [];
 			$(".item.active").each(function (){
 				copyItem.push(this.dm.serialize());
 			});
+			$(jsPlumbInstance.getConnections()).each(function (){
+				var s = $(document.getElementById(this.sourceId)).closest(".item");
+				var t = $(document.getElementById(this.targetId)).closest(".item");
+				if(s.hasClass("active") && t.hasClass("active"))
+					copyConn.push($.extend(this.serialize(),{
+						sourceIndex : s.attr("data-index"),
+						targetIndex : t.attr("data-index")
+					}));
+			});
 			if(copyItem.length > 0)
-				layer.msg("已复制"+copyItem.length+"条");
+				layer.msg("已复制"+copyItem.length+"条"+(copyConn.length > 0 ? "及"+copyConn.length+"条连线" : ""));
 		},
 		73 : function (e) { // I
 			if(e.target == document.body)
@@ -1116,13 +1139,31 @@
 			}
 		},
 		86 : function (e) { // V
-			if(e.ctrlKey)
-				$(copyItem).each(function (){
-					this.top = curClient.y + dc.scrollTop;
-					this.left = curClient.x + dc.scrollLeft;
-					delete this.index;
-					addItem(this);
+			if(!e.ctrlKey || copyItem.length == 0)
+				return;
+			var x = curClient.x + dc.scrollLeft;
+			var y = curClient.y + dc.scrollTop;
+			var l,t; //原选中项的左上角基准
+			$(copyItem).each(function (){
+				l = l == undefined ? this.left : Math.min(l,this.left);
+				t = t == undefined ? this.top : Math.min(t,this.top);
+			});
+			var indexMap = {}; //旧index -> 新index
+			$(copyItem).each(function (){
+				var d = $.extend({},this,{
+					left : this.left + x - l,
+					top : this.top + y - t
 				});
+				delete d.index;
+				indexMap[this.index] = addItem(d).index;
+			});
+			$(copyConn).each(function (){
+				createConn($.extend({},this,{
+					source : indexMap[this.sourceIndex] + this.source.substring(this.sourceIndex.length),
+					target : indexMap[this.targetIndex] + this.target.substring(this.targetIndex.length)
+				}));
+			});
+			jsPlumbInstance.repaintEverything();
 		}
 
 	};

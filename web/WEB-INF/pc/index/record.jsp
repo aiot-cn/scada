@@ -232,6 +232,9 @@
 					scrollElem : ".d-table"
 				});
 			});
+		},
+		afterSubmit : function(){
+			$(".d-table").trigger("scroll");
 		}
 	});
 
