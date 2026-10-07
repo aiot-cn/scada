@@ -954,7 +954,7 @@
 
 	function openView(path){
 		layer.open({type : 2,btn : false,shade : 0,title: path,
-			content : "${base}/view/" + path,
+			content : "${base}/view/" + path + "?MODE=preview",
 			area : ["80%","80%"],scrollbar: false,maxmin: true,
 			success: function(layero, index){
 				imgWin = window[layero.find('iframe')[0].name];
