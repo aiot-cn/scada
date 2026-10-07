@@ -59,7 +59,7 @@
 	"record" : {
 		"remark" : "查询历史记录",
 		"sqlStatement" : "select t.*,p.name,p.code,p.unit from t_record t \nleft join t_point p on p.id = t.pid\n$condition",
-		"updateDate" : "2026-04-04 16:00:00",
+		"updateDate" : "2026-10-07 16:00:00",
 		"condition" : [
 			{"ao":"AND","name":"t.id",			"op":"=", "value":"id"},
 			{"ao":"AND","name":"t.create_date",	"op":">=","value":"beginTime"},
