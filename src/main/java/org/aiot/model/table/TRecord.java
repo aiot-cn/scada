@@ -3,6 +3,7 @@ package org.aiot.model.table;
 import org.aiot.lang.annotation.AoTbase;
 import org.aiot.util.FileUtil;
 import org.nutz.dao.entity.annotation.Table;
+import org.nutz.lang.Strings;
 
 import java.io.File;
 import java.util.Date;
@@ -23,6 +24,7 @@ public class TRecord extends TBase{
 	//复核之后的状态
 	private Integer reviewState;
 	private Date reviewDate; //复核时间
+	private String reviewOpinion;//复核意见
 
 	private String remark;
 	private String file;
@@ -105,6 +107,14 @@ public class TRecord extends TBase{
 
 	public void setFile(File file) {
 		this.file = FileUtil.toPath(file);
+	}
+
+	public String getReviewOpinion() {
+		return reviewOpinion;
+	}
+
+	public void setReviewOpinion(String reviewOpinion) {
+		this.reviewOpinion = Strings.isBlank(reviewOpinion) ? null : reviewOpinion;
 	}
 
 	public void setVal(Object val){

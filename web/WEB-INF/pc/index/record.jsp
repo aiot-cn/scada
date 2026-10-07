@@ -123,9 +123,10 @@
 								<th data-field="value">值</th>
 								<th data-field="unit" data-edit="true">单位</th>
 								<th data-field="state" data-type="select">状态</th>
+								<th data-field="file" data-class="p-img" width="80">文件</th>
 								<th data-field="reviewState" data-type="select">复核</th>
 								<th data-field="reviewDate" data-show="false">复核时间</th>
-								<th data-field="file" data-class="p-img" width="80">文件</th>
+								<th data-field="reviewOpinion" data-show="false">复核意见</th>
 								<th data-field="remark">备注</th>
 								<th data-type="edit" width="40" class="tac" data-class="tac">操作</th>
 							</tr>
@@ -169,6 +170,12 @@
 					<option value="1" style="color: #ef8a0c">预警</option>
 					<option value="2" style="color: red">报警</option>
 				</select>
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">复核意见</label>
+			<div class="layui-input-block">
+				<input type="text" class="layui-input" name="reviewOpinion">
 			</div>
 		</div>
 		<div class="layui-form-item">
