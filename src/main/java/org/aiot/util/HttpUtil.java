@@ -228,7 +228,22 @@ public class HttpUtil {
 		return resp.getContent();
 	}
 
+	/**
+	 * 下载进度回调
+	 */
+	public interface DownloadProgress {
+		/**
+		 * @param current 已下载字节
+		 * @param total   总字节 未知为-1
+		 */
+		void update(long current,long total);
+	}
+
 	public static File downloadFile(String downloadUrl,File saveFile, Map<String,String> m) {
+		return downloadFile(downloadUrl,saveFile,m,null);
+	}
+
+	public static File downloadFile(String downloadUrl,File saveFile, Map<String,String> m, DownloadProgress progress) {
 		System.out.println("开始下载：" + downloadUrl);
 
 		try {
@@ -271,21 +286,27 @@ public class HttpUtil {
 					saveFile = new File(saveFile,filename);
 				}
 				Files.createDirIfNoExists(saveFile.getParent());
-				// 创建文件输出流
-				FileOutputStream outputStream = new FileOutputStream(saveFile);
 
+				long total = httpConn.getContentLengthLong();
+				long current = 0;
 				int bytesRead;
 				byte[] buffer = new byte[4096];
-				// 从输入流读取数据并写入到输出流中
-				while ((bytesRead = inputStream.read(buffer)) != -1) {
-					outputStream.write(buffer, 0, bytesRead);
+				// 从输入流读取数据并写入到输出流中 异常时关闭流以释放文件句柄
+				try (FileOutputStream outputStream = new FileOutputStream(saveFile)) {
+					while ((bytesRead = inputStream.read(buffer)) != -1) {
+						outputStream.write(buffer, 0, bytesRead);
+						if (progress != null) {
+							current += bytesRead;
+							progress.update(current, total);
+						}
+					}
+				} finally {
+					inputStream.close();
 				}
-
-				// 关闭流
-				outputStream.close();
-				inputStream.close();
 			} else {
 				System.out.println("下载错误，HTTP响应码：" + responseCode + " <- " + url);
+				httpConn.disconnect();
+				return null;
 			}
 			httpConn.disconnect();
 			System.out.println("下载完成：" + saveFile.getAbsolutePath() + " " + (saveFile.length()/1024) + "kb");

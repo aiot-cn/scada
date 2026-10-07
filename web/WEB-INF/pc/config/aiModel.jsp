@@ -193,6 +193,12 @@
 		cursor: pointer;
 	}
 
+	.d-model-download .model-download-text{
+		font-size: 13px;
+		color: #676f83;
+		margin-top: 10px;
+	}
+
 </style>
 </head>
 <body>
@@ -270,6 +276,13 @@
 		</table>
 	</div>
 
+	<div class="lay-con d-model-download">
+		<div class="layui-progress" style="margin-top: 30px" lay-showPercent="true">
+			<div class="layui-progress-bar layui-bg-blue" lay-percent="0%"></div>
+		</div>
+		<div class="model-download-text">等待下载...</div>
+	</div>
+
 	<form name="fmodel" data-for="tAiModel" class="layui-form layui-form-pane">
 		<input type="hidden" name="id">
 		<input type="hidden" name="fileSize">
@@ -286,6 +299,7 @@
 	var modelTypeEnum = []
 	var modelTypeDict=[];
 	var serverModel = [];
+	layui.use("element");//进度条渲染模块
 	var card = $(".card-li").clone().removeAttr("style");
 	var tAiModel = new iTables("#tAiModel",{},{
 		baseOption : common.iTableModel("tAiModel"),
@@ -307,10 +321,7 @@
 				$tr.addClass("by-server");
 				var btn = $("<span class='btn-install-model layui-icon layui-icon-add-1'> 安装</span>");
 				btn.appendTo(td).click(function (){
-					common.devExec("AIMODEL","downloadModel",data,function(json){
-						$tr.before(tAiModel.insertRecord(json.data));
-						$tr.remove();
-					},{"maskType":1})
+					installModel(data,$tr);
 				});
 			}
 
@@ -374,6 +385,66 @@
 		c.find(".card-name").text(data.name);
 
 		return c;
+	}
+
+	//安装模型 全屏遮罩显示layui进度条
+	function installModel(data,$tr){
+		var $box = $(".d-model-download");
+		var $bar = $box.find(".layui-progress-bar").attr("lay-percent","0%");
+		layui.element.render("progress");
+
+		var $text = $box.find(".model-download-text").text("等待下载...");
+		var names = data.modelPath.split("/");
+		var modelName = names[names.length - 1];
+
+		var index = layer.open({
+			type: 1,
+			title : modelName,
+			closeBtn: 0,
+			shade: [0.5, "#393D49"],
+			shadeClose: false,
+			area: ["420px", "auto"],
+			content: $box
+		});
+
+		var timer = setInterval(function (){
+			common.devExec("AIMODEL","getDownloadProgress",{modelPath:data.modelPath},function(json){
+				var p = json.data;
+				if(!p)
+					return;
+				var cur = p[0]/1024/1024;
+				var total = p[1]/1024/1024;
+				if(p[1] <= 0){//总大小未知 只显示已下载
+					$text.text("下载中 "+cur.toFixed(1)+"Mb");
+					return;
+				}
+				var percent = Math.min(100, p[0] / p[1] * 100).toFixed(1);
+				$bar.attr("lay-percent",percent+"%");
+				layui.element.render("progress");
+				$text.text(percent >= 100 ? "下载完成，正在安装模型..."
+						: "下载中 "+cur.toFixed(1)+"/"+total.toFixed(1)+"Mb");
+			});
+		},500);
+
+		function closeMask(){
+			clearInterval(timer);
+			layer.close(index);
+		}
+
+		common.devExec("AIMODEL","downloadModel",data,function(json){
+			closeMask();
+			if(json.success === false){
+				layer.alert("安装失败 "+(json.message || ""),{icon:2});
+				return true;
+			}
+			$tr.before(tAiModel.insertRecord(json.data));
+			$tr.remove();
+		},{callError:true,errorCallback:function(jqXHR,textStatus){
+			if(textStatus){//HTTP请求失败
+				closeMask();
+				layer.alert("安装失败 "+textStatus,{icon:2});
+			}
+		}});
 	}
 
 	function loadModel(code){

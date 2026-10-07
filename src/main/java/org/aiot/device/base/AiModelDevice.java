@@ -23,6 +23,8 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class AiModelDevice extends BaseDevice implements Observer,BaseExtend.RMenu{
 
@@ -31,6 +33,11 @@ public class AiModelDevice extends BaseDevice implements Observer,BaseExtend.RMe
      */
     private Map<Long, AbstractTarget> aiModelMap = new HashMap<>();
     private Map<String,String> labelMap = new HashMap<>();
+
+    /**
+     * 下载进度缓存 modelPath -> [已下载字节,总字节]
+     */
+    private static final ConcurrentMap<String,long[]> downloadMap = new ConcurrentHashMap<>();
 
     @Override
     public void init(){
@@ -120,31 +127,49 @@ public class AiModelDevice extends BaseDevice implements Observer,BaseExtend.RMe
 
     //下载模型
     public TAiModel downloadModel(@AoReflect(type = AstEnum.param) TAiModel tAiModel) throws UnsupportedEncodingException {
-        File file = FileUtil.toFile(tAiModel.getModelPath());
-        boolean needDownload = true;
-        if(file.isFile()){
-            if(Lang.md5(file).equals(tAiModel.getMd5())){
-                needDownload = false;
-            }else{
-                file.delete();
+        try {
+            File file = FileUtil.toFile(tAiModel.getModelPath());
+            boolean needDownload = true;
+            if(file.isFile()){
+                if(Lang.md5(file).equals(tAiModel.getMd5())){
+                    needDownload = false;
+                }else{
+                    file.delete();
+                }
             }
-        }
 
-        String server = "http://www.ai-ot.cn/file/download";
-        if(needDownload){
-            HttpUtil.downloadFile(server+urlCode(tAiModel.getModelPath()),file,null);
-        }
+            String server = "http://www.ai-ot.cn/file/download";
+            if(needDownload){
+                File down = HttpUtil.downloadFile(server+urlCode(tAiModel.getModelPath()),file,null,
+                        (current,total)-> downloadMap.put(tAiModel.getModelPath(),new long[]{current,total}));
+                if(down == null){
+                    file.delete();//清理下载不完整的文件
+                    throw Lang.makeThrow("模型文件下载失败:%s",tAiModel.getModelPath());
+                }
+            }
 
-        String labels = tAiModel.getClassNames();
-        if(Strings.startsWithChar(labels,'/')){
-            File vocabFile = FileUtil.toFile(labels);
-            HttpUtil.downloadFile(server+urlCode(labels),vocabFile,null);
-        }
+            String labels = tAiModel.getClassNames();
+            if(Strings.startsWithChar(labels,'/')){
+                File vocabFile = FileUtil.toFile(labels);
+                if(HttpUtil.downloadFile(server+urlCode(labels),vocabFile,null) == null){
+                    vocabFile.delete();
+                    throw Lang.makeThrow("标签文件下载失败:%s",labels);
+                }
+            }
 
-        tAiModel.setId(null);
-        tAiModel.setIsRemoved(0);
-        bs.daoSave(tAiModel);
-        return bs.getTCache(TAiModel.class,tAiModel.getId());
+            tAiModel.setId(null);
+            tAiModel.setIsRemoved(0);
+            bs.daoSave(tAiModel);
+            return bs.getTCache(TAiModel.class,tAiModel.getId());
+        }finally {
+            if(tAiModel.getModelPath() != null)
+                downloadMap.remove(tAiModel.getModelPath());
+        }
+    }
+
+    //获取模型下载进度 [已下载字节,总字节]
+    public long[] getDownloadProgress(String modelPath){
+        return downloadMap.get(modelPath);
     }
 
     private String urlCode(String url) throws UnsupportedEncodingException {

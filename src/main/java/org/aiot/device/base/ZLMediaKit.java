@@ -5,13 +5,11 @@ import org.aiot.device.BaseDevice;
 import org.aiot.infc.device.BaseExtend;
 import org.aiot.lang.NotifyEvent;
 import org.aiot.lang.annotation.AoReflect;
-import org.aiot.lang.workflow.Workflow;
 import org.aiot.model.enums.ANSI;
 import org.aiot.model.enums.EventEnum;
 import org.aiot.model.enums.PathEnum;
 import org.aiot.model.table.TCommunication;
 import org.aiot.model.table.TVideoSource;
-import org.aiot.model.table.TWorkflow;
 import org.aiot.util.*;
 import org.nutz.http.Http;
 import org.nutz.http.HttpException;
@@ -142,6 +140,8 @@ public class ZLMediaKit extends BaseDevice implements Observer,BaseExtend.RMenu{
 
 		String server = "http://www.ai-ot.cn/file/download/release/"+ SystemInfo.getOsType()+"/"+SystemInfo.getOsArch()+"/ZLMediaKit.zip";
 		File zipLib = HttpUtil.downloadFile(server,ZLMediaPath.getParentFile(),null);
+		if(zipLib == null)
+			throw Lang.makeThrow("ZLMediaKit 下载失败:%s",server);
 		ZipUtil.unzip(zipLib);
 		//如果网络不好，拉流需要很长时间
 		new Thread(this::init).start();

@@ -5,6 +5,7 @@ import org.aiot.util.FileUtil;
 import org.nutz.dao.entity.annotation.Table;
 
 import java.io.File;
+import java.util.Date;
 
 @Table
 @AoTbase(cache = false)
@@ -17,7 +18,12 @@ public class TRecord extends TBase{
 	private Double value;
 	private String valStr;
 
-	private Integer state; //0正常 1预警 2报警
+	//0正常 1预警 2报警
+	private Integer state;
+	//复核之后的状态
+	private Integer reviewState;
+	private Date reviewDate; //复核时间
+
 	private String remark;
 	private String file;
 	private String targets;//name,confidence,left,top,width,height
@@ -37,6 +43,24 @@ public class TRecord extends TBase{
 
 	public void setState(Integer state) {
 		this.state = state;
+	}
+
+	public Integer getReviewState() {
+		return reviewState;
+	}
+
+	public void setReviewState(Integer reviewState){
+		this.reviewState = reviewState;
+		if(reviewState != null)
+			reviewDate = new Date();
+	}
+
+	public Date getReviewDate() {
+		return reviewDate;
+	}
+
+	public void setReviewDate(Date reviewDate) {
+		this.reviewDate = reviewDate;
 	}
 
 	public Long getPid() {
