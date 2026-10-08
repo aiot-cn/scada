@@ -1,6 +1,13 @@
 package org.aiot.util;
 
+import com.sun.management.OperatingSystemMXBean;
+
+import java.io.File;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryUsage;
+
 public class SystemInfo {
+    private static final OperatingSystemMXBean OS_BEAN = (OperatingSystemMXBean) ManagementFactory.getOperatingSystemMXBean();
     /**
      * windows 10
      */
@@ -36,6 +43,85 @@ public class SystemInfo {
         return "x86_32";
     }
 
+    /**
+     * 系统整体 CPU 使用率，范围 0.0 ~ 1.0，不可用时返回 -1
+     */
+    public static double getSystemCpuUsage() {
+        return OS_BEAN.getSystemCpuLoad();
+    }
+
+    /**
+     * 当前 JVM 进程的 CPU 使用率，范围 0.0 ~ 1.0，不可用时返回 -1
+     */
+    public static double getProcessCpuUsage() {
+        return OS_BEAN.getProcessCpuLoad();
+    }
+
+    /**
+     * 物理内存使用率，范围 0.0 ~ 1.0
+     */
+    public static double getSystemMemoryUsage() {
+        long total = OS_BEAN.getTotalPhysicalMemorySize();
+        long free = OS_BEAN.getFreePhysicalMemorySize();
+        if (total <= 0) {
+            return -1;
+        }
+        return (double) (total - free) / total;
+    }
+
+    /**
+     * JVM 堆内存使用率，范围 0.0 ~ 1.0
+     */
+    public static double getHeapMemoryUsage() {
+        MemoryUsage heap = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
+        long max = heap.getMax();
+        if (max <= 0) {
+            return -1;
+        }
+        return (double) heap.getUsed() / max;
+    }
+
+    public static long getHeapMemoryUsed() {
+        return ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getUsed();
+    }
+
+    public static long getHeapMemoryMax() {
+        return ManagementFactory.getMemoryMXBean().getHeapMemoryUsage().getMax();
+    }
+
+    /**
+     * JVM 启动时间，毫秒时间戳
+     */
+    public static long getStartTime() {
+        return ManagementFactory.getRuntimeMXBean().getStartTime();
+    }
+
+    public static long getTotalPhysicalMemory() {
+        return OS_BEAN.getTotalPhysicalMemorySize();
+    }
+
+    public static long getFreePhysicalMemory() {
+        return OS_BEAN.getFreePhysicalMemorySize();
+    }
+
+    /**
+     * 所有磁盘分区（Windows 下为 C:\、D:\ 等，Linux 下为 /）
+     */
+    public static File[] getDiskRoots() {
+        return File.listRoots();
+    }
+
+    /**
+     * 指定分区磁盘使用率，范围 0.0 ~ 1.0，分区不可用（如空光驱）返回 -1
+     */
+    public static double getDiskUsage(File root) {
+        long total = root.getTotalSpace();
+        if (total <= 0) {
+            return -1;
+        }
+        return (double) (total - root.getFreeSpace()) / total;
+    }
+
     public static boolean isWindows() {
         return OS_NAME.contains("win");
     }
@@ -62,5 +148,38 @@ public class SystemInfo {
 
     public static boolean isArm32() {
         return !isArm64() && OS_ARCH.contains("arm");
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+        // 关键：CPU 使用率是"区间统计值"，
+        // 需要两次调用之间有采样间隔，第一次调用往往返回 0 或 -1
+        getSystemCpuUsage();
+        getProcessCpuUsage();
+        Thread.sleep(1000);
+
+        System.out.printf("系统CPU  : %.1f%%%n", getSystemCpuUsage() * 100);
+        System.out.printf("进程CPU  : %.1f%%%n", getProcessCpuUsage() * 100);
+        System.out.printf("物理内存  : %.1f%%  (已用 %.1f GB / 共 %.1f GB)%n",
+                getSystemMemoryUsage() * 100,
+                (getTotalPhysicalMemory() - getFreePhysicalMemory()) / 1024.0 / 1024 / 1024,
+                getTotalPhysicalMemory() / 1024.0 / 1024 / 1024);
+        MemoryUsage heap = ManagementFactory.getMemoryMXBean().getHeapMemoryUsage();
+        System.out.printf("JVM 堆内存: %.1f%%  (已用 %.1f GB / 共 %.1f GB)%n",
+                getHeapMemoryUsage() * 100,
+                heap.getUsed() / 1024.0 / 1024 / 1024,
+                heap.getMax() / 1024.0 / 1024 / 1024);
+
+        for (File root : getDiskRoots()) {
+            long total = root.getTotalSpace();
+            long free = root.getFreeSpace();
+            if (total <= 0) {
+                continue;
+            }
+            System.out.printf("磁盘 %s  : %.1f%%  (已用 %.1f GB / 共 %.1f GB)%n",
+                    root.getPath(),
+                    getDiskUsage(root) * 100,
+                    (total - free) / 1024.0 / 1024 / 1024,
+                    total / 1024.0 / 1024 / 1024);
+        }
     }
 }

@@ -141,6 +141,7 @@
 								<th data-field="isRemoved" data-type="switch" width="30" data-class="tac switch-contrary">状态</th>
 								<th data-field="id" width="20">ID</th>
 								<th data-field="areaId" data-translate="select" data-edit="true" data-show="false">区域</th>
+								<th data-field="classifyId" data-translate="select" data-edit="true" data-show="false">分类</th>
 								<th data-field="name" data-edit="true">名称</th>
 								<th data-field="code" data-edit="true">编号</th>
 								<th data-field="address" data-edit="true">地址</th>
@@ -172,6 +173,7 @@
 	    <input class="layui-input" name="name" required="required">
 		<select class="layui-input" name="deviceId" data-clear="false"></select>
 		<select class="layui-input" name="areaId" data-clear="false"></select>
+		<select class="layui-input" name="classifyId" data-clear="false"></select>
 		<%--<select class="layui-input" name="typeId" data-clear="false"></select>--%>
 		<select class="layui-input" name="placeId" data-clear="false"></select>
 		<input class="layui-input" name="code">
@@ -280,6 +282,7 @@
 	common.jsonModel("deviceType",{},function (json){
 		common.renderSelect(fBatch.deviceType,json.list,{dft:"",value:"code"});
 	});
+	common.selectFromDict("dataClassify","[name='classifyId']",{dft:"",value:"id"});
 	/*类型下拉：编辑表单与表格"类型"列翻译都取自 [name='typeId'] 的选项*/
 	/*function loadPointType(){
 		common.jsonModel("tPointType",{},function(json){

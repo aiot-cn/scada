@@ -3,6 +3,8 @@ package org.aiot.controller;
 import com.fazecast.jSerialComm.SerialPort;
 import org.aiot.communication.CommunicationInfc;
 import org.aiot.device.BaseDevice;
+import org.aiot.device.base.AiModelDevice;
+import org.aiot.device.base.ZLMediaKit;
 import org.aiot.infc.ProtocolInfc;
 import org.aiot.infc.device.BaseExtend;
 import org.aiot.infc.device.DevData;
@@ -13,15 +15,18 @@ import org.aiot.lang.workflow.Workflow;
 import org.aiot.main.Constants;
 import org.aiot.model.DataRes;
 import org.aiot.model.enums.DictTypeEnum;
+import org.aiot.model.enums.PathEnum;
 import org.aiot.model.lang.PointData;
 import org.aiot.model.lang.RecognitionRes;
 import org.aiot.model.lang.SRes;
 import org.aiot.model.project.ArgBean;
 import org.aiot.model.project.MethodBean;
 import org.aiot.model.table.*;
+import org.aiot.model.table.user.SysUser;
 import org.aiot.mvc.RoleActionFilter;
 import org.aiot.service.*;
 import org.aiot.util.*;
+import org.nutz.dao.Cnd;
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
 import org.nutz.lang.Mirror;
@@ -39,6 +44,8 @@ import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -482,6 +489,217 @@ public class JsonController {
 			}
 		});
 		return r;
+	}
+
+	//====================   总览 dashboard   =============================
+	//总览信息：概况、磁盘、网络、插件、流媒体、模型、设备、点位、记录 一次返回
+	@At
+	public @Ok("json") NutMap getDashboardInfo(){
+		BaseService bs = ioc.get(BaseService.class);
+		DeviceService ds = ioc.get(DeviceService.class);
+		PointService ps = ioc.get(PointService.class);
+		NutMap nm = NutMap.NEW();
+
+		//概况
+		NutMap overview = NutMap.NEW();
+		overview.put("userCount", bs.getTCache(SysUser.class).size());
+		nm.put("overview", overview);
+
+		//磁盘
+		List<NutMap> disks = new ArrayList<>();
+		for(File root : SystemInfo.getDiskRoots()){
+			long total = root.getTotalSpace();
+			if(total <= 0)
+				continue;
+			NutMap disk = NutMap.NEW();
+			disk.put("path", root.getPath());
+			disk.put("total", total);
+			disk.put("free", root.getFreeSpace());
+			disk.put("usage", SystemInfo.getDiskUsage(root));
+			disks.add(disk);
+		}
+		nm.put("disks", disks);
+
+		//网络：网口、wifi、蓝牙
+		List<NutMap> networks = new ArrayList<>();
+		try {
+			Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
+			while (nis.hasMoreElements()){
+				NetworkInterface ni = nis.nextElement();
+				if(ni.isLoopback())
+					continue;
+
+				NutMap net = NutMap.NEW();
+				net.put("name", ni.getName());
+				net.put("displayName", ni.getDisplayName());
+				net.put("up", ni.isUp());
+				net.put("type", netType(ni));
+				List<String> addrs = new ArrayList<>();
+				ni.getInterfaceAddresses().forEach(a->{
+					if(a.getAddress() != null)
+						addrs.add(a.getAddress().getHostAddress());
+				});
+				if(addrs.isEmpty())
+					continue;
+				net.put("addrs", addrs);
+				networks.add(net);
+			}
+		} catch (SocketException ignored) {
+		}
+		nm.put("networks", networks);
+
+		//插件：资源目录 lib 下存在对应文件夹即视为已安装
+		String[][] plugins = {
+				{"HCNetSDK","海康"},
+				{"dhNetSDK","大华"},
+				{"nginx","代理"},
+				{"ZLMediaKit","流媒体"},
+				{"wkhtmltox","HTML转pdf或图像"}
+		};
+		List<NutMap> pluginList = new ArrayList<>();
+		for(String[] p : plugins){
+			NutMap plugin = NutMap.NEW();
+			plugin.put("name", p[0]);
+			plugin.put("text", p[1]);
+			plugin.put("installed", PathEnum.lib.getFile(p[0]).isDirectory());
+			pluginList.add(plugin);
+		}
+		nm.put("plugins", pluginList);
+
+		//流媒体：视频源总数及拉流在线数
+		NutMap video = NutMap.NEW();
+		video.put("total", bs.getTCache(TVideoSource.class).size());
+		int online = 0;
+		ZLMediaKit zlm = ds.getDevice(ZLMediaKit.class);
+		if(zlm != null){
+			NutMap res = zlm.getMediaList();
+			if(res != null && res.get("data") instanceof List)
+				online = ((List<?>) res.get("data")).size();
+		}
+		video.put("online", online);
+		nm.put("video", video);
+
+		//模型：总数及已加载数
+		NutMap model = NutMap.NEW();
+		model.put("total", bs.getTCache(TAiModel.class).size());
+		AiModelDevice amd = ds.getDevice(AiModelDevice.class);
+		model.put("loaded", amd == null ? 0 : amd.getLoadedCount());
+		nm.put("model", model);
+
+		//设备：总数及各类型数量
+		Map<String, List<TDevice>> devMap = bs.getTCacheMap(TDevice.class, v->true, TDevice::getDeviceType);
+		List<NutMap> types = new ArrayList<>();
+		devMap.forEach((k,v)->{
+			DeviceType dt = bs.getTCacheAllFirst(DeviceType.class, t->Strings.equals(k,t.getCode()));
+			NutMap type = NutMap.NEW();
+			type.put("type", k);
+			type.put("name", dt == null ? k : dt.getName());
+			type.put("count", v.size());
+			types.add(type);
+		});
+		types.sort((a,b)-> b.getInt("count") - a.getInt("count"));
+		NutMap device = NutMap.NEW();
+		device.put("total", bs.getTCache(TDevice.class).size());
+		device.put("types", types);
+		nm.put("device", device);
+
+		//点位：1分钟内没有数据的即为离线，在线中按报警状态再细分，三类互斥
+		List<TPoint> points = bs.getTCache(TPoint.class);
+		long now = System.currentTimeMillis();
+		int ptOnline = 0, alarm = 0;
+		for(TPoint p : points){
+			PointData pd = ps.getPointData(p.getId());
+			if(pd == null || pd.getTime() == null || now - pd.getTime() >= 60*1000L)
+				continue;
+			if(pd.getState() != null && pd.getState() > 1)
+				alarm++;
+			else
+				ptOnline++;
+		}
+		NutMap point = NutMap.NEW();
+		point.put("total", points.size());
+		point.put("online", ptOnline);
+		point.put("offline", points.size() - ptOnline - alarm);
+		point.put("alarm", alarm);
+		nm.put("point", point);
+
+		//记录：按当日、本周、本月统计
+		Date date = new Date();
+		NutMap record = NutMap.NEW();
+		record.put("today", recordStat(bs, dayStart(date)));
+		record.put("week", recordStat(bs, weekStart(date)));
+		record.put("month", recordStat(bs, monthStart(date)));
+		nm.put("record", record);
+
+		return nm;
+	}
+
+	//CPU、内存，页面轮询累加显示
+	@At
+	public @Ok("json") NutMap getDashboardPerf(){
+		NutMap nm = NutMap.NEW();
+		nm.put("time", System.currentTimeMillis());
+		nm.put("cpuSystem", SystemInfo.getSystemCpuUsage());
+		nm.put("cpuProcess", SystemInfo.getProcessCpuUsage());
+		nm.put("memPhysical", SystemInfo.getSystemMemoryUsage());
+		nm.put("physicalTotal", SystemInfo.getTotalPhysicalMemory());
+		nm.put("physicalUsed", SystemInfo.getTotalPhysicalMemory() - SystemInfo.getFreePhysicalMemory());
+		nm.put("memHeap", SystemInfo.getHeapMemoryUsage());
+		nm.put("heapUsed", SystemInfo.getHeapMemoryUsed());
+		nm.put("heapMax", SystemInfo.getHeapMemoryMax());
+		return nm;
+	}
+
+	//按名称粗略区分网卡类型：wifi、bluetooth、ethernet
+	private String netType(NetworkInterface ni){
+		String n = (ni.getName() + " " + Strings.sNull(ni.getDisplayName())).toLowerCase();
+		if(n.contains("bluetooth") || n.contains("蓝牙") || n.startsWith("bt"))
+			return "bluetooth";
+		if(n.contains("wifi") || n.contains("wi-fi") || n.contains("802.11") || n.contains("wireless") || n.contains("wlan") || n.contains("无线"))
+			return "wifi";
+		return "ethernet";
+	}
+
+	/**
+	 * 待复核：state>0 且 reviewState 为空
+	 * 待处理：reviewState>0 且 reviewOpinion 为空
+	 * 已处理：reviewState>0 且 reviewOpinion 不为空
+	 */
+	private NutMap recordStat(BaseService bs,Date start){
+		NutMap nm = NutMap.NEW();
+		Cnd base = Cnd.where("createDate", ">=", start).and("isRemoved", "=", 0);
+		nm.put("pendingReview", bs.count(TRecord.class, base.clone().and("state", ">", 0).and("reviewState", "is", null)));
+		nm.put("pendingProcess", bs.count(TRecord.class, base.clone().and("reviewState", ">", 0).and("reviewOpinion", "is", null)));
+		nm.put("processed", bs.count(TRecord.class, base.clone().and("reviewState", ">", 0).and("reviewOpinion", "is not", null)));
+		return nm;
+	}
+
+	//当天 00:00
+	private static Date dayStart(Date date){
+		Calendar c = Calendar.getInstance();
+		c.setTime(date);
+		c.set(Calendar.HOUR_OF_DAY, 0);
+		c.set(Calendar.MINUTE, 0);
+		c.set(Calendar.SECOND, 0);
+		c.set(Calendar.MILLISECOND, 0);
+		return c.getTime();
+	}
+
+	//本周一 00:00
+	private static Date weekStart(Date date){
+		Calendar c = Calendar.getInstance();
+		c.setTime(dayStart(date));
+		int dow = c.get(Calendar.DAY_OF_WEEK);//1=周日 ... 7=周六
+		c.add(Calendar.DAY_OF_MONTH, dow == Calendar.SUNDAY ? -6 : Calendar.MONDAY - dow);
+		return c.getTime();
+	}
+
+	//本月1号 00:00
+	private static Date monthStart(Date date){
+		Calendar c = Calendar.getInstance();
+		c.setTime(dayStart(date));
+		c.set(Calendar.DAY_OF_MONTH, 1);
+		return c.getTime();
 	}
 
 	//====================   服务提供   =============================

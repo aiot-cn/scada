@@ -125,6 +125,11 @@ public class AiModelDevice extends BaseDevice implements Observer,BaseExtend.RMe
         }
     }
 
+    //已加载的模型数量
+    public int getLoadedCount(){
+        return aiModelMap.size();
+    }
+
     //下载模型
     public TAiModel downloadModel(@AoReflect(type = AstEnum.param) TAiModel tAiModel) throws UnsupportedEncodingException {
         try {

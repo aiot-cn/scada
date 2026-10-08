@@ -120,7 +120,7 @@
                 <cite>主页</cite>
               <span class="layui-nav-more"></span></a>
               <dl class="layui-nav-child">
-                <dd class="layui-this"><a lay-href="${base }/config/aiModel">模型</a></dd>
+                <dd><a lay-href="${base }/config/aiModel">模型</a></dd>
                 <dd><a lay-href="${base }/config/device">设备</a></dd>
                 <dd><a lay-href="${base }/config/communication">通讯</a></dd>
                 <dd><a lay-href="${base }/index/point">点位</a></dd>
@@ -197,8 +197,8 @@
         </div>
         <div class="layui-tab" lay-unauto lay-allowClose="true" lay-filter="layadmin-layout-tabs">
           <ul class="layui-tab-title" id="LAY_app_tabsheader">
-            <li lay-id="${base }/config/aiModel" lay-attr="${base }/config/aiModel" class="layui-this">
-              <i class="layui-icon layui-icon-home"></i> AI 模型
+            <li lay-id="${base }/config/dashboard" lay-attr="${base }/config/dashboard" class="layui-this">
+              <i class="layui-icon layui-icon-console"></i> 控制台
             </li>
           </ul>
         </div>
@@ -208,7 +208,7 @@
       <!-- 主体内容 -->
       <div class="layui-body" id="LAY_app_body">
         <div class="layadmin-tabsbody-item layui-show">
-          <iframe src="${base }/config/aiModel" frameborder="0" class="layadmin-iframe"></iframe>
+          <iframe src="${base }/config/dashboard" frameborder="0" class="layadmin-iframe"></iframe>
         </div>
       </div>
       

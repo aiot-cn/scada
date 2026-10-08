@@ -18,7 +18,8 @@ public class TPoint extends TPointType {
 
 	private Long typeId;//暂无用
 
-	private Long areaId;//sysDict
+	private Long areaId;//sysDict area
+	private Long classifyId;//sysDict dataClassify
 
 	private String image;
 	private String target;//label,confidence,left,top,width,height,rotate
@@ -104,5 +105,13 @@ public class TPoint extends TPointType {
 
 	public void setAddress(String address) {
 		this.address = address;
+	}
+
+	public Long getClassifyId() {
+		return classifyId;
+	}
+
+	public void setClassifyId(Long classifyId) {
+		this.classifyId = classifyId;
 	}
 }

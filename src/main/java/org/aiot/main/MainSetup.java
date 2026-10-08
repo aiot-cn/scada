@@ -1,8 +1,8 @@
 package org.aiot.main;
 
+import org.aiot.handler.json.JsonFileHandler;
 import org.aiot.model.castor.String2File;
 import org.aiot.model.enums.*;
-import org.aiot.handler.json.JsonFileHandler;
 import org.aiot.model.table.TLog;
 import org.aiot.service.*;
 import org.aiot.util.SysUtil;
@@ -10,7 +10,10 @@ import org.nutz.castor.Castors;
 import org.nutz.ioc.impl.PropertiesProxy;
 import org.nutz.json.Json;
 import org.nutz.json.JsonTypeHandler;
-import org.nutz.lang.*;
+import org.nutz.lang.Files;
+import org.nutz.lang.Mirror;
+import org.nutz.lang.Streams;
+import org.nutz.lang.Strings;
 import org.nutz.lang.util.Disks;
 import org.nutz.log.Log;
 import org.nutz.log.Logs;
@@ -56,7 +59,7 @@ public class MainSetup implements Setup{
 			e.printStackTrace();
 		}
 		ServletEnum.res.val(servletContext.getContextPath()+"/static");
-		ServletEnum.resCache.val(Times.getNowSDT());
+		ServletEnum.resCache.val(System.currentTimeMillis());
 		ServletEnum.serialNo.val(servletContext.getSessionCookieConfig().getName());
 
 		for(Class<?> klass: Scans.me().scanPackage(String2File.class)){
