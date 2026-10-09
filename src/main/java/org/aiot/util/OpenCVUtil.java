@@ -3,9 +3,12 @@ package org.aiot.util;
 import nu.pattern.OpenCV;
 import org.aiot.infc.ImgAbstract;
 import org.aiot.infc.ImgInfc;
+import org.aiot.model.enums.DictTypeEnum;
 import org.aiot.model.lang.RecognitionRes;
 import org.aiot.model.lang.Target;
+import org.aiot.model.table.SysDict;
 import org.nutz.castor.Castors;
+import org.nutz.lang.Strings;
 import org.opencv.core.*;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
@@ -305,8 +308,47 @@ public class OpenCVUtil {
 		if (label == null) {
 			return new Scalar(0, 255, 0);
 		}
+		SysDict dict = DictTypeEnum.tag.getByCode(label);
+		if(dict != null && Strings.isNotBlank(dict.getColor())){
+			Scalar color = hexColor(dict.getColor());
+			if(color != null)
+				return color;
+		}
 		int hash = label.hashCode();
 		return new Scalar(Math.max(hash & 0xFF, 60), Math.max((hash >> 8) & 0xFF, 60), Math.max((hash >> 16) & 0xFF, 60));
+	}
+
+	/**
+	 * 把 "#ffffff"/"#fff" 形式的颜色转换为 OpenCV 的 BGR Scalar。
+	 * @return 解析失败时返回 null
+	 */
+	public static Scalar hexColor(String hex) {
+		if (hex == null) {
+			return null;
+		}
+		hex = hex.trim();
+		if (hex.startsWith("#")) {
+			hex = hex.substring(1);
+		}
+		if (hex.length() == 3) {
+			//#abc 展开成 #aabbcc
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < 3; i++) {
+				sb.append(hex.charAt(i)).append(hex.charAt(i));
+			}
+			hex = sb.toString();
+		}
+		if (hex.length() != 6) {
+			return null;
+		}
+		int rgb;
+		try {
+			rgb = Integer.parseInt(hex, 16);
+		} catch (NumberFormatException e) {
+			return null;
+		}
+		//OpenCV 是 BGR 顺序
+		return new Scalar(rgb & 0xFF, (rgb >> 8) & 0xFF, (rgb >> 16) & 0xFF);
 	}
 
 	//旋转

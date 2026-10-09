@@ -52,7 +52,6 @@
 		<div class="layui-card">
           <div class="layui-card-header">
 			  <span class="title">字典数据</span>
-			  <div id="c1"></div>
 			  <div data-itable="tool_tDictValue" class="itable-tool"></div>
 		  </div>
           <div class="layui-card-body">
@@ -69,7 +68,7 @@
 					<th data-field="v2">值2</th>
 					<th data-field="v3" data-show="false">值3</th>
 					<th data-field="helpCode" data-show="false">助记符</th>
-					<th data-field="color" width="40">颜色</th>
+					<th data-field="color" width="50">颜色</th>
 					<th data-field="backColor" width="50" data-class="tac">背景色</th>
 					<th data-field="icon"  data-show="false" width="30">图标</th>
 					<th data-field="remark" data-show="false">备注</th>
@@ -101,8 +100,8 @@
 	    <input type="text" class="layui-input" name="v2">
 	    <input type="text" class="layui-input" name="v3">
 	    <input type="text" class="layui-input" name="icon">
-	    <input type="text" class="layui-input" name="color" >
-		<input type="text" class="layui-input" name="backColor">
+	    <input type="color" class="layui-input" name="color" >
+		<input type="color" class="layui-input" name="backColor">
 	    <input type="text" class="layui-input" name="status">
 	    <input type="text" class="layui-input" name="helpCode">
 	    <input type="text" class="layui-input" name="remark">
@@ -122,15 +121,6 @@
 </body>
 <script type="text/javascript">
 	var type = param.type;
-	layui.colorpicker.render({
-		elem: '#c1'
-		,color: '#0000ff'
-		,predefine: true // 开启预定义颜色
-		,done: function(color){
-			tDictValue._form.color.value = color;
-		}
-	});
-
 
 var tDictType = new iTables("#tDictType",{},{
 	getController  : "${base}/json/getDictType",
@@ -175,6 +165,10 @@ var tDictValue = new iTables("#tDictValue",{},{
 	},
 	callForm:function(params){
 		params.type = type;
+		if(params.color == "#000000")
+			params.color = "";
+		if(params.backColor == "#000000")
+			params.backColor = "";
 	}
 });
 

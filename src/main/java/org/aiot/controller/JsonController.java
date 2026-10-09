@@ -32,6 +32,8 @@ import org.nutz.lang.Lang;
 import org.nutz.lang.Mirror;
 import org.nutz.lang.Strings;
 import org.nutz.lang.util.NutMap;
+import org.nutz.log.Log;
+import org.nutz.log.Logs;
 import org.nutz.mvc.annotation.At;
 import org.nutz.mvc.annotation.By;
 import org.nutz.mvc.annotation.Filters;
@@ -53,6 +55,7 @@ import static org.aiot.main.Constants.ioc;
 
 @At("/json")
 public class JsonController {
+	Log log = Logs.get();
 
 	@At
 	public @Ok("json") Object getEnum(String type) throws ClassNotFoundException, SecurityException, IllegalArgumentException {
@@ -492,9 +495,10 @@ public class JsonController {
 	}
 
 	//====================   总览 dashboard   =============================
-	//总览信息：概况、磁盘、网络、插件、流媒体、模型、设备、点位、记录 一次返回
+	//总览信息：概况、磁盘、插件、模型、设备、点位，均为内存缓存或本地快速操作
 	@At
 	public @Ok("json") NutMap getDashboardInfo(){
+		long ts = System.currentTimeMillis();
 		BaseService bs = ioc.get(BaseService.class);
 		DeviceService ds = ioc.get(DeviceService.class);
 		PointService ps = ioc.get(PointService.class);
@@ -520,41 +524,13 @@ public class JsonController {
 		}
 		nm.put("disks", disks);
 
-		//网络：网口、wifi、蓝牙
-		List<NutMap> networks = new ArrayList<>();
-		try {
-			Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
-			while (nis.hasMoreElements()){
-				NetworkInterface ni = nis.nextElement();
-				if(ni.isLoopback())
-					continue;
-
-				NutMap net = NutMap.NEW();
-				net.put("name", ni.getName());
-				net.put("displayName", ni.getDisplayName());
-				net.put("up", ni.isUp());
-				net.put("type", netType(ni));
-				List<String> addrs = new ArrayList<>();
-				ni.getInterfaceAddresses().forEach(a->{
-					if(a.getAddress() != null)
-						addrs.add(a.getAddress().getHostAddress());
-				});
-				if(addrs.isEmpty())
-					continue;
-				net.put("addrs", addrs);
-				networks.add(net);
-			}
-		} catch (SocketException ignored) {
-		}
-		nm.put("networks", networks);
-
 		//插件：资源目录 lib 下存在对应文件夹即视为已安装
 		String[][] plugins = {
 				{"HCNetSDK","海康"},
 				{"dhNetSDK","大华"},
 				{"nginx","代理"},
 				{"ZLMediaKit","流媒体"},
-				{"wkhtmltox","HTML转pdf或图像"}
+				{"wkhtmltox","PDF"}
 		};
 		List<NutMap> pluginList = new ArrayList<>();
 		for(String[] p : plugins){
@@ -566,19 +542,6 @@ public class JsonController {
 		}
 		nm.put("plugins", pluginList);
 
-		//流媒体：视频源总数及拉流在线数
-		NutMap video = NutMap.NEW();
-		video.put("total", bs.getTCache(TVideoSource.class).size());
-		int online = 0;
-		ZLMediaKit zlm = ds.getDevice(ZLMediaKit.class);
-		if(zlm != null){
-			NutMap res = zlm.getMediaList();
-			if(res != null && res.get("data") instanceof List)
-				online = ((List<?>) res.get("data")).size();
-		}
-		video.put("online", online);
-		nm.put("video", video);
-
 		//模型：总数及已加载数
 		NutMap model = NutMap.NEW();
 		model.put("total", bs.getTCache(TAiModel.class).size());
@@ -586,20 +549,21 @@ public class JsonController {
 		model.put("loaded", amd == null ? 0 : amd.getLoadedCount());
 		nm.put("model", model);
 
-		//设备：总数及各类型数量
-		Map<String, List<TDevice>> devMap = bs.getTCacheMap(TDevice.class, v->true, TDevice::getDeviceType);
+		//设备：总数及各类型数量，id<0 的内置/虚拟设备不统计
+		Map<String, List<TDevice>> devMap = bs.getTCacheMap(TDevice.class, v-> v.getId() != null && v.getId() >= 0, TDevice::getDeviceType);
 		List<NutMap> types = new ArrayList<>();
 		devMap.forEach((k,v)->{
 			DeviceType dt = bs.getTCacheAllFirst(DeviceType.class, t->Strings.equals(k,t.getCode()));
 			NutMap type = NutMap.NEW();
 			type.put("type", k);
 			type.put("name", dt == null ? k : dt.getName());
+			type.put("icon", dt == null ? "" : Strings.sNull(dt.getIcon()));
 			type.put("count", v.size());
 			types.add(type);
 		});
 		types.sort((a,b)-> b.getInt("count") - a.getInt("count"));
 		NutMap device = NutMap.NEW();
-		device.put("total", bs.getTCache(TDevice.class).size());
+		device.put("total", devMap.values().stream().mapToInt(List::size).sum());
 		device.put("types", types);
 		nm.put("device", device);
 
@@ -623,14 +587,71 @@ public class JsonController {
 		point.put("alarm", alarm);
 		nm.put("point", point);
 
-		//记录：按当日、本周、本月统计
-		Date date = new Date();
-		NutMap record = NutMap.NEW();
-		record.put("today", recordStat(bs, dayStart(date)));
-		record.put("week", recordStat(bs, weekStart(date)));
-		record.put("month", recordStat(bs, monthStart(date)));
-		nm.put("record", record);
+		return nm;
+	}
 
+	//网络：网口、wifi、蓝牙，Windows 下网卡(含虚拟网卡)较多时枚举很慢，独立请求
+	@At
+	public @Ok("json") List<NutMap> getDashboardNetwork(){
+		long t = System.currentTimeMillis();
+		List<NutMap> list = new ArrayList<>();
+		try {
+			Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
+			while (nis.hasMoreElements()){
+				NetworkInterface ni = nis.nextElement();
+				if(ni.isLoopback())
+					continue;
+
+				//getName/getDisplayName 每次调用都有系统开销，取一次复用
+				String name = ni.getName();
+				String displayName = ni.getDisplayName();
+				NutMap net = NutMap.NEW();
+				net.put("name", name);
+				net.put("displayName", displayName);
+				net.put("up", ni.isUp());
+				net.put("type", netType(name, displayName));
+				List<String> addrs = new ArrayList<>();
+				ni.getInterfaceAddresses().forEach(a->{
+					if(a.getAddress() != null)
+						addrs.add(a.getAddress().getHostAddress());
+				});
+				if(addrs.isEmpty())
+					continue;
+				net.put("addrs", addrs);
+				list.add(net);
+			}
+		} catch (SocketException ignored) {
+		}
+		//log.infof("getDashboardNetwork %d 个网卡 %dms", list.size(), System.currentTimeMillis() - t);
+		return list;
+	}
+
+	//流媒体：视频源总数及拉流在线数，getMediaList 为 ZLMediaKit 的 HTTP 调用较慢，独立请求
+	@At
+	public @Ok("json") NutMap getDashboardVideo(){
+		BaseService bs = ioc.get(BaseService.class);
+		NutMap video = NutMap.NEW();
+		video.put("total", bs.getTCache(TVideoSource.class).size());
+		int online = 0;
+		ZLMediaKit zlm = ioc.get(DeviceService.class).getDevice(ZLMediaKit.class);
+		if(zlm != null){
+			NutMap res = zlm.getMediaList();
+			if(res != null && res.get("data") instanceof List)
+				online = ((List<?>) res.get("data")).size();
+		}
+		video.put("online", online);
+		return video;
+	}
+
+	//记录：按当日、本周、本月统计，多次数据库 count 较慢，独立请求
+	@At
+	public @Ok("json") NutMap getDashboardRecord(){
+		BaseService bs = ioc.get(BaseService.class);
+		Date date = new Date();
+		NutMap nm = NutMap.NEW();
+		nm.put("today", recordStat(bs, dayStart(date)));
+		nm.put("week", recordStat(bs, weekStart(date)));
+		nm.put("month", recordStat(bs, monthStart(date)));
 		return nm;
 	}
 
@@ -644,6 +665,12 @@ public class JsonController {
 		nm.put("memPhysical", SystemInfo.getSystemMemoryUsage());
 		nm.put("physicalTotal", SystemInfo.getTotalPhysicalMemory());
 		nm.put("physicalUsed", SystemInfo.getTotalPhysicalMemory() - SystemInfo.getFreePhysicalMemory());
+		//程序内存：进程实际占用（含堆外与原生库），与任务管理器口径一致，占物理内存的百分比
+		long processUsed = SystemInfo.getProcessMemoryUsed();
+		long physicalTotal = SystemInfo.getTotalPhysicalMemory();
+		nm.put("processUsed", processUsed);
+		nm.put("memProcess", processUsed < 0 || physicalTotal <= 0 ? -1 : (double) processUsed / physicalTotal);
+		//JVM 堆内存：占堆上限(-Xmx)的百分比
 		nm.put("memHeap", SystemInfo.getHeapMemoryUsage());
 		nm.put("heapUsed", SystemInfo.getHeapMemoryUsed());
 		nm.put("heapMax", SystemInfo.getHeapMemoryMax());
@@ -651,8 +678,8 @@ public class JsonController {
 	}
 
 	//按名称粗略区分网卡类型：wifi、bluetooth、ethernet
-	private String netType(NetworkInterface ni){
-		String n = (ni.getName() + " " + Strings.sNull(ni.getDisplayName())).toLowerCase();
+	private String netType(String name,String displayName){
+		String n = (name + " " + Strings.sNull(displayName)).toLowerCase();
 		if(n.contains("bluetooth") || n.contains("蓝牙") || n.startsWith("bt"))
 			return "bluetooth";
 		if(n.contains("wifi") || n.contains("wi-fi") || n.contains("802.11") || n.contains("wireless") || n.contains("wlan") || n.contains("无线"))
@@ -661,6 +688,8 @@ public class JsonController {
 	}
 
 	/**
+	 * total：时间段内记录总数
+	 * 正常/预警/报警：state 0/1/2 的数量
 	 * 待复核：state>0 且 reviewState 为空
 	 * 待处理：reviewState>0 且 reviewOpinion 为空
 	 * 已处理：reviewState>0 且 reviewOpinion 不为空
@@ -671,6 +700,23 @@ public class JsonController {
 		nm.put("pendingReview", bs.count(TRecord.class, base.clone().and("state", ">", 0).and("reviewState", "is", null)));
 		nm.put("pendingProcess", bs.count(TRecord.class, base.clone().and("reviewState", ">", 0).and("reviewOpinion", "is", null)));
 		nm.put("processed", bs.count(TRecord.class, base.clone().and("reviewState", ">", 0).and("reviewOpinion", "is not", null)));
+		//正常/预警/报警：按 state 分组一次查出，避免再加多次 count
+		String[] stateKeys = {"normal", "warning", "alarm"};
+		for(String k : stateKeys)
+			nm.put(k, 0);
+		List<NutMap> groups = bs.querySql("select state, count(*) as c from t_record where create_date >= @start and is_removed = 0 group by state",
+				NutMap.NEW().setv("start", start));
+		long total = 0;
+		for(NutMap g : groups){
+			total += ((Number)g.get("c")).longValue();
+			Object st = g.get("state");
+			if(st != null){
+				int i = ((Number)st).intValue();
+				if(i >= 0 && i < stateKeys.length)
+					nm.put(stateKeys[i], ((Number)g.get("c")).longValue());
+			}
+		}
+		nm.put("total", total);
 		return nm;
 	}
 

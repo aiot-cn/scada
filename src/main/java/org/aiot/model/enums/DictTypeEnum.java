@@ -23,6 +23,7 @@ public enum DictTypeEnum {
 	sysDevice("系统设备"),//以太网 ethernet PCI\VEN_10EC&DEV_8168
 	sex("性别"),
 	docProject("文档项目"),
+	tag("标签")
 	;
 
 	
