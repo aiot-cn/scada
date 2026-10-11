@@ -162,6 +162,7 @@
                 <dd><a lay-href="${base}/config/sys/model">实体表</a></dd>
                 <dd><a lay-href="${base}/config/sys/sqlCode">SQLCode</a></dd>
                 <dd><a lay-href="${base}/index/debug">调试</a></dd>
+                <dd><a lay-href="${base}/index/log">日志</a></dd>
               </dl>
             </li>
 

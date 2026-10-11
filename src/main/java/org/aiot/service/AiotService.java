@@ -7,11 +7,9 @@ import org.aiot.lang.NotifyEvent;
 import org.aiot.lang.workflow.Workflow;
 import org.aiot.main.Constants;
 import org.aiot.model.enums.EventEnum;
+import org.aiot.model.enums.LogEventEnum;
 import org.aiot.model.project.Token;
-import org.aiot.model.table.TBase;
-import org.aiot.model.table.TFile;
-import org.aiot.model.table.TRecord;
-import org.aiot.model.table.TWorkflow;
+import org.aiot.model.table.*;
 import org.aiot.util.HttpUtil;
 import org.aiot.util.SysUtil;
 import org.nutz.dao.Cnd;
@@ -88,6 +86,16 @@ public class AiotService implements Observer{
 		TRecord tRecord = bs.daoFetch(TRecord.class,Cnd.where("file","=",pathName));
 		if(tRecord == null)
 			Files.deleteFile(new File(Constants.HOME_PATH,pathName));
+	}
+
+	/**
+	 * 记录一条日志
+	 */
+	public void log(LogEventEnum event, String message) {
+		TLog log = new TLog();
+		log.setEventType(event);
+		log.setContent(message);
+		bs.daoSave(log);
 	}
 
 	//============================== 同步表 ==============================

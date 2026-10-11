@@ -3,7 +3,6 @@ package org.aiot.main;
 import org.aiot.handler.json.JsonFileHandler;
 import org.aiot.model.castor.String2File;
 import org.aiot.model.enums.*;
-import org.aiot.model.table.TLog;
 import org.aiot.service.*;
 import org.aiot.util.SysUtil;
 import org.nutz.castor.Castors;
@@ -79,7 +78,7 @@ public class MainSetup implements Setup{
 			ioc.get(CommuService.class);	//通讯
 			ioc.get(CronService.class);	//定时任务
 
-			bs.daoSave(new TLog("系统启动"));
+			ioc.get(AiotService.class).log(LogEventEnum.SYSTEM_BOOTING, "系统启动");
 			try {
 				ScriptEnum.initCall.exec();
 			}catch (Exception e){

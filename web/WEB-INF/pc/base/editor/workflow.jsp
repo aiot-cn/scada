@@ -533,7 +533,7 @@
 		}
 		var rt = method.returnType || "";
 		this.tfoot.find(".i-variable").attr("title",rt).attr("placeholder",rt.substring(rt.lastIndexOf(".")+1));
-		this.repaint();
+		jsPlumbInstance.setSuspendDrawing(false,true);
 		//jsPlumbInstance.repaint(this.tfoot);//刷新样式
 		//jsPlumbInstance.revalidate(this.tfoot);//重绘某个元素
 	}
@@ -591,15 +591,6 @@
 			isTarget: true,
 			maxConnections: -1
 		})
-	};
-
-	DM.prototype.repaint = function (){
-		//revalidate必须传原生DOM（jQuery对象会在getId时生成随机id导致offset不重算）
-		jsPlumbInstance.revalidate(this.thead[0]);
-		jsPlumbInstance.revalidate(this.tfoot[0]);
-		this.tbody.find("tr").each(function (){
-			jsPlumbInstance.revalidate(this);
-		});
 	};
 
 	DM.prototype.active = function (){
@@ -984,7 +975,6 @@
 		if($(e.target).hasClass("rb-resize")){
 			reSizeEvent = {x:e.clientX,y:e.clientY};
 			var dm = getDm(e.target);
-			reSizeEvent.dm = dm;
 			reSizeEvent.div = dm.div;
 			reSizeEvent.width = dm.div.width();
 			reSizeEvent.height = dm.div.height();
@@ -1021,9 +1011,8 @@
 
 			var diffX = e.clientX - eClinet.x;
 			var diffY = e.clientY - eClinet.y;
-			$(".item.active").diff(diffX,diffY).fitArea().each(function (){
-				this.dm.repaint();
-			});
+			$(".item.active").diff(diffX,diffY).fitArea();
+			jsPlumbInstance.repaint($(".item.active"));
 
 		}else if(selBoxPos != null){
 			if(e.clientX - selBoxPos.x > 3 && e.clientY - selBoxPos.y > 3){
@@ -1040,7 +1029,7 @@
 				reSizeEvent.div.css({"height":h}).attr("data-height",h);
 				reSizeEvent.div.find("iframe").css({"height":h - 57});
 			}
-			reSizeEvent.dm.repaint();//端点跟随大小变化重绘
+			jsPlumbInstance.repaint(reSizeEvent.div);
 
 		}
 
@@ -1094,6 +1083,11 @@
 
 	var copyItem = [];
 	var copyConn = [];
+	function remapConnId(id, idxMap){
+		id = String(id);
+		var i = id.indexOf("-");
+		return idxMap[id.substring(0, i)] + id.substring(i);
+	}
 	var keyFun = {
 
 		27 : function (){// ESC
@@ -1113,20 +1107,19 @@
 				return;
 			copyItem = [];
 			copyConn = [];
+			var idxSet = {};
 			$(".item.active").each(function (){
+				idxSet[String(this.dm.index)] = true;
 				copyItem.push(this.dm.serialize());
 			});
 			$(jsPlumbInstance.getConnections()).each(function (){
-				var s = $(document.getElementById(this.sourceId)).closest(".item");
-				var t = $(document.getElementById(this.targetId)).closest(".item");
-				if(s.hasClass("active") && t.hasClass("active"))
-					copyConn.push($.extend(this.serialize(),{
-						sourceIndex : s.attr("data-index"),
-						targetIndex : t.attr("data-index")
-					}));
+				var s = String(this.sourceId), t = String(this.targetId);
+				var si = s.indexOf("-"), ti = t.indexOf("-");
+				if(si > 0 && ti > 0 && idxSet[s.substring(0, si)] && idxSet[t.substring(0, ti)])
+					copyConn.push(this.serialize());
 			});
 			if(copyItem.length > 0)
-				layer.msg("已复制"+copyItem.length+"条"+(copyConn.length > 0 ? "及"+copyConn.length+"条连线" : ""));
+				layer.msg("已复制"+copyItem.length+"条");
 		},
 		73 : function (e) { // I
 			if(e.target == document.body)
@@ -1139,31 +1132,32 @@
 			}
 		},
 		86 : function (e) { // V
-			if(!e.ctrlKey || copyItem.length == 0)
-				return;
-			var x = curClient.x + dc.scrollLeft;
-			var y = curClient.y + dc.scrollTop;
-			var l,t; //原选中项的左上角基准
-			$(copyItem).each(function (){
-				l = l == undefined ? this.left : Math.min(l,this.left);
-				t = t == undefined ? this.top : Math.min(t,this.top);
-			});
-			var indexMap = {}; //旧index -> 新index
-			$(copyItem).each(function (){
-				var d = $.extend({},this,{
-					left : this.left + x - l,
-					top : this.top + y - t
+			if(e.ctrlKey){
+				var cx = curClient.x + dc.scrollLeft;
+				var cy = curClient.y + dc.scrollTop;
+				var minLeft, minTop;
+				$(copyItem).each(function (){
+					if(minLeft == null || this.left < minLeft)
+						minLeft = this.left;
+					if(minTop == null || this.top < minTop)
+						minTop = this.top;
 				});
-				delete d.index;
-				indexMap[this.index] = addItem(d).index;
-			});
-			$(copyConn).each(function (){
-				createConn($.extend({},this,{
-					source : indexMap[this.sourceIndex] + this.source.substring(this.sourceIndex.length),
-					target : indexMap[this.targetIndex] + this.target.substring(this.targetIndex.length)
-				}));
-			});
-			jsPlumbInstance.repaintEverything();
+				var idxMap = {};
+				$(copyItem).each(function (){
+					var oldIndex = String(this.index);
+					var it = $.extend({}, this);
+					it.left = (this.left - minLeft) + cx;
+					it.top = (this.top - minTop) + cy;
+					delete it.index;
+					idxMap[oldIndex] = addItem(it).index;
+				});
+				$(copyConn).each(function (){
+					var c = $.extend({}, this);
+					c.source = remapConnId(this.source, idxMap);
+					c.target = remapConnId(this.target, idxMap);
+					createConn(c);
+				});
+			}
 		}
 
 	};

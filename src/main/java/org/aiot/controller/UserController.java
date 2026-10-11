@@ -1,12 +1,13 @@
 package org.aiot.controller;
 
 import org.aiot.model.DataRes;
+import org.aiot.model.enums.LogEventEnum;
 import org.aiot.model.enums.SessionEnum;
 import org.aiot.model.project.Token;
 import org.aiot.model.table.TDevice;
-import org.aiot.model.table.TLog;
 import org.aiot.model.table.user.SysMenu;
 import org.aiot.model.table.user.SysUser;
+import org.aiot.service.AiotService;
 import org.aiot.service.BaseService;
 import org.aiot.service.UserService;
 import org.aiot.util.HttpUtil;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.aiot.main.Constants.ioc;
+
 @At("/user")
 public class UserController {
 	private NutMap licenseCode = new NutMap();
@@ -53,11 +55,11 @@ public class UserController {
 	@Filters(@By(type=CrossOriginFilter.class))
 	public @Ok("json") DataRes doLogin(String loginName,String password,boolean remember,HttpServletResponse resp) {
 		UserService us = ioc.get(UserService.class);
-		BaseService bs = ioc.get(BaseService.class);
+		AiotService as = ioc.get(AiotService.class);
 		try {
 			SysUser user = us.validate(loginName, password);
 			us.sessionUser(user);
-			bs.daoSave(new TLog("账号["+loginName+"]登录"));
+			as.log(LogEventEnum.LOGIN_SUCCESS, loginName);
 			if(remember){
 				HttpUtil.addCookie(resp, "loginName", loginName, 30*24*60*60,null);
 				HttpUtil.addCookie(resp, "password", password, 30*24*60*60,null);
@@ -65,7 +67,7 @@ public class UserController {
 			NutMap nm = new NutMap().addv("user",user);
 			return new DataRes(nm);
 		}catch (RuntimeException e){
-			bs.daoSave(new TLog(e.getMessage()));
+			as.log(LogEventEnum.LOGIN_FAILURE, e.getMessage());
 			return new DataRes("登录失败："+e.getMessage());
 		}
 	}

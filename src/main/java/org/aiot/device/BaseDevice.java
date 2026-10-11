@@ -109,6 +109,17 @@ public class BaseDevice extends Observable implements DeviceInfc,MethodIntercept
 		String codeName = "设置[" + (a != null ? a.getName() : code) + "]";
 		List<Command> c = getProtocol().buildSet(code,device,codeName,p);
 		execCommand(c,p);
+		//无用户在TRecord中
+		if(SessionEnum.user.val() != null){
+			AiotService as = ioc.get(AiotService.class);
+			Object v = p[0];
+			if("1".equals(v+""))
+				v = "ON";
+			if("0".equals(v+""))
+				v = "OFF";
+
+			as.log(LogEventEnum.DEVICE_OPERATION, codeName+v);
+		}
 		return c;
 	}
 
