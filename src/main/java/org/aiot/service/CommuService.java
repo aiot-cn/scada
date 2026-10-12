@@ -1,8 +1,8 @@
 package org.aiot.service;
 
-import org.aiot.infc.ProtocolInfc;
 import org.aiot.communication.CommunicationInfc;
 import org.aiot.communication.ReceiveData;
+import org.aiot.infc.ProtocolInfc;
 import org.aiot.infc.device.DeviceInfc;
 import org.aiot.lang.Command;
 import org.aiot.lang.CommuncationThread;
@@ -23,7 +23,10 @@ import org.nutz.log.Logs;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Observable;
+import java.util.Observer;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -53,6 +56,8 @@ public class CommuService implements Observer  {
 	}
 
 	public CommunicationInfc getInstance(Long id){
+		if(id == null)
+			return null;
 		return  instance.get(id);
 	}
 
@@ -81,6 +86,8 @@ public class CommuService implements Observer  {
 	}
 
 	public ProtocolInfc getProtocol(String klass){
+		if(Strings.isBlank(klass))
+			throw Lang.makeThrow("请配置协议类型");
 		ProtocolInfc ci = protocolMap.get(klass);
 		if(ci == null)
 			try {
@@ -92,7 +99,6 @@ public class CommuService implements Observer  {
 			}catch (Exception e) {
 				e.printStackTrace();
 			}
-
 		return ci;
 	}
 
