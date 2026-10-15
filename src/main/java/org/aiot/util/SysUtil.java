@@ -1,6 +1,7 @@
 package org.aiot.util;
 
 import org.aiot.main.Constants;
+import org.aiot.model.enums.PropEnum;
 import org.aiot.model.enums.ServletEnum;
 import org.aiot.model.enums.VarRuntimeEnum;
 import org.aiot.model.project.License;
@@ -306,7 +307,7 @@ public class SysUtil {
 	 */
 	public static String desEncode(String str){
 		byte[] data = str.getBytes();
-		byte[] key = Constants.desKey.getBytes();
+		byte[] key = PropEnum.DES_KEY.val().getBytes();
 		SecretKey deskey = new SecretKeySpec(key, "DESede");
 		IvParameterSpec iv = new IvParameterSpec(Iv.getBytes());
 		try {
@@ -324,7 +325,7 @@ public class SysUtil {
 	 */
 	public static String desDecode(String str){
 		byte[] data = Base64.decode(str);
-		byte[] key = Constants.desKey.getBytes();
+		byte[] key = PropEnum.DES_KEY.val().getBytes();
 		SecretKey deskey = new SecretKeySpec(key, "DESede");
 		IvParameterSpec iv = new IvParameterSpec(Iv.getBytes());
 		try {

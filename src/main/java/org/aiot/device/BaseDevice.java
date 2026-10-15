@@ -9,7 +9,6 @@ import org.aiot.infc.device.DeviceInfc;
 import org.aiot.lang.Command;
 import org.aiot.lang.CriQueue;
 import org.aiot.lang.annotation.AoReflect;
-import org.aiot.main.Constants;
 import org.aiot.model.enums.*;
 import org.aiot.model.lang.PointData;
 import org.aiot.model.table.*;
@@ -154,7 +153,7 @@ public class BaseDevice extends Observable implements DeviceInfc,MethodIntercept
 	public Object getDataVal(String key){
 		if(Strings.isBlank(key))
 			return null;
-		if(key.contains(Constants.devFiled)){
+		if(key.contains("dev_")){
 			return getFieldVal(key.split("_")[1]);
 		}else{
 			DevData data = getDevData(key);

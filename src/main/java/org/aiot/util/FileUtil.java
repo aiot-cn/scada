@@ -1,7 +1,5 @@
 package org.aiot.util;
 
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
 import org.aiot.main.Constants;
 import org.aiot.model.table.TFile;
 import org.aiot.service.BaseService;
@@ -10,17 +8,10 @@ import org.apache.poi.ss.usermodel.*;
 import org.nutz.dao.Cnd;
 import org.nutz.lang.Files;
 import org.nutz.lang.Lang;
-import org.nutz.lang.Streams;
 import org.nutz.lang.Strings;
-import org.nutz.log.Logs;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -141,42 +132,6 @@ public class FileUtil {
             }
         }
         return lstFileNames;
-    }
-
-    public static String bmp2Jpeg(String filePath, String outPath) {
-        try {
-            long start = System.currentTimeMillis();
-            File file = new File(filePath);
-            Image img = ImageIO.read(file);
-            BufferedImage tag = new BufferedImage(img.getWidth(null), img.getHeight(null), BufferedImage.TYPE_INT_RGB);
-            tag.getGraphics().drawImage(img.getScaledInstance(img.getWidth(null), img.getHeight(null), Image.SCALE_SMOOTH), 0, 0, null);
-            FileOutputStream out = new FileOutputStream(outPath);
-            // JPEGImageEncoder可适用于其他图片类型的转换
-            JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(out);
-            encoder.encode(tag);
-            out.close();
-            Logs.get().info("bmp 转 JPEG，共耗时：  " + (System.currentTimeMillis() - start) + " 毫秒");
-            return outPath;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return outPath;
-    }
-
-    public static void setStationProp(String key,String value){
-        try {
-            //还是原生的 Properties 好用，只是 =# 等字符会加斜杠转义符
-            Constants.propStation.put(key,value);
-            Writer writer = Streams.utf8w(new FileOutputStream(Constants.propPath));
-            Constants.propStation.store(writer, "station");
-            Streams.safeClose(writer);
-            /*MultiLineProperties prop = new MultiLineProperties(Streams.utf8r(new FileInputStream(Constants.propPath)));
-            prop.put(key,value);
-            prop.print(Streams.utf8w(new FileOutputStream(Constants.propPath)));*/
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     //文件路径转存

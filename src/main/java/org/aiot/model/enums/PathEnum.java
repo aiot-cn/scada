@@ -75,7 +75,7 @@ public enum PathEnum {
 	}
 
 	public static void initPath(){
-		ramPath = PropEnum.RAM_PATH.val();
+		ramPath = PropHomeEnum.RAM_PATH.val();
 		if(Strings.isBlank(ramPath)){
 			String dirName = Constants.HOME_PATH.substring(Constants.HOME_PATH.lastIndexOf(File.separator)+1);
 			ramPath = Lang.isWin() ? Constants.HOME_PATH + File.separator + "ram" : "/dev/shm/"+dirName;

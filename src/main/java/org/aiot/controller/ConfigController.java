@@ -2,7 +2,7 @@ package org.aiot.controller;
 
 import org.aiot.main.Constants;
 import org.aiot.model.DataRes;
-import org.aiot.model.enums.PropEnum;
+import org.aiot.model.enums.PropHomeEnum;
 import org.aiot.model.enums.ServletEnum;
 import org.aiot.model.enums.VarRuntimeEnum;
 import org.aiot.model.table.TParam;
@@ -56,7 +56,7 @@ public class ConfigController {
 		String msg = SysUtil.beAuthorized(license);
 		if(msg == null){
 			Constants.isAuthorized = true;
-			PropEnum.license.val(license);
+			PropHomeEnum.license.val(license);
 		}
 		return new DataRes(msg);
 	}

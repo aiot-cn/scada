@@ -11,7 +11,6 @@ import org.nutz.json.Json;
 import org.nutz.json.JsonTypeHandler;
 import org.nutz.lang.Files;
 import org.nutz.lang.Mirror;
-import org.nutz.lang.Streams;
 import org.nutz.lang.Strings;
 import org.nutz.lang.util.Disks;
 import org.nutz.log.Log;
@@ -22,9 +21,8 @@ import org.nutz.resource.Scans;
 
 import javax.script.ScriptContext;
 import javax.servlet.ServletContext;
-import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
@@ -37,26 +35,29 @@ public class MainSetup implements Setup{
 
 		Log log = Logs.get();
 		ioc = nc.getIoc();
+		//这里的conf是dao.js中的键
 		prop = ioc.get(PropertiesProxy.class, "conf");
-		HOME_PATH = prop.get("HOME_PATH", Disks.home());
+		//修改环境变量IDE中需要重启IDE,所以直接用配置文件
+		HOME_PATH = prop.get("AIOT_HOME");
 
 		ServletContext servletContext = nc.getServletContext();
 		String contextName = servletContext.getContextPath().replace("/","");
-		HOME_PATH += File.separator + prop.get("HOME_PATH_SUB",Strings.sBlank(contextName, "aiot")+"-data");
+		if(Strings.isBlank(HOME_PATH))
+			HOME_PATH = Disks.home() + File.separator + Strings.sBlank(contextName, "aiot")+"-data";
+
+		homePropFile = new File(HOME_PATH,"aiot.properties");
+		Files.createFileIfNoExists(homePropFile);
+		try (Reader reader = new InputStreamReader(
+				new FileInputStream(homePropFile),StandardCharsets.UTF_8)) {
+			homeProp.load(reader);
+		}catch(IOException e) {
+			e.printStackTrace();
+		}
 
 		SysUtil.addLibraryPath(PathEnum.lib.p());//JNI
 		SysUtil.addLibraryPath(PathEnum.lib.p()+"FFmpeg");
 		System.setProperty("jna.library.path",PathEnum.lib.p());//JNA
 
-		File propFile = new File(HOME_PATH,"aiot.properties");
-		Files.createFileIfNoExists(propFile);
-		try {
-			Reader reader = Streams.fileInr(propFile);
-			propStation.load(reader);
-			Streams.safeClose(reader);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
 		ServletEnum.res.val(servletContext.getContextPath()+"/static");
 		ServletEnum.resCache.val(System.currentTimeMillis());
 		ServletEnum.serialNo.val(servletContext.getSessionCookieConfig().getName());
@@ -68,7 +69,6 @@ public class MainSetup implements Setup{
 			Json.addTypeHandler((JsonTypeHandler) Mirror.me(klass).born());
 		}
 
-		isAuthorized = SysUtil.beAuthorized(PropEnum.license.val()) == null;
 		try {
 			BaseService bs = ioc.get(BaseService.class);
 			ioc.get(ConfigService.class);	//配置
@@ -88,11 +88,12 @@ public class MainSetup implements Setup{
 		}catch (Exception e){
 			e.printStackTrace();
 		}
+		isAuthorized = SysUtil.beAuthorized(PropHomeEnum.license.val()) == null;
 		//ioc.addBean(name, Mirror.me(c).born());
 	}
 
 	public static String daoPath(){
-		String dbUrl = PropEnum.DB_URL.val();
+		String dbUrl = PropHomeEnum.DB_URL.val();
 		if(dbUrl.startsWith("jdbc:")){
 			VarRuntimeEnum.dbUrl.val(dbUrl);
 		}else{

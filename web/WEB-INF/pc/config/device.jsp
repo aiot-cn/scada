@@ -74,7 +74,7 @@
 								<tr>
 									<th data-field="isRemoved" data-type="switch" width="40" data-class="tac switch-contrary-no">状态</th>
 									<th data-field="id" width="20" data-show="false">ID</th>
-									<th data-field="areaId" data-translate="select" data-edit="true" data-show="false">组别</th>
+									<th data-field="areaId" data-translate="select" data-edit="true" data-show="false">区域</th>
 									<th data-field="name" data-edit="true">名称</th>
 									<th data-field="deviceType" data-edit="true">类型</th>
 									<th data-field="communication" width="80" data-edit="true" data-translate="select">通信方式</th>

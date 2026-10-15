@@ -2,7 +2,6 @@ package org.aiot.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import org.aiot.lang.annotation.AoTbase;
-import org.aiot.main.Constants;
 import org.aiot.model.DataRes;
 import org.aiot.model.enums.CompareEnum;
 import org.aiot.model.table.TBase;
@@ -16,6 +15,7 @@ import org.nutz.dao.*;
 import org.nutz.dao.impl.NutDao;
 import org.nutz.dao.pager.Pager;
 import org.nutz.lang.Strings;
+import org.nutz.lang.Times;
 import org.nutz.lang.util.NutMap;
 import org.nutz.mvc.adaptor.JsonAdaptor;
 import org.nutz.mvc.adaptor.injector.ObjectPairInjector;
@@ -98,7 +98,7 @@ public class TableController {
 			String etag = maxId+"-"+count;
 			TBase t2 = (TBase) dao.fetch(c,cnd.clone().and("updateDate","is not",null).desc("updateDate"));
 			if(t2 != null && t2.getUpdateDate() != null)
-				etag += "-"+ Constants.ymdhmsFormat.format(t2.getUpdateDate());
+				etag += "-"+ Times.format("yyMMddHHmmss", t2.getUpdateDate());
 			res.setHeader("Etag",etag);
 			String ifNoneMath = r.getHeader("If-None-Match");
 			if(Strings.equals(etag,ifNoneMath)){

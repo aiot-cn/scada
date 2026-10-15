@@ -1,16 +1,13 @@
 package org.aiot.model.enums;
 
 import org.aiot.main.Constants;
-import org.aiot.util.FileUtil;
 
 /**
- * 配置文件
- *
+ * system.properties 等
  */
 public enum PropEnum {
-	DB_URL("数据库","aiot.db"),
-	license("许可证",""),
-	RAM_PATH("缓存路径",null)
+	AIOT_HOME("资源目录",""),
+	DES_KEY("3des密钥","AIOTAIOTAIOTAIOTAIOTAIOT"),//3des必须是24个密钥字符串
 	;
 
 	private String name;
@@ -26,11 +23,7 @@ public enum PropEnum {
 	}
 
 	public String val() {
-		return Constants.propStation.getProperty(this.name(),this.value);
-	}
-
-	public void val(String value) {
-		FileUtil.setStationProp(this.name(),value);
+		return Constants.prop.get(this.name(),this.value);
 	}
 
 }
